@@ -1,0 +1,8 @@
+app:
+  port: 3000
+  debug: true
+
+service:
+  backend: backend:3001
+  auth: auth:3002
+  file: file:3003
