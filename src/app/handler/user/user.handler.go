@@ -16,7 +16,6 @@ type Handler struct {
 
 type IService interface {
 	FindOne(string) (*user_proto.User, *dto.ResponseErr)
-	Create(*dto.UserDto) (*user_proto.User, *dto.ResponseErr)
 	Update(string, *dto.UpdateUserDto) (*user_proto.User, *dto.ResponseErr)
 	Delete(string) (bool, *dto.ResponseErr)
 }
@@ -37,34 +36,6 @@ func (h *Handler) FindOne(c *router.FiberCtx) {
 	}
 
 	user, errRes := h.service.FindOne(id)
-	if errRes != nil {
-		c.JSON(errRes.StatusCode, errRes)
-		return
-	}
-
-	c.JSON(http.StatusCreated, user)
-	return
-}
-
-func (h *Handler) Create(c *router.FiberCtx) {
-	usrDto := dto.UserDto{}
-
-	err := c.Bind(&usrDto)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, err)
-		return
-	}
-
-	if errors := h.validate.Validate(usrDto); errors != nil {
-		c.JSON(http.StatusBadRequest, &dto.ResponseErr{
-			StatusCode: http.StatusBadRequest,
-			Message:    "Invalid body request",
-			Data:       errors,
-		})
-		return
-	}
-
-	user, errRes := h.service.Create(&usrDto)
 	if errRes != nil {
 		c.JSON(errRes.StatusCode, errRes)
 		return
