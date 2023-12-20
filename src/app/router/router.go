@@ -10,11 +10,11 @@ import (
 
 type FiberRouter struct {
 	*fiber.App
-	user    fiber.Router
-	auth    fiber.Router
-	course  fiber.Router
-	problem fiber.Router
-	like    fiber.Router
+	auth  fiber.Router
+	user  fiber.Router
+	pet   fiber.Router
+	like  fiber.Router
+	adopt fiber.Router
 }
 
 type IGuard interface {
@@ -24,7 +24,7 @@ type IGuard interface {
 func NewFiberRouter(authGuard IGuard, conf config.App) *FiberRouter {
 	r := fiber.New(fiber.Config{
 		StrictRouting: true,
-		AppName:       "MyGraderList API",
+		AppName:       "JohnJud API",
 	})
 
 	r.Use(cors.New(cors.Config{
@@ -38,8 +38,8 @@ func NewFiberRouter(authGuard IGuard, conf config.App) *FiberRouter {
 		r.Get("/docs/*", swagger.HandlerDefault)
 	}
 
-	user := GroupWithAuthMiddleware(r, "/user", authGuard.Use)
 	auth := GroupWithAuthMiddleware(r, "/auth", authGuard.Use)
+	user := GroupWithAuthMiddleware(r, "/user", authGuard.Use)
 	pet := GroupWithAuthMiddleware(r, "/pet", authGuard.Use)
 	like := GroupWithAuthMiddleware(r, "/like", authGuard.Use)
 	adopt := GroupWithAuthMiddleware(r, "/adopt", authGuard.Use)
