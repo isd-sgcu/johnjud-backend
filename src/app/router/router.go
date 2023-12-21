@@ -13,6 +13,7 @@ type FiberRouter struct {
 	auth  fiber.Router
 	user  fiber.Router
 	pet   fiber.Router
+	image fiber.Router
 	like  fiber.Router
 	adopt fiber.Router
 }
@@ -41,10 +42,11 @@ func NewFiberRouter(authGuard IGuard, conf config.App) *FiberRouter {
 	auth := GroupWithAuthMiddleware(r, "/auth", authGuard.Use)
 	user := GroupWithAuthMiddleware(r, "/user", authGuard.Use)
 	pet := GroupWithAuthMiddleware(r, "/pet", authGuard.Use)
+	image := GroupWithAuthMiddleware(r, "/image", authGuard.Use)
 	like := GroupWithAuthMiddleware(r, "/like", authGuard.Use)
 	adopt := GroupWithAuthMiddleware(r, "/adopt", authGuard.Use)
 
-	return &FiberRouter{r, user, auth, pet, adopt, like}
+	return &FiberRouter{r, user, auth, pet, image, adopt, like}
 }
 
 func GroupWithAuthMiddleware(r *fiber.App, path string, middleware func(ctx *FiberCtx)) fiber.Router {
