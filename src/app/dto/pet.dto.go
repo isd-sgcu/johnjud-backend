@@ -13,7 +13,6 @@ type PetDto struct {
 	Habit        string     `json:"habit" validate:"required"`
 	Caption      string     `json:"caption"`
 	Status       pet.Status `json:"status" validate:"required" example:"findhome"`
-	Image        []byte     `json:"image" validate:"required"`
 	IsSterile    bool       `json:"is_sterile" validate:"required"`
 	IsVaccinated bool       `json:"is_vaccine" validate:"required"`
 	IsVisible    bool       `json:"is_visible" validate:"required"`
