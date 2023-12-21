@@ -1,15 +1,15 @@
 package pet
 
-type Gender string
+type Gender int
 
 const (
-	MALE   = "male"
-	FEMALE = "female"
+	MALE   = 1
+	FEMALE = 2
 )
 
-type Status string
+type Status int
 
 const (
-	ADOPTED  = "adopted"
-	FINDHOME = "findhome"
+	ADOPTED  = 1
+	FINDHOME = 2
 )
