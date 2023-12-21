@@ -13,7 +13,7 @@ type Handler struct {
 }
 
 type Service interface {
-	FindAll() ([]*proto.Like, *dto.ResponseErr)
+	FindByUserId(string) ([]*proto.Like, *dto.ResponseErr)
 	Create(*dto.LikeDto) (*proto.Like, *dto.ResponseErr)
 	Delete(string) (bool, *dto.ResponseErr)
 }
@@ -22,7 +22,7 @@ func NewHandler(service Service, validate *validator.DtoValidator) *Handler {
 	return &Handler{service, validate}
 }
 
-func (h *Handler) FindAll(c *router.FiberCtx) {
+func (h *Handler) FindByUserId(c *router.FiberCtx) {
 
 }
 
