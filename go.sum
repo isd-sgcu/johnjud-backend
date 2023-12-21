@@ -59,8 +59,8 @@ github.com/google/uuid v1.5.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+
 github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=
 github.com/hashicorp/hcl v1.0.0 h1:0Anlzjpi4vEasTeNFn2mLJgTSwt0+6sfsiTG8qcWGx4=
 github.com/hashicorp/hcl v1.0.0/go.mod h1:E5yfLk+7swimpb2L/Alb/PJmXilQ/rhwaUYs4T20WEQ=
-github.com/isd-sgcu/johnjud-go-proto v0.0.7 h1:ZJtCVEkTW6s21g4kdJKO4I1OcGRKbLT+WmBTFWTWojo=
-github.com/isd-sgcu/johnjud-go-proto v0.0.7/go.mod h1:HP0w9gC30b5WNnqeFBM9JJZud+pvyikz0+pGFSI/Wjw=
+github.com/isd-sgcu/johnjud-go-proto v0.0.8 h1:nIQBZgK2OFVrLjVtpeDgwows8poA7LhsIVE4hlbBC1o=
+github.com/isd-sgcu/johnjud-go-proto v0.0.8/go.mod h1:HP0w9gC30b5WNnqeFBM9JJZud+pvyikz0+pGFSI/Wjw=
 github.com/josharian/intern v1.0.0 h1:vlS4z54oSdjm0bgjRigI+G1HpF+tI+9rE5LLzOg8HmY=
 github.com/josharian/intern v1.0.0/go.mod h1:5DoeVV0s6jJacbCEi61lwdGj/aVlrQvzHFFd8Hwg//Y=
 github.com/jtolds/gls v4.20.0+incompatible/go.mod h1:QJZ7F/aHp+rZTRtaJ1ow/lLfFfVYBRgL+9YlvaHOwJU=
