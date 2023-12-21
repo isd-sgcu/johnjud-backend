@@ -1,6 +1,6 @@
 module github.com/isd-sgcu/johnjud-gateway
 
-go 1.21.5
+go 1.21.3
 
 require (
 	github.com/arsmn/fiber-swagger/v2 v2.31.1
@@ -9,7 +9,7 @@ require (
 	github.com/go-playground/validator/v10 v10.16.0
 	github.com/gofiber/fiber/v2 v2.51.0
 	github.com/google/uuid v1.5.0
-	github.com/isd-sgcu/johnjud-go-proto v0.0.5
+	github.com/isd-sgcu/johnjud-go-proto v0.0.7
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.31.0
 	github.com/spf13/viper v1.18.2
