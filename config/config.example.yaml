@@ -3,6 +3,6 @@ app:
   debug: true
 
 service:
-  auth: auth:3001
+  auth: auth:3002
   backend: backend:3003
   file: file:3004
