@@ -9,9 +9,9 @@ import (
 )
 
 type Handler struct {
-	service    Service
-	usrService UserService
-	validate   *validator.DtoValidator
+	service     Service
+	userService UserService
+	validate    *validator.DtoValidator
 }
 
 type Service interface {
@@ -26,8 +26,8 @@ type UserService interface {
 	FindOne(string) (*user_proto.User, *dto.ResponseErr)
 }
 
-func NewHandler(service Service, usrService UserService, validate *validator.DtoValidator) *Handler {
-	return &Handler{service, usrService, validate}
+func NewHandler(service Service, userService UserService, validate *validator.DtoValidator) *Handler {
+	return &Handler{service, userService, validate}
 }
 
 func (h *Handler) Validate(c *router.FiberCtx) {
