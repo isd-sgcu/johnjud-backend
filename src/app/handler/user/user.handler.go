@@ -10,17 +10,17 @@ import (
 )
 
 type Handler struct {
-	service  IService
+	service  Service
 	validate *validator.DtoValidator
 }
 
-type IService interface {
+type Service interface {
 	FindOne(string) (*user_proto.User, *dto.ResponseErr)
 	Update(string, *dto.UpdateUserDto) (*user_proto.User, *dto.ResponseErr)
 	Delete(string) (bool, *dto.ResponseErr)
 }
 
-func NewHandler(service IService, validate *validator.DtoValidator) *Handler {
+func NewHandler(service Service, validate *validator.DtoValidator) *Handler {
 	return &Handler{service, validate}
 }
 
