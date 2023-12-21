@@ -22,7 +22,3 @@ func (s *Service) FindOne(id string) (*proto.User, *dto.ResponseErr) {
 func (s *Service) Update(id string, in *dto.UpdateUserDto) (*proto.User, *dto.ResponseErr) {
 	return nil, nil
 }
-
-func (s *Service) Delete(id string) (bool, *dto.ResponseErr) {
-	return false, nil
-}

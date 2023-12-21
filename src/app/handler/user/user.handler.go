@@ -17,7 +17,6 @@ type Handler struct {
 type Service interface {
 	FindOne(string) (*user_proto.User, *dto.ResponseErr)
 	Update(string, *dto.UpdateUserDto) (*user_proto.User, *dto.ResponseErr)
-	Delete(string) (bool, *dto.ResponseErr)
 }
 
 func NewHandler(service Service, validate *validator.DtoValidator) *Handler {
@@ -57,27 +56,6 @@ func (h *Handler) Update(c *router.FiberCtx) {
 	}
 
 	user, errRes := h.service.Update(usrId, &usrDto)
-	if errRes != nil {
-		c.JSON(errRes.StatusCode, errRes)
-		return
-	}
-
-	c.JSON(http.StatusOK, user)
-	return
-}
-
-func (h *Handler) Delete(c *router.FiberCtx) {
-	id, err := c.ID()
-	if err != nil {
-		c.JSON(http.StatusBadRequest, &dto.ResponseErr{
-			StatusCode: http.StatusBadRequest,
-			Message:    err.Error(),
-			Data:       nil,
-		})
-		return
-	}
-
-	user, errRes := h.service.Delete(id)
 	if errRes != nil {
 		c.JSON(errRes.StatusCode, errRes)
 		return
