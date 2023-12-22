@@ -1,0 +1,38 @@
+name: 'Pull request/Push: Run unit test'
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - master
+      - main
+      - beta
+  push:
+    branches:
+      - dev
+      - master
+      - main
+      - beta
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.21
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Vet
+        run: |
+          go vet ./...
+
+      - name: Test
+        run: |
+          go test  -v -coverpkg ./src/app/... -coverprofile coverage.out -covermode count ./src/app/...
+          go tool cover -func="./coverage.out"
