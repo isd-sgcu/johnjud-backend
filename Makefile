@@ -19,3 +19,4 @@ mockGen:
 	mockgen -source ./src/pkg/service/auth/auth.service.go -destination ./src/mocks/service/auth/auth.mock.go
 	mockgen -source ./src/pkg/service/user/user.service.go -destination ./src/mocks/service/user/user.mock.go
 	mockgen -source ./src/app/validator/validator.go -destination ./src/mocks/validator/validator.mock.go
+	mockgen -source ./src/app/router/context.go -destination ./src/mocks/router/context.mock.go

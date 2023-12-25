@@ -17,24 +17,24 @@ func NewHandler(service auth.Service, userService user.Service, validate validat
 	return &Handler{service, userService, validate}
 }
 
-func (h *Handler) Validate(c *router.FiberCtx) {
+func (h *Handler) Validate(c router.IContext) {
 
 }
 
-func (h *Handler) RefreshToken(c *router.FiberCtx) {
+func (h *Handler) RefreshToken(c router.IContext) {
 
 }
 
-func (h *Handler) Signup(c *router.FiberCtx) {
+func (h *Handler) Signup(c router.IContext) {
 	// bind request
 	// validate request
 	// call authService.Signup
 }
 
-func (h *Handler) Signin(c *router.FiberCtx) {
+func (h *Handler) Signin(c router.IContext) {
 
 }
 
-func (h *Handler) Signout(c *router.FiberCtx) {
+func (h *Handler) Signout(c router.IContext) {
 
 }

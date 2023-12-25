@@ -7,6 +7,19 @@ import (
 	"github.com/google/uuid"
 )
 
+type IContext interface {
+	UserID() string
+	Bind(v interface{}) error
+	JSON(int, interface{})
+	ID() (string, error)
+	Param(string) (string, error)
+	Token() string
+	Method() string
+	Path() string
+	StoreValue(string, string)
+	Next()
+}
+
 type FiberCtx struct {
 	*fiber.Ctx
 }
