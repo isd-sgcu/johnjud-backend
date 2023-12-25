@@ -31,7 +31,9 @@ func (h *Handler) RefreshToken(c *router.FiberCtx) {
 }
 
 func (h *Handler) Signup(c *router.FiberCtx) {
-
+	// bind request
+	// validate request
+	// call authService.Signup
 }
 
 func (h *Handler) Signin(c *router.FiberCtx) {
