@@ -1,19 +1,19 @@
 package auth
 
 import (
-	"github.com/isd-sgcu/johnjud-gateway/src/app/handler/auth"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/config"
+	authPkg "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/auth"
 )
 
 type Guard struct {
-	service    auth.Service
+	service    authPkg.Service
 	excludes   map[string]struct{}
 	conf       config.App
 	isValidate bool
 }
 
-func NewAuthGuard(s auth.Service, e map[string]struct{}, conf config.App) Guard {
+func NewAuthGuard(s authPkg.Service, e map[string]struct{}, conf config.App) Guard {
 	return Guard{
 		service:    s,
 		excludes:   e,
