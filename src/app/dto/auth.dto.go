@@ -19,7 +19,7 @@ type Signup struct {
 	Lastname  string `json:"lastname" validate:"required"`
 }
 
-type Signin struct {
+type SignIn struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,gte=6,lte=30"`
 }

@@ -16,8 +16,8 @@ type Handler struct {
 
 type Service interface {
 	Signup(*dto.Signup) (*auth_proto.Credential, *dto.ResponseErr)
-	Signin(*dto.Signin) (*auth_proto.Credential, *dto.ResponseErr)
-	Signout(string) (bool, *dto.ResponseErr)
+	SignIn(*dto.SignIn) (*auth_proto.Credential, *dto.ResponseErr)
+	SignOut(string) (bool, *dto.ResponseErr)
 	Validate(string) (*dto.TokenPayloadAuth, *dto.ResponseErr)
 	RefreshToken(string) (*auth_proto.Credential, *dto.ResponseErr)
 }

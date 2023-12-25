@@ -19,11 +19,11 @@ func (s *Service) Signup(signup *dto.Signup) (*auth_proto.Credential, *dto.Respo
 	return nil, nil
 }
 
-func (s *Service) Signin(signin *dto.Signin) (*auth_proto.Credential, *dto.ResponseErr) {
+func (s *Service) SignIn(signIn *dto.SignIn) (*auth_proto.Credential, *dto.ResponseErr) {
 	return nil, nil
 }
 
-func (s *Service) Signout(token string) (bool, *dto.ResponseErr) {
+func (s *Service) SignOut(token string) (bool, *dto.ResponseErr) {
 	return false, nil
 }
 
