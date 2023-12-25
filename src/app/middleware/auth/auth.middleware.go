@@ -22,7 +22,7 @@ func NewAuthGuard(s authPkg.Service, e map[string]struct{}, conf config.App) Gua
 	}
 }
 
-func (m *Guard) Use(ctx *router.FiberCtx) {
+func (m *Guard) Use(ctx router.IContext) {
 	m.isValidate = true
 
 	m.Validate(ctx)
@@ -35,6 +35,6 @@ func (m *Guard) Use(ctx *router.FiberCtx) {
 
 }
 
-func (m *Guard) Validate(ctx *router.FiberCtx) {
+func (m *Guard) Validate(ctx router.IContext) {
 	ctx.Next()
 }
