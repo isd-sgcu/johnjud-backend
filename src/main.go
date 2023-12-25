@@ -36,7 +36,7 @@ func main() {
 			Msg("Failed to start service")
 	}
 
-	v, err := validator.NewValidator()
+	v, err := validator.NewIValidator()
 	if err != nil {
 		log.Fatal().
 			Err(err).

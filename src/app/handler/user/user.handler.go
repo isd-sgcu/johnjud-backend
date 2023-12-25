@@ -10,10 +10,10 @@ import (
 
 type Handler struct {
 	service  user.Service
-	validate *validator.DtoValidator
+	validate validator.IDtoValidator
 }
 
-func NewHandler(service user.Service, validate *validator.DtoValidator) *Handler {
+func NewHandler(service user.Service, validate validator.IDtoValidator) *Handler {
 	return &Handler{service, validate}
 }
 
