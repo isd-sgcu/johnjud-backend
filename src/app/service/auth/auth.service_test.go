@@ -58,7 +58,7 @@ func (t *AuthServiceTest) TestSignupSuccess() {
 	}
 
 	expected := &dto.SignupResponse{
-		Id:        faker.UUIDDigit(),
+		Id:        protoResp.Id,
 		Email:     t.signupRequestDto.Email,
 		Firstname: t.signupRequestDto.Firstname,
 		Lastname:  t.signupRequestDto.Lastname,
@@ -79,6 +79,12 @@ func (t *AuthServiceTest) TestSignupSuccess() {
 }
 
 func (t *AuthServiceTest) TestSignupConflict() {
+	protoReq := &authProto.SignupRequest{
+		FirstName: t.signupRequestDto.Firstname,
+		LastName:  t.signupRequestDto.Lastname,
+		Email:     t.signupRequestDto.Email,
+		Password:  t.signupRequestDto.Password,
+	}
 	clientErr := status.Error(codes.AlreadyExists, "Duplicate email")
 
 	expected := &dto.ResponseErr{
@@ -88,7 +94,7 @@ func (t *AuthServiceTest) TestSignupConflict() {
 	}
 
 	client := auth.AuthClientMock{}
-	client.On("Signup", t.signupRequestDto).Return(nil, clientErr)
+	client.On("Signup", protoReq).Return(nil, clientErr)
 
 	svc := NewService(&client)
 	actual, err := svc.Signup(t.signupRequestDto)
@@ -98,6 +104,12 @@ func (t *AuthServiceTest) TestSignupConflict() {
 }
 
 func (t *AuthServiceTest) TestSignupInternalError() {
+	protoReq := &authProto.SignupRequest{
+		FirstName: t.signupRequestDto.Firstname,
+		LastName:  t.signupRequestDto.Lastname,
+		Email:     t.signupRequestDto.Email,
+		Password:  t.signupRequestDto.Password,
+	}
 	clientErr := status.Error(codes.Internal, "Internal error")
 
 	expected := &dto.ResponseErr{
@@ -107,7 +119,7 @@ func (t *AuthServiceTest) TestSignupInternalError() {
 	}
 
 	client := auth.AuthClientMock{}
-	client.On("Signup", t.signupRequestDto).Return(nil, clientErr)
+	client.On("Signup", protoReq).Return(nil, clientErr)
 
 	svc := NewService(&client)
 	actual, err := svc.Signup(t.signupRequestDto)
@@ -117,6 +129,12 @@ func (t *AuthServiceTest) TestSignupInternalError() {
 }
 
 func (t *AuthServiceTest) TestSignupUnavailableService() {
+	protoReq := &authProto.SignupRequest{
+		FirstName: t.signupRequestDto.Firstname,
+		LastName:  t.signupRequestDto.Lastname,
+		Email:     t.signupRequestDto.Email,
+		Password:  t.signupRequestDto.Password,
+	}
 	clientErr := status.Error(codes.Unavailable, "Connection lost")
 
 	expected := &dto.ResponseErr{
@@ -126,7 +144,7 @@ func (t *AuthServiceTest) TestSignupUnavailableService() {
 	}
 
 	client := auth.AuthClientMock{}
-	client.On("Signup", t.signupRequestDto).Return(nil, clientErr)
+	client.On("Signup", protoReq).Return(nil, clientErr)
 
 	svc := NewService(&client)
 	actual, err := svc.Signup(t.signupRequestDto)
