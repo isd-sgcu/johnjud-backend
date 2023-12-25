@@ -4,29 +4,21 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
-	auth_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
+	"github.com/isd-sgcu/johnjud-gateway/src/pkg/service/auth"
 	user_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/user/v1"
 )
 
 type Handler struct {
-	service     Service
+	service     auth.Service
 	userService UserService
 	validate    *validator.DtoValidator
-}
-
-type Service interface {
-	Signup(*dto.SignupRequest) (*dto.SignupResponse, *dto.ResponseErr)
-	SignIn(*dto.SignIn) (*auth_proto.Credential, *dto.ResponseErr)
-	SignOut(string) (bool, *dto.ResponseErr)
-	Validate(string) (*dto.TokenPayloadAuth, *dto.ResponseErr)
-	RefreshToken(string) (*auth_proto.Credential, *dto.ResponseErr)
 }
 
 type UserService interface {
 	FindOne(string) (*user_proto.User, *dto.ResponseErr)
 }
 
-func NewHandler(service Service, userService UserService, validate *validator.DtoValidator) *Handler {
+func NewHandler(service auth.Service, userService UserService, validate *validator.DtoValidator) *Handler {
 	return &Handler{service, userService, validate}
 }
 

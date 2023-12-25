@@ -14,3 +14,6 @@ test:
 
 server:
 	go run ./src/.
+
+mockGen:
+	mockgen -source ./src/pkg/service/auth/auth.service.go -destination ./src/mocks/service/auth/auth.mock.go
