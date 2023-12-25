@@ -15,7 +15,7 @@ func NewService(client auth_proto.AuthServiceClient) *Service {
 	}
 }
 
-func (s *Service) Signup(signup *dto.Signup) (*auth_proto.Credential, *dto.ResponseErr) {
+func (s *Service) Signup(signup *dto.SignupRequest) (*dto.SignupResponse, *dto.ResponseErr) {
 	// call authClient.Signup()
 	// handle error: conflict data, internal error and unavailable service
 	return nil, nil
