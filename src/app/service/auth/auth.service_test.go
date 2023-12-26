@@ -163,7 +163,14 @@ func (t *AuthServiceTest) TestSignInSuccess() {
 			AccessToken:  faker.Word(),
 			RefreshToken: faker.UUIDDigit(),
 			ExpiresIn:    3600,
-		}}
+		},
+	}
+
+	expected := &dto.Credential{
+		AccessToken:  protoResp.Credential.AccessToken,
+		RefreshToken: protoResp.Credential.RefreshToken,
+		ExpiresIn:    int(protoResp.Credential.ExpiresIn),
+	}
 
 	client := auth.AuthClientMock{}
 
@@ -173,7 +180,7 @@ func (t *AuthServiceTest) TestSignInSuccess() {
 	actual, err := svc.SignIn(t.signInDto)
 
 	assert.Nil(t.T(), err)
-	assert.Equal(t.T(), protoResp.Credential, actual)
+	assert.Equal(t.T(), expected, actual)
 }
 
 func (t *AuthServiceTest) TestSignInForbidden() {

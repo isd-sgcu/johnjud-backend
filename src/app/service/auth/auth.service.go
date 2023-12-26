@@ -63,7 +63,7 @@ func (s *Service) Signup(request *dto.SignupRequest) (*dto.SignupResponse, *dto.
 	}, nil
 }
 
-func (s *Service) SignIn(signIn *dto.SignIn) (*auth_proto.Credential, *dto.ResponseErr) {
+func (s *Service) SignIn(signIn *dto.SignIn) (*dto.Credential, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -95,7 +95,11 @@ func (s *Service) SignIn(signIn *dto.SignIn) (*auth_proto.Credential, *dto.Respo
 		}
 	}
 
-	return resp.Credential, nil
+	return &dto.Credential{
+		AccessToken:  resp.Credential.AccessToken,
+		RefreshToken: resp.Credential.RefreshToken,
+		ExpiresIn:    int(resp.Credential.ExpiresIn),
+	}, nil
 }
 
 func (s *Service) SignOut(token string) (bool, *dto.ResponseErr) {
