@@ -107,7 +107,7 @@ func (h *Handler) Create(c *router.FiberCtx) {
 }
 
 func (h *Handler) Update(c *router.FiberCtx) {
-
+	// petId := c.petI
 }
 
 func (h *Handler) ChangeView(c *router.FiberCtx) {
@@ -115,5 +115,22 @@ func (h *Handler) ChangeView(c *router.FiberCtx) {
 }
 
 func (h *Handler) Delete(c *router.FiberCtx) {
+	id, err := c.Param("id")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, &dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    err.Error(),
+			Data:       nil,
+		})
+		return
+	}
 
+	pet, errRes := h.service.Delete(id)
+	if errRes != nil {
+		c.JSON(errRes.StatusCode, errRes)
+		return
+	}
+
+	c.JSON(http.StatusOK, pet)
+	return
 }
