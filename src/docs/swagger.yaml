@@ -7,6 +7,18 @@ definitions:
         type: string
       value: {}
     type: object
+  dto.Credential:
+    properties:
+      access_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3BiZX...
+        type: string
+      expires_in:
+        example: 3600
+        type: integer
+      refresh_token:
+        example: e7e84d54-7518-4...
+        type: string
+    type: object
   dto.ResponseBadRequestErr:
     properties:
       data:
@@ -30,6 +42,16 @@ definitions:
         example: 409
         type: integer
     type: object
+  dto.ResponseForbiddenErr:
+    properties:
+      data: {}
+      message:
+        example: Insufficiency permission
+        type: string
+      status_code:
+        example: 403
+        type: integer
+    type: object
   dto.ResponseInternalErr:
     properties:
       data: {}
@@ -49,6 +71,18 @@ definitions:
       status_code:
         example: 503
         type: integer
+    type: object
+  dto.SignIn:
+    properties:
+      email:
+        type: string
+      password:
+        maxLength: 30
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
     type: object
   dto.SignupRequest:
     properties:
@@ -87,6 +121,45 @@ info:
   title: JohnJud API
   version: "1.0"
 paths:
+  /v1/auth/signin:
+    post:
+      consumes:
+      - application/json
+      description: Return the credential of user including access token and refresh
+        token
+      parameters:
+      - description: signIn request dto
+        in: body
+        name: signIn
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SignIn'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.Credential'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "403":
+          description: Incorrect email or password
+          schema:
+            $ref: '#/definitions/dto.ResponseForbiddenErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Sign in user
+      tags:
+      - auth
   /v1/auth/signup:
     post:
       consumes:
