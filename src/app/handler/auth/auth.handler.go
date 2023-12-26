@@ -76,6 +76,19 @@ func (h *Handler) Signup(c router.IContext) {
 	c.JSON(http.StatusOK, response)
 }
 
+// SignIn is a function that authenticate user with email and password
+// @Summary Sign in user
+// @Description Return the credential of user including access token and refresh token
+// @Param signIn body dto.SignIn true "signIn request dto"
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Success 201 {object} dto.Credential
+// @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
+// @Failure 403 {object} dto.ResponseForbiddenErr "Incorrect email or password"
+// @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
+// @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
+// @Router /v1/auth/signin [post]
 func (h *Handler) SignIn(c router.IContext) {
 	request := &dto.SignIn{}
 	err := c.Bind(request)
