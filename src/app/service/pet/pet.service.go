@@ -126,3 +126,69 @@ func (s *Service) Create(in *dto.PetDto) (ressult *proto.Pet, err *dto.ResponseE
 	}
 	return res.Pet, nil
 }
+
+func (s *Service) Update(id string, in *dto.UpDatePetDto) (result *proto.Pet, err *dto.ResponseErr) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	petReq := &proto.UpdatePetRequest{
+		Pet: &proto.Pet{
+			Id:           id,
+			Type:         in.Type,
+			Species:      in.Species,
+			Name:         in.Name,
+			Birthdate:    in.Birthdate,
+			Gender:       proto.Gender(in.Gender),
+			Habit:        in.Habit,
+			Caption:      in.Caption,
+			Status:       proto.PetStatus(in.Status),
+			ImageUrls:    []string{},
+			IsSterile:    in.IsSterile,
+			IsVaccinated: in.IsVaccinated,
+			IsVisible:    in.IsVisible,
+			IsClubPet:    in.IsClubPet,
+			Background:   in.Background,
+			Address:      in.Address,
+			Contact:      in.Contact,
+		},
+	}
+
+	res, errRes := s.client.Update(ctx, petReq)
+	if errRes != nil {
+		st, ok := status.FromError(errRes)
+		if ok {
+			switch st.Code() {
+			case codes.NotFound:
+				return nil, &dto.ResponseErr{
+					StatusCode: http.StatusNotFound,
+					Message:    st.Message(),
+					Data:       nil,
+				}
+			default:
+				log.Error().
+					Err(errRes).
+					Str("service", "pet").
+					Str("module", "update").
+					Msg("Error while connecting to service")
+
+				return nil, &dto.ResponseErr{
+					StatusCode: http.StatusServiceUnavailable,
+					Message:    "Service is down",
+					Data:       nil,
+				}
+			}
+		}
+		log.Error().
+			Err(errRes).
+			Str("service", "pet").
+			Str("module", "update").
+			Msg("Error while connecting to service")
+
+		return nil, &dto.ResponseErr{
+			StatusCode: http.StatusServiceUnavailable,
+			Message:    "Service is down",
+			Data:       nil,
+		}
+	}
+	return res.Pet, nil
+}
