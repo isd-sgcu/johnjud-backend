@@ -76,8 +76,38 @@ func (h *Handler) Signup(c router.IContext) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (h *Handler) Signin(c router.IContext) {
+func (h *Handler) SignIn(c router.IContext) {
+	request := &dto.SignIn{}
+	err := c.Bind(request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.BindingRequestErrorMessage + err.Error(),
+			Data:       nil,
+		})
+		return
+	}
 
+	if err := h.validate.Validate(request); err != nil {
+		var errorMessage []string
+		for _, reqErr := range err {
+			errorMessage = append(errorMessage, reqErr.Message)
+		}
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.InvalidRequestBodyMessage + strings.Join(errorMessage, ", "),
+			Data:       nil,
+		})
+		return
+	}
+
+	response, respErr := h.service.SignIn(request)
+	if respErr != nil {
+		c.JSON(respErr.StatusCode, respErr)
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 func (h *Handler) Signout(c router.IContext) {
