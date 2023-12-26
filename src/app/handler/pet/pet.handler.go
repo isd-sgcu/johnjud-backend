@@ -1,6 +1,9 @@
 package auth
 
 import (
+	"net/http"
+	"strings"
+
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
@@ -36,7 +39,36 @@ func (h *Handler) FindAll(c *router.FiberCtx) {
 }
 
 func (h *Handler) FindOne(c *router.FiberCtx) {
+	request := &dto.FindOnePetDto{}
+	err := c.Bind(request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    "Binding Request Error due to:" + err.Error(),
+			Data:       nil,
+		})
+	}
 
+	if err := h.validate.Validate(request); err != nil {
+		var errorMessage []string
+		for _, reqErr := range err {
+			errorMessage = append(errorMessage, reqErr.Message)
+		}
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    "Invalid Request Body due to:" + strings.Join(errorMessage, ", "),
+			Data:       nil,
+		})
+		return
+	}
+
+	response, respErr := h.service.FindOne(request.Id)
+	if respErr != nil {
+		c.JSON(respErr.StatusCode, respErr)
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 func (h *Handler) Create(c *router.FiberCtx) {

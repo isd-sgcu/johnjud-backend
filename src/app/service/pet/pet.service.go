@@ -22,7 +22,7 @@ func NewService(client proto.PetServiceClient) *Service {
 	}
 }
 
-func (s *Service) FindAll(req *dto.FindOnePetDto) (result *proto.Pet, err *dto.ResponseErr) {
+func (s *Service) FindAll(request *dto.FindOnePetDto) (result *proto.Pet, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -36,7 +36,7 @@ func (s *Service) FindAll(req *dto.FindOnePetDto) (result *proto.Pet, err *dto.R
 					Err(errRes).
 					Str("service", "pet").
 					Str("module", "find one").
-					Str("pet_id", req.Id).
+					Str("pet_id", request.Id).
 					Msg("Not found")
 				return nil, &dto.ResponseErr{
 					StatusCode: http.StatusNotFound,
@@ -47,7 +47,7 @@ func (s *Service) FindAll(req *dto.FindOnePetDto) (result *proto.Pet, err *dto.R
 				log.Error().
 					Err(errRes).
 					Str("service", "pet").
-					Str("pet_id", req.Id).
+					Str("pet_id", request.Id).
 					Msg("Invaild pet id")
 				return nil, &dto.ResponseErr{
 					StatusCode: http.StatusBadRequest,
@@ -58,7 +58,7 @@ func (s *Service) FindAll(req *dto.FindOnePetDto) (result *proto.Pet, err *dto.R
 				log.Error().
 					Err(errRes).
 					Str("service", "pet").
-					Str("pet_id", req.Id).
+					Str("pet_id", request.Id).
 					Msg("Error while connecting to service")
 				return nil, &dto.ResponseErr{
 					StatusCode: http.StatusServiceUnavailable,
@@ -71,7 +71,7 @@ func (s *Service) FindAll(req *dto.FindOnePetDto) (result *proto.Pet, err *dto.R
 			Err(errRes).
 			Str("service", "group").
 			Str("module", "find one").
-			Str("per_id", req.Id).
+			Str("per_id", request.Id).
 			Msg("Error while connecting to service")
 		return nil, &dto.ResponseErr{
 			StatusCode: http.StatusServiceUnavailable,
@@ -82,7 +82,7 @@ func (s *Service) FindAll(req *dto.FindOnePetDto) (result *proto.Pet, err *dto.R
 	log.Info().
 		Str("service", "pet").
 		Str("module", "find one").
-		Str("pet_id", req.Id).
+		Str("pet_id", request.Id).
 		Msg("Find pet success")
 	return res.Pet, nil
 }
