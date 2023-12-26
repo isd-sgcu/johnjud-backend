@@ -3,13 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"os"
-	"os/signal"
-	"sync"
-	"syscall"
-	"time"
-
 	authHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/auth"
 	health_check "github.com/isd-sgcu/johnjud-gateway/src/app/handler/health-check"
 	userHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/user"
@@ -25,6 +18,12 @@ import (
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"net/http"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
+	"time"
 )
 
 func main() {
@@ -93,8 +92,10 @@ func main() {
 
 	r.GetHealthCheck("/", hc.HealthCheck)
 
+	v1 := router.NewAPIv1(r, conf.App)
+
 	go func() {
-		if err := r.Listen(fmt.Sprintf(":%v", conf.App.Port)); err != nil && err != http.ErrServerClosed {
+		if err := v1.Listen(fmt.Sprintf(":%v", conf.App.Port)); err != nil && err != http.ErrServerClosed {
 			log.Fatal().
 				Err(err).
 				Str("service", "mgl-gateway").

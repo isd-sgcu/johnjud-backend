@@ -31,5 +31,5 @@ func (m *Guard) Use(ctx router.IContext) error {
 }
 
 func (m *Guard) Validate(ctx router.IContext) error {
-	return ctx.Next()
+	return nil
 }
