@@ -47,6 +47,7 @@ func (h *Handler) FindOne(c *router.FiberCtx) {
 			Message:    "Binding Request Error due to:" + err.Error(),
 			Data:       nil,
 		})
+		return
 	}
 
 	if err := h.validate.Validate(request); err != nil {
@@ -72,7 +73,37 @@ func (h *Handler) FindOne(c *router.FiberCtx) {
 }
 
 func (h *Handler) Create(c *router.FiberCtx) {
+	request := &dto.PetDto{}
+	err := c.Bind(request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    "Binding Request Error due to:" + err.Error(),
+			Data:       nil,
+		})
+		return
+	}
 
+	if err := h.validate.Validate(request); err != nil {
+		var errorMessage []string
+		for _, reqErr := range err {
+			errorMessage = append(errorMessage, reqErr.Message)
+		}
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    "Invalid Request Body due to:" + strings.Join(errorMessage, ", "),
+			Data:       nil,
+		})
+		return
+	}
+
+	response, respErr := h.service.Create(request)
+	if respErr != nil {
+		c.JSON(respErr.StatusCode, respErr)
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 func (h *Handler) Update(c *router.FiberCtx) {
