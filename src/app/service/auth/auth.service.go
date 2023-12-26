@@ -64,9 +64,38 @@ func (s *Service) Signup(request *dto.SignupRequest) (*dto.SignupResponse, *dto.
 }
 
 func (s *Service) SignIn(signIn *dto.SignIn) (*auth_proto.Credential, *dto.ResponseErr) {
-	// call authClient.SignIn()
-	// handle error: forbidden, internal error and unavailable service
-	return nil, nil
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := s.client.SignIn(ctx, &auth_proto.SignInRequest{
+		Email:    signIn.Email,
+		Password: signIn.Password,
+	})
+	if err != nil {
+		st, _ := status.FromError(err)
+		switch st.Code() {
+		case codes.PermissionDenied:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusForbidden,
+				Message:    constant.IncorrectEmailPasswordMessage,
+				Data:       nil,
+			}
+		case codes.Unavailable:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusServiceUnavailable,
+				Message:    constant.UnavailableServiceMessage,
+				Data:       nil,
+			}
+		default:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusInternalServerError,
+				Message:    constant.InternalErrorMessage,
+				Data:       nil,
+			}
+		}
+	}
+
+	return resp.Credential, nil
 }
 
 func (s *Service) SignOut(token string) (bool, *dto.ResponseErr) {
