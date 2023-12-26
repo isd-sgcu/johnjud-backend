@@ -44,6 +44,12 @@ type ResponseNotfoundErr struct {
 	Data       interface{} `json:"data"`
 }
 
+type ResponseConflictErr struct {
+	StatusCode int         `json:"status_code" example:"409"`
+	Message    string      `json:"message" example:"Conflict"`
+	Data       interface{} `json:"data"`
+}
+
 type ResponseInternalErr struct {
 	StatusCode int         `json:"status_code" example:"500"`
 	Message    string      `json:"message" example:"Internal service error"`

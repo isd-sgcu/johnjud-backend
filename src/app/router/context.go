@@ -7,6 +7,19 @@ import (
 	"github.com/google/uuid"
 )
 
+type IContext interface {
+	UserID() string
+	Bind(interface{}) error
+	JSON(int, interface{})
+	ID() (string, error)
+	Param(string) (string, error)
+	Token() string
+	Method() string
+	Path() string
+	StoreValue(string, string)
+	Next() error
+}
+
 type FiberCtx struct {
 	*fiber.Ctx
 }
@@ -73,6 +86,8 @@ func (c *FiberCtx) StoreValue(k string, v string) {
 	c.Locals(k, v)
 }
 
-func (c *FiberCtx) Next() {
-	c.Ctx.Next()
-}
+//func (c *FiberCtx) Next() {
+//	err := c.Ctx.Next()
+//	fmt.Println(c.Route().Path)
+//	fmt.Println("next error:", err)
+//}
