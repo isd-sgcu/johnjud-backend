@@ -22,6 +22,26 @@ func NewService(client proto.PetServiceClient) *Service {
 	}
 }
 
+func (s *Service) FindAll() (result []*proto.Pet, err *dto.ResponseErr) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	res, errRes := s.client.FindAll(ctx, &proto.FindAllPetRequest{})
+	if errRes != nil {
+		log.Error().
+			Err(errRes).
+			Str("service", "pet").
+			Str("module", "find all").
+			Msg("Error while find all pets")
+		return nil, &dto.ResponseErr{
+			StatusCode: http.StatusServiceUnavailable,
+			Message:    "Service is down",
+			Data:       nil,
+		}
+	}
+	return res.Pets, nil
+}
+
 func (s *Service) FindOne(request *dto.FindOnePetDto) (result *proto.Pet, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
