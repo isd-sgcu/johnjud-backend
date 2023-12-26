@@ -9,7 +9,7 @@ import (
 
 type IContext interface {
 	UserID() string
-	Bind(v interface{}) error
+	Bind(interface{}) error
 	JSON(int, interface{})
 	ID() (string, error)
 	Param(string) (string, error)
@@ -17,7 +17,7 @@ type IContext interface {
 	Method() string
 	Path() string
 	StoreValue(string, string)
-	Next()
+	Next() error
 }
 
 type FiberCtx struct {
@@ -86,6 +86,8 @@ func (c *FiberCtx) StoreValue(k string, v string) {
 	c.Locals(k, v)
 }
 
-func (c *FiberCtx) Next() {
-	c.Ctx.Next()
-}
+//func (c *FiberCtx) Next() {
+//	err := c.Ctx.Next()
+//	fmt.Println(c.Route().Path)
+//	fmt.Println("next error:", err)
+//}

@@ -19,7 +19,7 @@ type FiberRouter struct {
 }
 
 type IGuard interface {
-	Use(IContext)
+	Use(IContext) error
 }
 
 func NewFiberRouter(authGuard IGuard, conf config.App) *FiberRouter {
@@ -49,9 +49,8 @@ func NewFiberRouter(authGuard IGuard, conf config.App) *FiberRouter {
 	return &FiberRouter{r, user, auth, pet, image, adopt, like}
 }
 
-func GroupWithAuthMiddleware(r *fiber.App, path string, middleware func(ctx IContext)) fiber.Router {
+func GroupWithAuthMiddleware(r *fiber.App, path string, middleware func(ctx IContext) error) fiber.Router {
 	return r.Group(path, func(c *fiber.Ctx) error {
-		middleware(NewFiberCtx(c))
-		return nil
+		return middleware(NewFiberCtx(c))
 	})
 }

@@ -34,17 +34,17 @@ func (m *MockIContext) EXPECT() *MockIContextMockRecorder {
 }
 
 // Bind mocks base method.
-func (m *MockIContext) Bind(v interface{}) error {
+func (m *MockIContext) Bind(arg0 interface{}) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Bind", v)
+	ret := m.ctrl.Call(m, "Bind", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Bind indicates an expected call of Bind.
-func (mr *MockIContextMockRecorder) Bind(v interface{}) *gomock.Call {
+func (mr *MockIContextMockRecorder) Bind(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Bind", reflect.TypeOf((*MockIContext)(nil).Bind), v)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Bind", reflect.TypeOf((*MockIContext)(nil).Bind), arg0)
 }
 
 // ID mocks base method.
@@ -89,9 +89,11 @@ func (mr *MockIContextMockRecorder) Method() *gomock.Call {
 }
 
 // Next mocks base method.
-func (m *MockIContext) Next() {
+func (m *MockIContext) Next() error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Next")
+	ret := m.ctrl.Call(m, "Next")
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Next indicates an expected call of Next.
