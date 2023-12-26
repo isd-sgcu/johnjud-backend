@@ -86,3 +86,43 @@ func (s *Service) FindAll(req *dto.FindOnePetDto) (result *proto.Pet, err *dto.R
 		Msg("Find pet success")
 	return res.Pet, nil
 }
+
+func (s *Service) Create(in *dto.PetDto) (ressult *proto.Pet, err *dto.ResponseErr) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	petDto := &proto.Pet{
+		Type:         in.Type,
+		Species:      in.Species,
+		Name:         in.Name,
+		Birthdate:    in.Birthdate,
+		Gender:       proto.Gender(in.Gender),
+		Habit:        in.Habit,
+		Caption:      in.Caption,
+		Status:       proto.PetStatus(in.Status),
+		ImageUrls:    []string{},
+		IsSterile:    in.IsSterile,
+		IsVaccinated: in.IsVaccinated,
+		IsVisible:    in.IsVisible,
+		IsClubPet:    in.IsClubPet,
+		Background:   in.Background,
+		Address:      in.Address,
+		Contact:      in.Contact,
+	}
+
+	res, errRes := s.client.Create(ctx, &proto.CreatePetRequest{Pet: petDto})
+	if errRes != nil {
+		log.Error().
+			Err(errRes).
+			Str("service", "user").
+			Str("module", "create").
+			Msg("Error while connecting to service")
+
+		return nil, &dto.ResponseErr{
+			StatusCode: http.StatusServiceUnavailable,
+			Message:    "Service is down",
+			Data:       nil,
+		}
+	}
+	return res.Pet, nil
+}
