@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
@@ -44,7 +45,7 @@ func (h *Handler) FindOne(c *router.FiberCtx) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ResponseErr{
 			StatusCode: http.StatusBadRequest,
-			Message:    "Binding Request Error due to:" + err.Error(),
+			Message:    constant.BindingRequestErrorMessage + err.Error(),
 			Data:       nil,
 		})
 		return
@@ -57,7 +58,7 @@ func (h *Handler) FindOne(c *router.FiberCtx) {
 		}
 		c.JSON(http.StatusBadRequest, dto.ResponseErr{
 			StatusCode: http.StatusBadRequest,
-			Message:    "Invalid Request Body due to:" + strings.Join(errorMessage, ", "),
+			Message:    constant.InvalidRequestBodyMessage + strings.Join(errorMessage, ", "),
 			Data:       nil,
 		})
 		return
@@ -78,7 +79,7 @@ func (h *Handler) Create(c *router.FiberCtx) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ResponseErr{
 			StatusCode: http.StatusBadRequest,
-			Message:    "Binding Request Error due to:" + err.Error(),
+			Message:    constant.BindingRequestErrorMessage + err.Error(),
 			Data:       nil,
 		})
 		return
@@ -91,7 +92,7 @@ func (h *Handler) Create(c *router.FiberCtx) {
 		}
 		c.JSON(http.StatusBadRequest, dto.ResponseErr{
 			StatusCode: http.StatusBadRequest,
-			Message:    "Invalid Request Body due to:" + strings.Join(errorMessage, ", "),
+			Message:    constant.InvalidRequestBodyMessage + strings.Join(errorMessage, ", "),
 			Data:       nil,
 		})
 		return
