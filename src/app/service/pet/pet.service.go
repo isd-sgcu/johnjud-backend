@@ -192,3 +192,46 @@ func (s *Service) Update(id string, in *dto.UpDatePetDto) (result *proto.Pet, er
 	}
 	return res.Pet, nil
 }
+
+func (s *Service) Delete(id string) (result bool, err *dto.ResponseErr) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	res, errRes := s.client.Delete(ctx, &proto.DeletePetRequest{})
+	if errRes != nil {
+		st, ok := status.FromError(errRes)
+		if ok {
+			switch st.Code() {
+			case codes.NotFound:
+				return false, &dto.ResponseErr{
+					StatusCode: http.StatusNotFound,
+					Message:    st.Message(),
+					Data:       nil,
+				}
+			default:
+				log.Error().
+					Err(errRes).
+					Str("service", "pet").
+					Str("module", "delete").
+					Msg("Error while connecting to service")
+
+				return false, &dto.ResponseErr{
+					StatusCode: http.StatusServiceUnavailable,
+					Message:    "Service is down",
+					Data:       nil,
+				}
+			}
+		}
+		log.Error().
+			Err(errRes).
+			Str("service", "pet").
+			Str("module", "delete").
+			Msg("Error while connecting to service")
+		return false, &dto.ResponseErr{
+			StatusCode: http.StatusServiceUnavailable,
+			Message:    "Service is down",
+			Data:       nil,
+		}
+	}
+	return res.Success, nil
+}
