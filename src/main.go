@@ -26,6 +26,23 @@ import (
 	"time"
 )
 
+// @title JohnJud API
+// @version 1.0
+// @description.markdown
+
+// @contact.name ISD Team
+// @contact.email sd.team.sgcu@gmail.com
+
+// @schemes https http
+
+// @securityDefinitions.apikey  AuthToken
+// @in                          header
+// @name                        Authorization
+// @description					Description for what is this security definition being used
+
+// @tag.name auth
+// @tag.description.markdown
+
 func main() {
 	conf, err := config.LoadConfig()
 	if err != nil {
