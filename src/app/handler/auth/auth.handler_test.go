@@ -10,7 +10,6 @@ import (
 	mock_auth "github.com/isd-sgcu/johnjud-gateway/src/mocks/service/auth"
 	mock_user "github.com/isd-sgcu/johnjud-gateway/src/mocks/service/user"
 	mock_validator "github.com/isd-sgcu/johnjud-gateway/src/mocks/validator"
-	auth_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
 	"github.com/stretchr/testify/suite"
 	"net/http"
 	"testing"
@@ -145,7 +144,7 @@ func (t *AuthHandlerTest) TestSignupServiceError() {
 }
 
 func (t *AuthHandlerTest) TestSignInSuccess() {
-	signInResponse := &auth_proto.Credential{
+	signInResponse := &dto.Credential{
 		AccessToken:  faker.Word(),
 		RefreshToken: faker.UUIDDigit(),
 		ExpiresIn:    3600,
