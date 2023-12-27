@@ -112,7 +112,7 @@ func (c *ClientMock) ChangeView(ctx context.Context, in *proto.ChangeViewPetRequ
 	return res, args.Error(1)
 }
 
-func (c *ClientMock) Delete(ctx context.Context, in *proto.DeletePetRequest, opts ...grpc.CallOption) (res *proto.DeletePetResponse, error) {
+func (c *ClientMock) Delete(ctx context.Context, in *proto.DeletePetRequest, opts ...grpc.CallOption) (res *proto.DeletePetResponse, err error) {
 	args := c.Called(in.Id)
 
 	if args.Get(0) != nil {
