@@ -79,7 +79,7 @@ func (h *Handler) Signup(c router.IContext) {
 // SignIn is a function that authenticate user with email and password
 // @Summary Sign in user
 // @Description Return the credential of user including access token and refresh token
-// @Param signIn body dto.SignIn true "signIn request dto"
+// @Param signIn body dto.SignInRequest true "signIn request dto"
 // @Tags auth
 // @Accept json
 // @Produce json
@@ -90,7 +90,7 @@ func (h *Handler) Signup(c router.IContext) {
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/auth/signin [post]
 func (h *Handler) SignIn(c router.IContext) {
-	request := &dto.SignIn{}
+	request := &dto.SignInRequest{}
 	err := c.Bind(request)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ResponseErr{

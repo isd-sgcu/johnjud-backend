@@ -18,7 +18,7 @@ import (
 type AuthHandlerTest struct {
 	suite.Suite
 	signupRequest *dto.SignupRequest
-	signInRequest *dto.SignIn
+	signInRequest *dto.SignInRequest
 	bindErr       error
 	validateErr   []*dto.BadReqErrResponse
 }
@@ -29,7 +29,7 @@ func TestAuthHandler(t *testing.T) {
 
 func (t *AuthHandlerTest) SetupTest() {
 	signupRequest := &dto.SignupRequest{}
-	signInRequest := &dto.SignIn{}
+	signInRequest := &dto.SignInRequest{}
 	bindErr := errors.New("Binding request failed")
 	validateErr := []*dto.BadReqErrResponse{
 		{

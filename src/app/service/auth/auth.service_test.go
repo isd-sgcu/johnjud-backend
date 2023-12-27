@@ -17,7 +17,7 @@ import (
 type AuthServiceTest struct {
 	suite.Suite
 	signupRequestDto *dto.SignupRequest
-	signInDto        *dto.SignIn
+	signInDto        *dto.SignInRequest
 	token            string
 }
 
@@ -32,7 +32,7 @@ func (t *AuthServiceTest) SetupTest() {
 		Firstname: faker.FirstName(),
 		Lastname:  faker.LastName(),
 	}
-	signInDto := &dto.SignIn{
+	signInDto := &dto.SignInRequest{
 		Email:    faker.Email(),
 		Password: faker.Password(),
 	}

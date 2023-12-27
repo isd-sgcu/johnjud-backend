@@ -72,7 +72,7 @@ definitions:
         example: 503
         type: integer
     type: object
-  dto.SignIn:
+  dto.SignInRequest:
     properties:
       email:
         type: string
@@ -133,7 +133,7 @@ paths:
         name: signIn
         required: true
         schema:
-          $ref: '#/definitions/dto.SignIn'
+          $ref: '#/definitions/dto.SignInRequest'
       produces:
       - application/json
       responses:
