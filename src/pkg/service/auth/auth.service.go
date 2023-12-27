@@ -7,7 +7,7 @@ import (
 
 type Service interface {
 	Signup(*dto.SignupRequest) (*dto.SignupResponse, *dto.ResponseErr)
-	SignIn(*dto.SignIn) (*dto.Credential, *dto.ResponseErr)
+	SignIn(*dto.SignInRequest) (*dto.Credential, *dto.ResponseErr)
 	SignOut(string) (bool, *dto.ResponseErr)
 	Validate(string) (*dto.TokenPayloadAuth, *dto.ResponseErr)
 	RefreshToken(string) (*auth_proto.Credential, *dto.ResponseErr)

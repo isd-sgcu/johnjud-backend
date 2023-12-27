@@ -34,7 +34,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.SignIn"
+                            "$ref": "#/definitions/dto.SignInRequest"
                         }
                     }
                 ],
@@ -236,7 +236,7 @@
                 }
             }
         },
-        "dto.SignIn": {
+        "dto.SignInRequest": {
             "type": "object",
             "required": [
                 "email",

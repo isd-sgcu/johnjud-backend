@@ -26,7 +26,7 @@ type SignupResponse struct {
 	Lastname  string `json:"lastname"`
 }
 
-type SignIn struct {
+type SignInRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,gte=6,lte=30"`
 }

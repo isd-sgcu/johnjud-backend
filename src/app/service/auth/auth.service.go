@@ -63,7 +63,7 @@ func (s *Service) Signup(request *dto.SignupRequest) (*dto.SignupResponse, *dto.
 	}, nil
 }
 
-func (s *Service) SignIn(signIn *dto.SignIn) (*dto.Credential, *dto.ResponseErr) {
+func (s *Service) SignIn(signIn *dto.SignInRequest) (*dto.Credential, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

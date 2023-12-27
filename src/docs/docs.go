@@ -38,7 +38,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.SignIn"
+                            "$ref": "#/definitions/dto.SignInRequest"
                         }
                     }
                 ],
@@ -240,7 +240,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.SignIn": {
+        "dto.SignInRequest": {
             "type": "object",
             "required": [
                 "email",
