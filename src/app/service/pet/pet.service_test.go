@@ -181,7 +181,7 @@ func (t *PetServiceTest) TestFindOneGrpcErr() {
 	want := t.ServiceDownErr
 
 	c := &mock.ClientMock{}
-	c.On("FindOne", &proto.FindOnePetRequest{Id: t.Pet.Id}).Return(nil, errors.New("Service is down"))
+	c.On("FindOne", &proto.FindOnePetRequest{Id: t.Pet.Id}).Return(nil, errors.New(constant.ServiceDownMessage))
 
 	srv := NewService(c)
 
@@ -192,9 +192,23 @@ func (t *PetServiceTest) TestFindOneGrpcErr() {
 	assert.Equal(t.T(), want, err)
 }
 
-func (t *PetServiceTest) TestCreateSuccess() {}
+func (t *PetServiceTest) TestCreateSuccess() {
 
-func (t *PetServiceTest) TestCreateGrpcErr() {}
+}
+
+func (t *PetServiceTest) TestCreateGrpcErr() {
+	want := t.ServiceDownErr
+
+	c := &mock.ClientMock{}
+	c.On("Create", t.PetReq).Return(nil, errors.New("Service is down"))
+
+	srv := NewService(c)
+
+	actual, err := srv.Create(t.PetDto)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), want, err)
+}
 
 func (t *PetServiceTest) TestUpdateSuccess() {}
 
