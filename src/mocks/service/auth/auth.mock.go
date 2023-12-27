@@ -51,10 +51,10 @@ func (mr *MockServiceMockRecorder) RefreshToken(arg0 interface{}) *gomock.Call {
 }
 
 // SignIn mocks base method.
-func (m *MockService) SignIn(arg0 *dto.SignIn) (*v1.Credential, *dto.ResponseErr) {
+func (m *MockService) SignIn(arg0 *dto.SignIn) (*dto.Credential, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignIn", arg0)
-	ret0, _ := ret[0].(*v1.Credential)
+	ret0, _ := ret[0].(*dto.Credential)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
