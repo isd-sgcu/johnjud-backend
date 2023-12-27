@@ -6,13 +6,11 @@ import (
 	"testing"
 
 	"github.com/go-faker/faker/v4"
-	petConst "github.com/isd-sgcu/johnjud-backend/src/constant/pet"
-	"github.com/isd-sgcu/johnjud-gate/src/mock/pet"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
-	"github.com/isd-sgcu/johnjud-gateway/src/mocks/pet"
-	image_proto "github.com/isd-sgcu/johnjud-go-proto/johnjub/file/image/v1"
+	"github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
 	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
+	image_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -46,10 +44,10 @@ func (t *PetServiceTest) SetupTest() {
 			Species:      faker.Word(),
 			Name:         faker.Name(),
 			Birthdate:    faker.Word(),
-			Gender:       petConst.Gender(rand.Intn(1) + 1),
+			Gender:       proto.Gender(rand.Intn(1) + 1),
 			Habit:        faker.Paragraph(),
 			Caption:      faker.Paragraph(),
-			Status:       petConst.Status(rand.Intn(1) + 1),
+			Status:       proto.PetStatus(rand.Intn(1) + 1),
 			IsSterile:    true,
 			IsVaccinated: true,
 			IsVisible:    true,
@@ -83,10 +81,10 @@ func (t *PetServiceTest) SetupTest() {
 			Species:      faker.Word(),
 			Name:         faker.Name(),
 			Birthdate:    faker.Word(),
-			Gender:       petConst.Gender(rand.Intn(1) + 1),
+			Gender:       proto.Gender(rand.Intn(1) + 1),
 			Habit:        faker.Paragraph(),
 			Caption:      faker.Paragraph(),
-			Status:       petConst.Status(rand.Intn(1) + 1),
+			Status:       proto.PetStatus(rand.Intn(1) + 1),
 			IsSterile:    true,
 			IsVaccinated: true,
 			IsVisible:    true,
@@ -102,10 +100,10 @@ func (t *PetServiceTest) SetupTest() {
 		Species:      t.Pet.Species,
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
-		Gender:       petConst.Gender(t.Pet.Gender),
+		Gender:       pet.Gender(t.Pet.Gender),
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
-		Status:       petConst.Status(t.Pet.Status),
+		Status:       pet.Status(t.Pet.Status),
 		IsSterile:    t.Pet.IsSterile,
 		IsVaccinated: t.Pet.IsVaccinated,
 		IsVisible:    t.Pet.IsVisible,
@@ -122,10 +120,10 @@ func (t *PetServiceTest) SetupTest() {
 			Species:      t.Pet.Species,
 			Name:         t.Pet.Name,
 			Birthdate:    t.Pet.Birthdate,
-			Gender:       petConst.Gender(t.Pet.Gender),
+			Gender:       proto.Gender(t.Pet.Gender),
 			Habit:        t.Pet.Habit,
 			Caption:      t.Pet.Caption,
-			Status:       petConst.Status(t.Pet.Status),
+			Status:       proto.PetStatus(t.Pet.Status),
 			IsSterile:    t.Pet.IsSterile,
 			IsVaccinated: t.Pet.IsVaccinated,
 			IsVisible:    t.Pet.IsVisible,
@@ -160,9 +158,6 @@ func (t *PetServiceTest) TestFindAllSuccess() {}
 func (t *PetServiceTest) TestFindOneSuccess() {}
 
 func (t *PetServiceTest) TestFindOneNotFound() {
-	want := t.NotFoundErr
-
-	c := &pet
 }
 
 func (t *PetServiceTest) TestFindOneGrpcErr() {}
