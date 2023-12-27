@@ -1,6 +1,7 @@
 package pet
 
 import (
+	"errors"
 	"math/rand"
 	"net/http"
 	"testing"
@@ -9,9 +10,13 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
+	mock "github.com/isd-sgcu/johnjud-gateway/src/mocks/pet"
 	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	image_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type PetServiceTest struct {
@@ -158,9 +163,34 @@ func (t *PetServiceTest) TestFindAllSuccess() {}
 func (t *PetServiceTest) TestFindOneSuccess() {}
 
 func (t *PetServiceTest) TestFindOneNotFound() {
+	want := t.NotFoundErr
+
+	c := &mock.ClientMock{}
+	c.On("FindOne", &proto.FindOnePetRequest{Id: t.Pet.Id}).Return(nil, status.Error(codes.NotFound, "Pet not found"))
+
+	srv := NewService(c)
+
+	findOnePetDto := &dto.FindOnePetDto{Id: t.Pet.Id}
+	actual, err := srv.FindOne(findOnePetDto)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), want, err)
 }
 
-func (t *PetServiceTest) TestFindOneGrpcErr() {}
+func (t *PetServiceTest) TestFindOneGrpcErr() {
+	want := t.ServiceDownErr
+
+	c := &mock.ClientMock{}
+	c.On("FindOne", &proto.FindOnePetRequest{Id: t.Pet.Id}).Return(nil, errors.New("Service is down"))
+
+	srv := NewService(c)
+
+	findOnePetDto := &dto.FindOnePetDto{Id: t.Pet.Id}
+	actual, err := srv.FindOne(findOnePetDto)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), want, err)
+}
 
 func (t *PetServiceTest) TestCreateSuccess() {}
 

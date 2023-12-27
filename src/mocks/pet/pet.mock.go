@@ -73,6 +73,11 @@ type ClientMock struct {
 	mock.Mock
 }
 
+// FindAll implements v1.PetServiceClient.
+func (*ClientMock) FindAll(ctx context.Context, in *proto.FindAllPetRequest, opts ...grpc.CallOption) (*proto.FindAllPetResponse, error) {
+	panic("unimplemented")
+}
+
 func (c *ClientMock) FindOne(ctx context.Context, in *proto.FindOnePetRequest, opts ...grpc.CallOption) (res *proto.FindOnePetResponse, err error) {
 	args := c.Called(in)
 
