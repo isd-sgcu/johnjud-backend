@@ -7,8 +7,10 @@ import (
 
 	"github.com/go-faker/faker/v4"
 	petConst "github.com/isd-sgcu/johnjud-backend/src/constant/pet"
+	"github.com/isd-sgcu/johnjud-gate/src/mock/pet"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
+	"github.com/isd-sgcu/johnjud-gateway/src/mocks/pet"
 	image_proto "github.com/isd-sgcu/johnjud-go-proto/johnjub/file/image/v1"
 	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	"github.com/stretchr/testify/suite"
@@ -160,6 +162,7 @@ func (t *PetServiceTest) TestFindOneSuccess() {}
 func (t *PetServiceTest) TestFindOneNotFound() {
 	want := t.NotFoundErr
 
+	c := &pet
 }
 
 func (t *PetServiceTest) TestFindOneGrpcErr() {}
