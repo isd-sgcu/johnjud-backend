@@ -157,7 +157,10 @@ func (t *PetServiceTest) TestFindAllSuccess() {}
 
 func (t *PetServiceTest) TestFindOneSuccess() {}
 
-func (t *PetServiceTest) TestFindOneNotFound() {}
+func (t *PetServiceTest) TestFindOneNotFound() {
+	want := t.NotFoundErr
+
+}
 
 func (t *PetServiceTest) TestFindOneGrpcErr() {}
 
