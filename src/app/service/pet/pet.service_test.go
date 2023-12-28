@@ -44,7 +44,6 @@ func (t *PetServiceTest) SetupTest() {
 	var pets []*proto.Pet
 	for i := 0; i <= 3; i++ {
 		pet := &proto.Pet{
-			Id:           faker.UUIDDigit(),
 			Type:         faker.Word(),
 			Species:      faker.Word(),
 			Name:         faker.Name(),
@@ -57,23 +56,25 @@ func (t *PetServiceTest) SetupTest() {
 			IsVaccinated: true,
 			IsVisible:    true,
 			IsClubPet:    true,
+			ImageUrls:    []string{},
 			Background:   faker.Paragraph(),
 			Address:      faker.Paragraph(),
 			Contact:      faker.Paragraph(),
 		}
-		var images []*image_proto.Image
-		var imageUrls []string
-		for i := 0; i < 3; i++ {
-			url := faker.URL()
-			images = append(images, &image_proto.Image{
-				Id:       faker.UUIDDigit(),
-				PetId:    pet.Id,
-				ImageUrl: url,
-			})
-			imageUrls = append(imageUrls, url)
-		}
-		t.ImagesList = append(t.ImagesList, images)
-		t.ImageUrlsList = append(t.ImageUrlsList, imageUrls)
+		// ? wait for image mock
+		// var images []*image_proto.Image
+		// var imageUrls []string
+		// for i := 0; i < 3; i++ {
+		// 	url := faker.URL()
+		// 	images = append(images, &image_proto.Image{
+		// 		Id:       faker.UUIDDigit(),
+		// 		PetId:    pet.Id,
+		// 		ImageUrl: url,
+		// 	})
+		// 	imageUrls = append(imageUrls, url)
+		// }
+		// t.ImagesList = append(t.ImagesList, images)
+		// t.ImageUrlsList = append(t.ImageUrlsList, imageUrls)
 		pets = append(pets, pet)
 	}
 
@@ -82,21 +83,22 @@ func (t *PetServiceTest) SetupTest() {
 
 	t.PetReq = &proto.CreatePetRequest{
 		Pet: &proto.Pet{
-			Type:         faker.Word(),
-			Species:      faker.Word(),
-			Name:         faker.Name(),
-			Birthdate:    faker.Word(),
-			Gender:       proto.Gender(rand.Intn(1) + 1),
-			Habit:        faker.Paragraph(),
-			Caption:      faker.Paragraph(),
-			Status:       proto.PetStatus(rand.Intn(1) + 1),
-			IsSterile:    true,
-			IsVaccinated: true,
-			IsVisible:    true,
-			IsClubPet:    true,
-			Background:   faker.Paragraph(),
-			Address:      faker.Paragraph(),
-			Contact:      faker.Paragraph(),
+			Type:         t.Pet.Type,
+			Species:      t.Pet.Species,
+			Name:         t.Pet.Name,
+			Birthdate:    t.Pet.Birthdate,
+			Gender:       t.Pet.Gender,
+			Habit:        t.Pet.Habit,
+			Caption:      t.Pet.Caption,
+			Status:       t.Pet.Status,
+			ImageUrls:    t.Pet.ImageUrls,
+			IsSterile:    t.Pet.IsSterile,
+			IsVaccinated: t.Pet.IsVaccinated,
+			IsVisible:    t.Pet.IsVisible,
+			IsClubPet:    t.Pet.IsClubPet,
+			Background:   t.Pet.Background,
+			Address:      t.Pet.Address,
+			Contact:      t.Pet.Contact,
 		},
 	}
 
@@ -193,18 +195,68 @@ func (t *PetServiceTest) TestFindOneGrpcErr() {
 }
 
 func (t *PetServiceTest) TestCreateSuccess() {
+	want := t.Pet
 
+	c := &mock.ClientMock{}
+	c.On("Create", t.Pet).Return(&proto.CreatePetResponse{Pet: want}, nil)
+
+	srv := NewService(c)
+
+	in := &dto.CreatePetDto{
+		Pet: &dto.PetDto{
+			Type:         t.Pet.Type,
+			Species:      t.Pet.Species,
+			Name:         t.Pet.Name,
+			Birthdate:    t.Pet.Birthdate,
+			Gender:       pet.Gender(t.Pet.Gender),
+			Habit:        t.Pet.Habit,
+			Caption:      t.Pet.Caption,
+			Status:       pet.Status(t.Pet.Status),
+			IsSterile:    t.Pet.IsSterile,
+			IsVaccinated: t.Pet.IsVaccinated,
+			IsVisible:    t.Pet.IsVisible,
+			IsClubPet:    t.Pet.IsClubPet,
+			Background:   t.Pet.Background,
+			Address:      t.Pet.Address,
+			Contact:      t.Pet.Contact,
+		},
+	}
+
+	actual, err := srv.Create(in)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), actual, actual)
 }
 
 func (t *PetServiceTest) TestCreateGrpcErr() {
 	want := t.ServiceDownErr
 
 	c := &mock.ClientMock{}
-	c.On("Create", t.PetReq).Return(nil, errors.New("Service is down"))
+	c.On("Create", t.Pet).Return(nil, errors.New(constant.ServiceDownMessage))
 
 	srv := NewService(c)
 
-	actual, err := srv.Create(t.PetDto)
+	in := &dto.CreatePetDto{
+		Pet: &dto.PetDto{
+			Type:         t.Pet.Type,
+			Species:      t.Pet.Species,
+			Name:         t.Pet.Name,
+			Birthdate:    t.Pet.Birthdate,
+			Gender:       pet.Gender(t.Pet.Gender),
+			Habit:        t.Pet.Habit,
+			Caption:      t.Pet.Caption,
+			Status:       pet.Status(t.Pet.Status),
+			IsSterile:    t.Pet.IsSterile,
+			IsVaccinated: t.Pet.IsVaccinated,
+			IsVisible:    t.Pet.IsVisible,
+			IsClubPet:    t.Pet.IsClubPet,
+			Background:   t.Pet.Background,
+			Address:      t.Pet.Address,
+			Contact:      t.Pet.Contact,
+		},
+	}
+
+	actual, err := srv.Create(in)
 
 	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), want, err)
