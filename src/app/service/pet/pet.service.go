@@ -7,21 +7,18 @@ import (
 
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
-	image_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 type Service struct {
-	petClient   proto.PetServiceClient
-	imageClient image_proto.ImageServiceClient
+	petClient proto.PetServiceClient
 }
 
-func NewService(petClient proto.PetServiceClient, imageClient image_proto.ImageServiceClient) *Service {
+func NewService(petClient proto.PetServiceClient) *Service {
 	return &Service{
-		petClient:   petClient,
-		imageClient: imageClient,
+		petClient: petClient,
 	}
 }
 
@@ -108,39 +105,30 @@ func (s *Service) FindOne(request *dto.FindOnePetDto) (result *proto.Pet, err *d
 		Str("pet_id", request.Id).
 		Msg("Find pet success")
 
-	var imageUrls *image_proto.FindImageByPetIdRequest
-
-	images, errRes := s.imageClient.FindByPetId(ctx, imageUrls)
-	res.Pet.ImageUrls = make([]string, len(images.Images))
-
-	for i, img := range images.Images {
-		res.Pet.ImageUrls[i] = img.ImageUrl
-	}
-
 	return res.Pet, nil
 }
 
-func (s *Service) Create(in *dto.PetDto) (ressult *proto.Pet, err *dto.ResponseErr) {
+func (s *Service) Create(in *dto.CreatePetDto) (ressult *proto.Pet, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	petDto := &proto.Pet{
-		Type:         in.Type,
-		Species:      in.Species,
-		Name:         in.Name,
-		Birthdate:    in.Birthdate,
-		Gender:       proto.Gender(in.Gender),
-		Habit:        in.Habit,
-		Caption:      in.Caption,
-		Status:       proto.PetStatus(in.Status),
+		Type:         in.Pet.Type,
+		Species:      in.Pet.Species,
+		Name:         in.Pet.Name,
+		Birthdate:    in.Pet.Birthdate,
+		Gender:       proto.Gender(in.Pet.Gender),
+		Habit:        in.Pet.Habit,
+		Caption:      in.Pet.Caption,
+		Status:       proto.PetStatus(in.Pet.Status),
 		ImageUrls:    []string{},
-		IsSterile:    in.IsSterile,
-		IsVaccinated: in.IsVaccinated,
-		IsVisible:    in.IsVisible,
-		IsClubPet:    in.IsClubPet,
-		Background:   in.Background,
-		Address:      in.Address,
-		Contact:      in.Contact,
+		IsSterile:    in.Pet.IsSterile,
+		IsVaccinated: in.Pet.IsVaccinated,
+		IsVisible:    in.Pet.IsVisible,
+		IsClubPet:    in.Pet.IsClubPet,
+		Background:   in.Pet.Background,
+		Address:      in.Pet.Address,
+		Contact:      in.Pet.Contact,
 	}
 
 	res, errRes := s.petClient.Create(ctx, &proto.CreatePetRequest{Pet: petDto})
