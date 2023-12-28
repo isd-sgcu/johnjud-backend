@@ -7,18 +7,21 @@ import (
 
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
+	image_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 type Service struct {
-	client proto.PetServiceClient
+	petClient   proto.PetServiceClient
+	imageClient image_proto.ImageServiceClient
 }
 
-func NewService(client proto.PetServiceClient) *Service {
+func NewService(petClient proto.PetServiceClient, imageClient image_proto.ImageServiceClient) *Service {
 	return &Service{
-		client: client,
+		petClient:   petClient,
+		imageClient: imageClient,
 	}
 }
 
@@ -26,7 +29,7 @@ func (s *Service) FindAll() (result []*proto.Pet, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	res, errRes := s.client.FindAll(ctx, &proto.FindAllPetRequest{})
+	res, errRes := s.petClient.FindAll(ctx, &proto.FindAllPetRequest{})
 	if errRes != nil {
 		log.Error().
 			Err(errRes).
@@ -46,7 +49,7 @@ func (s *Service) FindOne(request *dto.FindOnePetDto) (result *proto.Pet, err *d
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	res, errRes := s.client.FindOne(ctx, &proto.FindOnePetRequest{Id: request.Id})
+	res, errRes := s.petClient.FindOne(ctx, &proto.FindOnePetRequest{Id: request.Id})
 	if errRes != nil {
 		st, ok := status.FromError(errRes)
 		if ok {
@@ -104,6 +107,16 @@ func (s *Service) FindOne(request *dto.FindOnePetDto) (result *proto.Pet, err *d
 		Str("module", "find one").
 		Str("pet_id", request.Id).
 		Msg("Find pet success")
+
+	var imageUrls *image_proto.FindImageByPetIdRequest
+
+	images, errRes := s.imageClient.FindByPetId(ctx, imageUrls)
+	res.Pet.ImageUrls = make([]string, len(images.Images))
+
+	for i, img := range images.Images {
+		res.Pet.ImageUrls[i] = img.ImageUrl
+	}
+
 	return res.Pet, nil
 }
 
@@ -130,7 +143,7 @@ func (s *Service) Create(in *dto.PetDto) (ressult *proto.Pet, err *dto.ResponseE
 		Contact:      in.Contact,
 	}
 
-	res, errRes := s.client.Create(ctx, &proto.CreatePetRequest{Pet: petDto})
+	res, errRes := s.petClient.Create(ctx, &proto.CreatePetRequest{Pet: petDto})
 	if errRes != nil {
 		log.Error().
 			Err(errRes).
@@ -173,7 +186,7 @@ func (s *Service) Update(id string, in *dto.UpDatePetDto) (result *proto.Pet, er
 		},
 	}
 
-	res, errRes := s.client.Update(ctx, petReq)
+	res, errRes := s.petClient.Update(ctx, petReq)
 	if errRes != nil {
 		st, ok := status.FromError(errRes)
 		if ok {
@@ -217,7 +230,7 @@ func (s *Service) Delete(id string) (result bool, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	res, errRes := s.client.Delete(ctx, &proto.DeletePetRequest{})
+	res, errRes := s.petClient.Delete(ctx, &proto.DeletePetRequest{})
 	if errRes != nil {
 		st, ok := status.FromError(errRes)
 		if ok {
