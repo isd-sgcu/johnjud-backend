@@ -22,6 +22,10 @@ type PetDto struct {
 	Contact      string     `json:"contact"`
 }
 
+type CreatePetDto struct {
+	Pet *PetDto `json:"pet" validate:"required"`
+}
+
 type FindOnePetDto struct {
 	Id string `json:"id" validate:"required"`
 }
