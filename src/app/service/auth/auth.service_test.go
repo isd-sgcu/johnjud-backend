@@ -17,7 +17,7 @@ import (
 type AuthServiceTest struct {
 	suite.Suite
 	signupRequestDto *dto.SignupRequest
-	signInDto        *dto.SignIn
+	signInDto        *dto.SignInRequest
 	token            string
 }
 
@@ -32,7 +32,7 @@ func (t *AuthServiceTest) SetupTest() {
 		Firstname: faker.FirstName(),
 		Lastname:  faker.LastName(),
 	}
-	signInDto := &dto.SignIn{
+	signInDto := &dto.SignInRequest{
 		Email:    faker.Email(),
 		Password: faker.Password(),
 	}
@@ -153,13 +153,106 @@ func (t *AuthServiceTest) TestSignupUnavailableService() {
 	assert.Equal(t.T(), expected, err)
 }
 
-func (t *AuthServiceTest) TestSignInSuccess() {}
+func (t *AuthServiceTest) TestSignInSuccess() {
+	protoReq := &authProto.SignInRequest{
+		Email:    t.signInDto.Email,
+		Password: t.signInDto.Password,
+	}
+	protoResp := &authProto.SignInResponse{
+		Credential: &authProto.Credential{
+			AccessToken:  faker.Word(),
+			RefreshToken: faker.UUIDDigit(),
+			ExpiresIn:    3600,
+		},
+	}
 
-func (t *AuthServiceTest) TestSignInForbidden() {}
+	expected := &dto.Credential{
+		AccessToken:  protoResp.Credential.AccessToken,
+		RefreshToken: protoResp.Credential.RefreshToken,
+		ExpiresIn:    int(protoResp.Credential.ExpiresIn),
+	}
 
-func (t *AuthServiceTest) TestSignInInternalError() {}
+	client := auth.AuthClientMock{}
 
-func (t *AuthServiceTest) TestSignInUnavailableService() {}
+	client.On("SignIn", protoReq).Return(protoResp, nil)
+
+	svc := NewService(&client)
+	actual, err := svc.SignIn(t.signInDto)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), expected, actual)
+}
+
+func (t *AuthServiceTest) TestSignInForbidden() {
+	protoReq := &authProto.SignInRequest{
+		Email:    t.signInDto.Email,
+		Password: t.signInDto.Password,
+	}
+	protoErr := status.Error(codes.PermissionDenied, "Incorrect email or password")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusForbidden,
+		Message:    constant.IncorrectEmailPasswordMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+
+	client.On("SignIn", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.SignIn(t.signInDto)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestSignInInternalError() {
+	protoReq := &authProto.SignInRequest{
+		Email:    t.signInDto.Email,
+		Password: t.signInDto.Password,
+	}
+	protoErr := status.Error(codes.Internal, "Internal error")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+
+	client.On("SignIn", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.SignIn(t.signInDto)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestSignInUnavailableService() {
+	protoReq := &authProto.SignInRequest{
+		Email:    t.signInDto.Email,
+		Password: t.signInDto.Password,
+	}
+	protoErr := status.Error(codes.Unavailable, "Connection lost")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusServiceUnavailable,
+		Message:    constant.UnavailableServiceMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("SignIn", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.SignIn(t.signInDto)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
 
 func (t *AuthServiceTest) TestValidateSuccess() {}
 

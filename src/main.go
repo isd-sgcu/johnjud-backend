@@ -102,7 +102,7 @@ func main() {
 	r.PutUser("/", userHandler.Update)
 
 	r.PostAuth("/signup", authHandler.Signup)
-	r.PostAuth("/signin", authHandler.Signin)
+	r.PostAuth("/signin", authHandler.SignIn)
 	r.PostAuth("/signout", authHandler.Signout)
 	r.PostAuth("/me", authHandler.Validate)
 	r.PostAuth("/refreshToken", authHandler.RefreshToken)

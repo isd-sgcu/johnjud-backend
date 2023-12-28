@@ -18,6 +18,64 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/v1/auth/signin": {
+            "post": {
+                "description": "Return the credential of user including access token and refresh token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Sign in user",
+                "parameters": [
+                    {
+                        "description": "signIn request dto",
+                        "name": "signIn",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.SignInRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Credential"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseBadRequestErr"
+                        }
+                    },
+                    "403": {
+                        "description": "Incorrect email or password",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseForbiddenErr"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal service error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseInternalErr"
+                        }
+                    },
+                    "503": {
+                        "description": "Service is down",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseServiceDownErr"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/auth/signup": {
             "post": {
                 "description": "Return the data of user if successfully",
@@ -90,6 +148,23 @@ const docTemplate = `{
                 "value": {}
             }
         },
+        "dto.Credential": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3BiZX..."
+                },
+                "expires_in": {
+                    "type": "integer",
+                    "example": 3600
+                },
+                "refresh_token": {
+                    "type": "string",
+                    "example": "e7e84d54-7518-4..."
+                }
+            }
+        },
         "dto.ResponseBadRequestErr": {
             "type": "object",
             "properties": {
@@ -123,6 +198,20 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ResponseForbiddenErr": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string",
+                    "example": "Insufficiency permission"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 403
+                }
+            }
+        },
         "dto.ResponseInternalErr": {
             "type": "object",
             "properties": {
@@ -148,6 +237,23 @@ const docTemplate = `{
                 "status_code": {
                     "type": "integer",
                     "example": 503
+                }
+            }
+        },
+        "dto.SignInRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 6
                 }
             }
         },
