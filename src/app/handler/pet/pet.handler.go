@@ -1,4 +1,4 @@
-package auth
+package pet
 
 import (
 	"net/http"
@@ -65,10 +65,19 @@ func (h *Handler) FindOne(c *router.FiberCtx) {
 	}
 
 	response, respErr := h.service.FindOne(request.Id)
+
 	if respErr != nil {
 		c.JSON(respErr.StatusCode, respErr)
 		return
 	}
+
+	imagesResp, respErr := h.imageService.FindByPetId(response.Id)
+
+	if respErr != nil {
+		c.JSON(respErr.StatusCode, respErr)
+	}
+
+	response.ImageUrls = []string{imagesResp.ImageUrl}
 
 	c.JSON(http.StatusOK, response)
 }
