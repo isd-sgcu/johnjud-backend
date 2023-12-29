@@ -30,6 +30,11 @@ type FindOnePetDto struct {
 	Id string `json:"id" validate:"required"`
 }
 
+type ChangeViewPetReqDto struct {
+	Id      string `json:"id" validate:"required"`
+	Visible bool   `json:"visible" validate:"required"`
+}
+
 type UpDatePetDto struct {
 	Type         string     `json:"type" validate:"required"`
 	Species      string     `json:"species" validate:"required"`
