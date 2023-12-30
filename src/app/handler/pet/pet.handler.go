@@ -23,7 +23,7 @@ type Service interface {
 	FindOne(string) (*proto.Pet, *dto.ResponseErr)
 	Create(*dto.PetDto) (*proto.Pet, *dto.ResponseErr)
 	Update(string, *dto.UpdatePetDto) (*proto.Pet, *dto.ResponseErr)
-	ChangeView(string, bool) (bool, *dto.ResponseErr)
+	ChangeView(*dto.ChangeViewPetDto) (bool, *dto.ResponseErr)
 	Delete(string) (bool, *dto.ResponseErr)
 }
 
@@ -138,7 +138,29 @@ func (h *Handler) Update(c router.IContext) {
 }
 
 func (h *Handler) ChangeView(c *router.FiberCtx) {
+	id, err := c.ID()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, &dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    err.Error(),
+			Data:       nil,
+		})
+		return
+	}
 
+	changeViewPetReqDto := &dto.ChangeViewPetDto{
+		Id:      id,
+		Visible: false,
+	}
+
+	res, errRes := h.service.ChangeView(changeViewPetReqDto)
+	if errRes != nil {
+		c.JSON(errRes.StatusCode, errRes)
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
+	return
 }
 
 func (h *Handler) Delete(c router.IContext) {
@@ -152,12 +174,12 @@ func (h *Handler) Delete(c router.IContext) {
 		return
 	}
 
-	pet, errRes := h.service.Delete(id)
+	res, errRes := h.service.Delete(id)
 	if errRes != nil {
 		c.JSON(errRes.StatusCode, errRes)
 		return
 	}
 
-	c.JSON(http.StatusOK, pet)
+	c.JSON(http.StatusOK, res)
 	return
 }
