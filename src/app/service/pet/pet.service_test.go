@@ -65,20 +65,7 @@ func (t *PetServiceTest) SetupTest() {
 			Address:      faker.Paragraph(),
 			Contact:      faker.Paragraph(),
 		}
-		// ? wait for image mock
-		// var images []*image_proto.Image
-		// var imageUrls []string
-		// for i := 0; i < 3; i++ {
-		// 	url := faker.URL()
-		// 	images = append(images, &image_proto.Image{
-		// 		Id:       faker.UUIDDigit(),
-		// 		PetId:    pet.Id,
-		// 		ImageUrl: url,
-		// 	})
-		// 	imageUrls = append(imageUrls, url)
-		// }
-		// t.ImagesList = append(t.ImagesList, images)
-		// t.ImageUrlsList = append(t.ImageUrlsList, imageUrls)
+
 		pets = append(pets, pet)
 	}
 
@@ -194,7 +181,19 @@ func (t *PetServiceTest) SetupTest() {
 	}
 }
 
-func (t *PetServiceTest) TestFindAllSuccess() {}
+func (t *PetServiceTest) TestFindAllSuccess() {
+	want := t.Pets
+
+	c := &mock.ClientMock{}
+	c.On("FindAll", &proto.FindAllPetRequest{}).Return(&proto.FindAllPetResponse{Pets: t.Pets}, nil)
+
+	service := NewService(c)
+
+	actual, err := service.FindAll()
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), want, actual)
+}
 
 func (t *PetServiceTest) TestFindOneSuccess() {
 	want := t.Pet
