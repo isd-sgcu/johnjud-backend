@@ -150,7 +150,7 @@ func (s *Service) Create(in *dto.CreatePetDto) (ressult *proto.Pet, err *dto.Res
 	return res.Pet, nil
 }
 
-func (s *Service) Update(id string, in *dto.UpDatePetDto) (result *proto.Pet, err *dto.ResponseErr) {
+func (s *Service) Update(id string, in *dto.UpdatePetDto) (result *proto.Pet, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
