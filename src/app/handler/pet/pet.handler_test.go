@@ -21,14 +21,15 @@ import (
 
 type PetHandlerTest struct {
 	suite.Suite
-	Pet            *proto.Pet
-	Pets           []*proto.Pet
-	PetDto         *dto.PetDto
-	UpdatedPetDto  *dto.UpdatePetDto
-	BindErr        *dto.ResponseErr
-	NotFoundErr    *dto.ResponseErr
-	ServiceDownErr *dto.ResponseErr
-	InternalErr    *dto.ResponseErr
+	Pet              *proto.Pet
+	Pets             []*proto.Pet
+	PetDto           *dto.PetDto
+	ChangeViewPetDto *dto.UpdatePetDto
+	UpdatedPetDto    *dto.UpdatePetDto
+	BindErr          *dto.ResponseErr
+	NotFoundErr      *dto.ResponseErr
+	ServiceDownErr   *dto.ResponseErr
+	InternalErr      *dto.ResponseErr
 }
 
 func TestPetHandler(t *testing.T) {
@@ -101,6 +102,25 @@ func (t *PetHandlerTest) SetupTest() {
 			Address:      t.Pet.Address,
 			Contact:      t.Pet.Contact,
 		},
+	}
+
+	t.ChangeViewPetDto = &dto.PetDto{
+		Id:           t.Pet.Id,
+		Type:         t.Pet.Type,
+		Species:      t.Pet.Species,
+		Name:         t.Pet.Name,
+		Birthdate:    t.Pet.Birthdate,
+		Gender:       pet.Gender(t.Pet.Gender),
+		Habit:        t.Pet.Habit,
+		Caption:      t.Pet.Caption,
+		Status:       pet.Status(t.Pet.Status),
+		IsSterile:    t.Pet.IsSterile,
+		IsVaccinated: t.Pet.IsVaccinated,
+		IsVisible:    !t.Pet.IsVisible,
+		IsClubPet:    t.Pet.IsClubPet,
+		Background:   t.Pet.Background,
+		Address:      t.Pet.Address,
+		Contact:      t.Pet.Contact,
 	}
 
 	t.ServiceDownErr = &dto.ResponseErr{
@@ -473,6 +493,32 @@ func (t *PetHandlerTest) TestDeleteGrpcErr() {
 
 	h := NewHandler(petService, imageService, validator)
 	h.Delete(c)
+
+	assert.Equal(t.T(), want, c.V)
+	assert.Equal(t.T(), http.StatusServiceUnavailable, c.StatusCode)
+}
+
+func (t *PetHandlerTest) TestChangeViewSuccess() {
+	want := t.ChangeViewPetDto
+
+	petService := &mock.ServiceMock{}
+	imageService := &imageMock.ServiceMock{}
+
+	petService.On("ChangeView", t.Pet.Id).Return(true, nil)
+
+	c := &mock.ContextMock{}
+	c.On("ID").Return(t.Pet.Id, nil)
+
+	validator, err := validator.NewValidator()
+	if err != nil {
+		log.Error().Err(err).
+			Str("handler", "pet").
+			Msg("Err creating validator")
+		return
+	}
+
+	h := NewHandler(petService, imageService, validator)
+	h.ChangeView(c)
 
 	assert.Equal(t.T(), want, c.V)
 	assert.Equal(t.T(), http.StatusServiceUnavailable, c.StatusCode)
