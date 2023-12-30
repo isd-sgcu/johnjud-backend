@@ -2,6 +2,7 @@ package pet
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -24,7 +25,7 @@ func NewService(petClient proto.PetServiceClient) *Service {
 }
 
 func (s *Service) FindAll() (result []*proto.Pet, err *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	res, errRes := s.petClient.FindAll(ctx, &proto.FindAllPetRequest{})
@@ -43,11 +44,12 @@ func (s *Service) FindAll() (result []*proto.Pet, err *dto.ResponseErr) {
 	return res.Pets, nil
 }
 
-func (s *Service) FindOne(request *dto.FindOnePetDto) (result *proto.Pet, err *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+func (s *Service) FindOne(id string) (result *proto.Pet, err *dto.ResponseErr) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	res, errRes := s.petClient.FindOne(ctx, &proto.FindOnePetRequest{Id: request.Id})
+	res, errRes := s.petClient.FindOne(ctx, &proto.FindOnePetRequest{Id: id})
+	fmt.Println("res: ", res, ", errRes: ", errRes)
 	if errRes != nil {
 		st, ok := status.FromError(errRes)
 		if ok {
@@ -57,7 +59,7 @@ func (s *Service) FindOne(request *dto.FindOnePetDto) (result *proto.Pet, err *d
 					Err(errRes).
 					Str("service", "pet").
 					Str("module", "find one").
-					Str("pet_id", request.Id).
+					Str("pet_id", id).
 					Msg("Not found")
 				return nil, &dto.ResponseErr{
 					StatusCode: http.StatusNotFound,
@@ -68,7 +70,7 @@ func (s *Service) FindOne(request *dto.FindOnePetDto) (result *proto.Pet, err *d
 				log.Error().
 					Err(errRes).
 					Str("service", "pet").
-					Str("pet_id", request.Id).
+					Str("pet_id", id).
 					Msg("Invaild pet id")
 				return nil, &dto.ResponseErr{
 					StatusCode: http.StatusBadRequest,
@@ -79,7 +81,7 @@ func (s *Service) FindOne(request *dto.FindOnePetDto) (result *proto.Pet, err *d
 				log.Error().
 					Err(errRes).
 					Str("service", "pet").
-					Str("pet_id", request.Id).
+					Str("pet_id", id).
 					Msg("Error while connecting to service")
 				return nil, &dto.ResponseErr{
 					StatusCode: http.StatusServiceUnavailable,
@@ -92,7 +94,7 @@ func (s *Service) FindOne(request *dto.FindOnePetDto) (result *proto.Pet, err *d
 			Err(errRes).
 			Str("service", "group").
 			Str("module", "find one").
-			Str("per_id", request.Id).
+			Str("per_id", id).
 			Msg("Error while connecting to service")
 		return nil, &dto.ResponseErr{
 			StatusCode: http.StatusServiceUnavailable,
@@ -103,14 +105,13 @@ func (s *Service) FindOne(request *dto.FindOnePetDto) (result *proto.Pet, err *d
 	log.Info().
 		Str("service", "pet").
 		Str("module", "find one").
-		Str("pet_id", request.Id).
+		Str("pet_id", id).
 		Msg("Find pet success")
-
 	return res.Pet, nil
 }
 
 func (s *Service) Create(in *dto.CreatePetDto) (ressult *proto.Pet, err *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	petDto := &proto.Pet{
@@ -150,7 +151,7 @@ func (s *Service) Create(in *dto.CreatePetDto) (ressult *proto.Pet, err *dto.Res
 }
 
 func (s *Service) Update(id string, in *dto.UpDatePetDto) (result *proto.Pet, err *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	petReq := &proto.UpdatePetRequest{
@@ -216,7 +217,7 @@ func (s *Service) Update(id string, in *dto.UpDatePetDto) (result *proto.Pet, er
 }
 
 func (s *Service) Delete(id string) (result bool, err *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	res, errRes := s.petClient.Delete(ctx, &proto.DeletePetRequest{
@@ -261,7 +262,7 @@ func (s *Service) Delete(id string) (result bool, err *dto.ResponseErr) {
 }
 
 func (s *Service) ChangeView(id string, visible bool) (result bool, err *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	res, errRes := s.petClient.ChangeView(ctx, &proto.ChangeViewPetRequest{
