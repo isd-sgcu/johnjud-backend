@@ -24,7 +24,7 @@ type PetHandlerTest struct {
 	Pet            *proto.Pet
 	Pets           []*proto.Pet
 	PetDto         *dto.PetDto
-	UpdatedPetReq  *dto.UpDatePetDto
+	UpdatedPetDto  *dto.UpdatePetDto
 	BindErr        *dto.ResponseErr
 	NotFoundErr    *dto.ResponseErr
 	ServiceDownErr *dto.ResponseErr
@@ -83,7 +83,7 @@ func (t *PetHandlerTest) SetupTest() {
 		Contact:      t.Pet.Contact,
 	}
 
-	t.UpdatedPetReq = &dto.UpDatePetDto{
+	t.UpdatedPetDto = &dto.UpdatePetDto{
 		Pet: &dto.PetDto{
 			Type:         t.Pet.Type,
 			Species:      t.Pet.Species,
@@ -270,8 +270,7 @@ func (t *PetHandlerTest) TestCreateGrpcErr() {
 	petService := &mock.ServiceMock{}
 	imageService := &imageMock.ServiceMock{}
 
-	imageService.On("FindByPetId", t.Pet.Id).Return(nil, t.ServiceDownErr)
-	petService.On("FindOne", t.Pet.Id).Return(nil, t.ServiceDownErr)
+	petService.On("Create", t.PetDto).Return(nil, t.ServiceDownErr)
 
 	c := &mock.ContextMock{}
 	c.On("Bind", &dto.PetDto{}).Return(t.PetDto, nil)
@@ -285,9 +284,53 @@ func (t *PetHandlerTest) TestCreateGrpcErr() {
 	}
 
 	h := NewHandler(petService, imageService, validator)
-	// TODO: fix this
 	h.Create(c)
 
 	assert.Equal(t.T(), want, c.V)
 	assert.Equal(t.T(), http.StatusServiceUnavailable, c.StatusCode)
 }
+
+func (t *PetHandlerTest) TestUpdateSuccess() {
+	want := t.Pet
+
+	petService := &mock.ServiceMock{}
+	imageService := &imageMock.ServiceMock{}
+
+	petService.On("Update", t.Pet.Id, t.UpdatedPetDto).Return(want, nil)
+	imageService.On("FindByPetId", t.Pet.Id).Return(t.Pet.ImageUrls, nil)
+
+	c := &mock.ContextMock{}
+	c.On("ID").Return(t.Pet.Id, nil)
+	c.On("Bind", &dto.UpdatePetDto{}).Return(t.UpdatedPetDto, nil)
+
+	validator, err := validator.NewValidator()
+	if err != nil {
+		log.Error().Err(err).
+			Str("handler", "pet").
+			Msg("Err creating validator")
+		return
+	}
+
+	h := NewHandler(petService, imageService, validator)
+	h.Update(c)
+
+	assert.Equal(t.T(), want, c.V)
+}
+
+func (t *PetHandlerTest) TestUpdateNotFound() {}
+
+func (t *PetHandlerTest) TestUpdateGrpcErr() {}
+
+func (t *PetHandlerTest) TestDeleteSuccess() {}
+
+func (t *PetHandlerTest) TestDeleteNotFound() {}
+
+func (t *PetHandlerTest) TestDeleteInvalidID() {}
+
+func (t *PetHandlerTest) TestDeleteGrpcErr() {}
+
+func (t *PetHandlerTest) TestChangeViewNotFound() {}
+
+func (t *PetHandlerTest) TestChangeViewGrpcErr() {}
+
+func (t *PetHandlerTest) TestChangeViewInternalErr() {}
