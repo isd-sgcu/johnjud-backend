@@ -317,9 +317,61 @@ func (t *PetHandlerTest) TestUpdateSuccess() {
 	assert.Equal(t.T(), want, c.V)
 }
 
-func (t *PetHandlerTest) TestUpdateNotFound() {}
+func (t *PetHandlerTest) TestUpdateNotFound() {
+	want := t.NotFoundErr
 
-func (t *PetHandlerTest) TestUpdateGrpcErr() {}
+	petService := &mock.ServiceMock{}
+	imageService := &imageMock.ServiceMock{}
+
+	petService.On("Update", t.Pet.Id, t.UpdatedPetDto).Return(nil, t.NotFoundErr)
+	imageService.On("FindByPetId", t.Pet.Id).Return(nil, t.NotFoundErr)
+
+	c := &mock.ContextMock{}
+	c.On("ID").Return(t.Pet.Id, nil)
+	c.On("Bind", &dto.UpdatePetDto{}).Return(t.UpdatedPetDto, nil)
+
+	validator, err := validator.NewValidator()
+	if err != nil {
+		log.Error().Err(err).
+			Str("handler", "pet").
+			Msg("Err creating validator")
+		return
+	}
+
+	h := NewHandler(petService, imageService, validator)
+	h.Update(c)
+
+	assert.Equal(t.T(), want, c.V)
+	assert.Equal(t.T(), http.StatusNotFound, c.StatusCode)
+}
+
+func (t *PetHandlerTest) TestUpdateGrpcErr() {
+	want := t.ServiceDownErr
+
+	petService := &mock.ServiceMock{}
+	imageService := &imageMock.ServiceMock{}
+
+	petService.On("Update", t.Pet.Id, t.UpdatedPetDto).Return(nil, t.ServiceDownErr)
+	imageService.On("FindByPetId", t.Pet.Id).Return(nil, t.ServiceDownErr)
+
+	c := &mock.ContextMock{}
+	c.On("ID").Return(t.Pet.Id, nil)
+	c.On("Bind", &dto.UpdatePetDto{}).Return(t.UpdatedPetDto, nil)
+
+	validator, err := validator.NewValidator()
+	if err != nil {
+		log.Error().Err(err).
+			Str("handler", "pet").
+			Msg("Err creating validator")
+		return
+	}
+
+	h := NewHandler(petService, imageService, validator)
+	h.Update(c)
+
+	assert.Equal(t.T(), want, c.V)
+	assert.Equal(t.T(), http.StatusServiceUnavailable, c.StatusCode)
+}
 
 func (t *PetHandlerTest) TestDeleteSuccess() {}
 
