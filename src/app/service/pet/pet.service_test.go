@@ -21,16 +21,17 @@ import (
 
 type PetServiceTest struct {
 	suite.Suite
-	Pets            []*proto.Pet
-	Pet             *proto.Pet
-	PetReq          *proto.Pet
-	UpdatePetReq    *proto.UpdatePetRequest
-	PetDto          *dto.PetDto
-	UpdatePetDto    *dto.UpdatePetDto
-	NotFoundErr     *dto.ResponseErr
-	ServiceDownErr  *dto.ResponseErr
-	InternalErr     *dto.ResponseErr
-	ChangeViewedPet *proto.Pet
+	Pets               []*proto.Pet
+	Pet                *proto.Pet
+	PetReq             *proto.Pet
+	UpdatePetReq       *proto.UpdatePetRequest
+	ChangeViewPetReq   *proto.ChangeViewPetRequest
+	PetDto             *dto.PetDto
+	UpdatePetDto       *dto.UpdatePetDto
+	NotFoundErr        *dto.ResponseErr
+	ServiceDownErr     *dto.ResponseErr
+	InternalErr        *dto.ResponseErr
+	ChangeViewedPetDto *dto.ChangeViewPetDto
 
 	Images        []*image_proto.Image
 	ImageUrls     []string
@@ -164,22 +165,14 @@ func (t *PetServiceTest) SetupTest() {
 		},
 	}
 
-	t.ChangeViewedPet = &proto.Pet{
-		Type:         t.Pet.Type,
-		Species:      t.Pet.Species,
-		Name:         t.Pet.Name,
-		Birthdate:    t.Pet.Birthdate,
-		Gender:       proto.Gender(t.Pet.Gender),
-		Habit:        t.Pet.Habit,
-		Caption:      t.Pet.Caption,
-		Status:       proto.PetStatus(t.Pet.Status),
-		IsSterile:    t.Pet.IsSterile,
-		IsVaccinated: t.Pet.IsVaccinated,
-		IsVisible:    !t.Pet.IsVisible,
-		IsClubPet:    t.Pet.IsClubPet,
-		Background:   t.Pet.Background,
-		Address:      t.Pet.Address,
-		Contact:      t.Pet.Contact,
+	t.ChangeViewedPetDto = &dto.ChangeViewPetDto{
+		Id:      t.Pet.Id,
+		Visible: !t.Pet.IsVisible,
+	}
+
+	t.ChangeViewPetReq = &proto.ChangeViewPetRequest{
+		Id:      t.Pet.Id,
+		Visible: !t.Pet.IsVisible,
 	}
 
 	t.ServiceDownErr = &dto.ResponseErr{
@@ -356,10 +349,11 @@ func (t *PetServiceTest) TestDeleteGrpcErr() {
 
 func (t *PetServiceTest) TestChangeViewSuccess() {
 	c := &mock.ClientMock{}
-	c.On("ChangeView", t.Pet.Id, !t.Pet.IsVisible).Return(&proto.ChangeViewPetResponse{Success: true}, nil)
+	c.On("ChangeView", t.ChangeViewPetReq).Return(&proto.ChangeViewPetResponse{Success: true}, nil)
 
 	service := NewService(c)
-	res, err := service.ChangeView(t.Pet.Id, !t.Pet.IsVisible)
+
+	res, err := service.ChangeView(t.ChangeViewedPetDto)
 
 	assert.Nil(t.T(), err)
 	assert.True(t.T(), res)
@@ -369,10 +363,11 @@ func (t *PetServiceTest) TestChangeViewNotFound() {
 	want := t.NotFoundErr
 
 	c := &mock.ClientMock{}
-	c.On("ChangeView", t.Pet.Id, !t.Pet.IsVisible).Return(nil, status.Error(codes.NotFound, "Pet not found"))
+	c.On("ChangeView", t.ChangeViewPetReq).Return(nil, status.Error(codes.NotFound, "Pet not found"))
 
 	service := NewService(c)
-	res, err := service.ChangeView(t.Pet.Id, !t.Pet.IsVisible)
+
+	res, err := service.ChangeView(t.ChangeViewedPetDto)
 
 	assert.False(t.T(), res)
 	assert.Equal(t.T(), want, err)
@@ -382,10 +377,11 @@ func (t *PetServiceTest) TestChangeViewGrpcErr() {
 	want := t.ServiceDownErr
 
 	c := &mock.ClientMock{}
-	c.On("ChangeView", t.Pet.Id, !t.Pet.IsVisible).Return(nil, errors.New("Service is down"))
+	c.On("ChangeView", t.ChangeViewPetReq).Return(nil, errors.New("Service is down"))
 
 	service := NewService(c)
-	res, err := service.ChangeView(t.Pet.Id, !t.Pet.IsVisible)
+
+	res, err := service.ChangeView(t.ChangeViewedPetDto)
 
 	assert.False(t.T(), res)
 	assert.Equal(t.T(), want, err)
