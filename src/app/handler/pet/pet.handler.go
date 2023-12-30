@@ -137,7 +137,7 @@ func (h *Handler) Update(c router.IContext) {
 	return
 }
 
-func (h *Handler) ChangeView(c *router.FiberCtx) {
+func (h *Handler) ChangeView(c router.IContext) {
 	id, err := c.ID()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, &dto.ResponseErr{
