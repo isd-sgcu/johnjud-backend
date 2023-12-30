@@ -141,8 +141,8 @@ func (h *Handler) ChangeView(c *router.FiberCtx) {
 
 }
 
-func (h *Handler) Delete(c *router.FiberCtx) {
-	id, err := c.Param("id")
+func (h *Handler) Delete(c router.IContext) {
+	id, err := c.ID()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, &dto.ResponseErr{
 			StatusCode: http.StatusBadRequest,
