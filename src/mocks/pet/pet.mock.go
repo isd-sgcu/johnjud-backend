@@ -55,11 +55,25 @@ func (s *ServiceMock) Update(id string, in *proto.Pet) (result *proto.Pet, err *
 	return
 }
 
-func (s *ServiceMock) Delete(in string) (result *proto.Pet, err *dto.ResponseErr) {
+func (s *ServiceMock) Delete(in string) (result bool, err *dto.ResponseErr) {
 	args := s.Called(in)
 
 	if args.Get(0) != nil {
-		result = args.Get(0).(*proto.Pet)
+		result = args.Get(0).(bool)
+	}
+
+	if args.Get(1) != nil {
+		err = args.Get(1).(*dto.ResponseErr)
+	}
+
+	return
+}
+
+func (s *ServiceMock) ChangeView(id string, visible bool) (result bool, err *dto.ResponseErr) {
+	args := s.Called(id, visible)
+
+	if args.Get(0) != nil {
+		result = args.Get(0).(bool)
 	}
 
 	if args.Get(1) != nil {
