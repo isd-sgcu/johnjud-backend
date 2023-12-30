@@ -55,7 +55,7 @@ func (s *ServiceMock) Create(in *dto.PetDto) (result *proto.Pet, err *dto.Respon
 	return
 }
 
-func (s *ServiceMock) Update(id string, in *dto.PetDto) (result *proto.Pet, err *dto.ResponseErr) {
+func (s *ServiceMock) Update(id string, in *dto.UpdatePetDto) (result *proto.Pet, err *dto.ResponseErr) {
 	args := s.Called(id, in)
 
 	if args.Get(0) != nil {
@@ -173,6 +173,8 @@ func (c *ContextMock) Bind(v interface{}) error {
 		switch v.(type) {
 		case *dto.PetDto:
 			*v.(*dto.PetDto) = *args.Get(0).(*dto.PetDto)
+		case *dto.UpdatePetDto:
+			*v.(*dto.UpdatePetDto) = *args.Get(0).(*dto.UpdatePetDto)
 		}
 	}
 
