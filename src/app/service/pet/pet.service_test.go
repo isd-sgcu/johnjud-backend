@@ -23,7 +23,7 @@ type PetServiceTest struct {
 	suite.Suite
 	Pets           []*proto.Pet
 	Pet            *proto.Pet
-	PetReq         *proto.CreatePetRequest
+	PetReq         *proto.Pet
 	UpdatePetReq   *proto.UpdatePetRequest
 	PetDto         *dto.PetDto
 	NotFoundErr    *dto.ResponseErr
@@ -44,6 +44,7 @@ func (t *PetServiceTest) SetupTest() {
 	var pets []*proto.Pet
 	for i := 0; i <= 3; i++ {
 		pet := &proto.Pet{
+			Id:           faker.UUIDDigit(),
 			Type:         faker.Word(),
 			Species:      faker.Word(),
 			Name:         faker.Name(),
@@ -81,25 +82,23 @@ func (t *PetServiceTest) SetupTest() {
 	t.Pets = pets
 	t.Pet = t.Pets[0]
 
-	t.PetReq = &proto.CreatePetRequest{
-		Pet: &proto.Pet{
-			Type:         t.Pet.Type,
-			Species:      t.Pet.Species,
-			Name:         t.Pet.Name,
-			Birthdate:    t.Pet.Birthdate,
-			Gender:       t.Pet.Gender,
-			Habit:        t.Pet.Habit,
-			Caption:      t.Pet.Caption,
-			Status:       t.Pet.Status,
-			ImageUrls:    t.Pet.ImageUrls,
-			IsSterile:    t.Pet.IsSterile,
-			IsVaccinated: t.Pet.IsVaccinated,
-			IsVisible:    t.Pet.IsVisible,
-			IsClubPet:    t.Pet.IsClubPet,
-			Background:   t.Pet.Background,
-			Address:      t.Pet.Address,
-			Contact:      t.Pet.Contact,
-		},
+	t.PetReq = &proto.Pet{
+		Type:         t.Pet.Type,
+		Species:      t.Pet.Species,
+		Name:         t.Pet.Name,
+		Birthdate:    t.Pet.Birthdate,
+		Gender:       t.Pet.Gender,
+		Habit:        t.Pet.Habit,
+		Caption:      t.Pet.Caption,
+		Status:       t.Pet.Status,
+		ImageUrls:    t.Pet.ImageUrls,
+		IsSterile:    t.Pet.IsSterile,
+		IsVaccinated: t.Pet.IsVaccinated,
+		IsVisible:    t.Pet.IsVisible,
+		IsClubPet:    t.Pet.IsClubPet,
+		Background:   t.Pet.Background,
+		Address:      t.Pet.Address,
+		Contact:      t.Pet.Contact,
 	}
 
 	t.PetDto = &dto.PetDto{
@@ -162,7 +161,19 @@ func (t *PetServiceTest) SetupTest() {
 
 func (t *PetServiceTest) TestFindAllSuccess() {}
 
-func (t *PetServiceTest) TestFindOneSuccess() {}
+func (t *PetServiceTest) TestFindOneSuccess() {
+	want := t.Pet
+
+	c := &mock.ClientMock{}
+	c.On("FindOne", &proto.FindOnePetRequest{Id: t.Pet.Id}).Return(&proto.FindOnePetResponse{Pet: want}, nil)
+
+	service := NewService(c)
+
+	actual, err := service.FindOne(t.Pet.Id)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), want, actual)
+}
 
 func (t *PetServiceTest) TestFindOneNotFound() {
 	want := t.NotFoundErr
@@ -172,8 +183,7 @@ func (t *PetServiceTest) TestFindOneNotFound() {
 
 	srv := NewService(c)
 
-	findOnePetDto := &dto.FindOnePetDto{Id: t.Pet.Id}
-	actual, err := srv.FindOne(findOnePetDto)
+	actual, err := srv.FindOne(t.Pet.Id)
 
 	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), want, err)
@@ -187,8 +197,7 @@ func (t *PetServiceTest) TestFindOneGrpcErr() {
 
 	srv := NewService(c)
 
-	findOnePetDto := &dto.FindOnePetDto{Id: t.Pet.Id}
-	actual, err := srv.FindOne(findOnePetDto)
+	actual, err := srv.FindOne(t.Pet.Id)
 
 	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), want, err)
@@ -198,7 +207,7 @@ func (t *PetServiceTest) TestCreateSuccess() {
 	want := t.Pet
 
 	c := &mock.ClientMock{}
-	c.On("Create", t.Pet).Return(&proto.CreatePetResponse{Pet: want}, nil)
+	c.On("Create", t.PetReq).Return(&proto.CreatePetResponse{Pet: want}, nil)
 
 	srv := NewService(c)
 
@@ -225,7 +234,7 @@ func (t *PetServiceTest) TestCreateSuccess() {
 	actual, err := srv.Create(in)
 
 	assert.Nil(t.T(), err)
-	assert.Equal(t.T(), actual, actual)
+	assert.Equal(t.T(), want, actual)
 }
 
 func (t *PetServiceTest) TestCreateGrpcErr() {
