@@ -136,7 +136,7 @@ func (c *ClientMock) Update(ctx context.Context, in *proto.UpdatePetRequest, opt
 }
 
 func (c *ClientMock) ChangeView(ctx context.Context, in *proto.ChangeViewPetRequest, opts ...grpc.CallOption) (res *proto.ChangeViewPetResponse, err error) {
-	args := c.Called(in.Id)
+	args := c.Called(in.Id, in.Visible)
 
 	if args.Get(0) != nil {
 		res = args.Get(0).(*proto.ChangeViewPetResponse)
