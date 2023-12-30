@@ -373,7 +373,29 @@ func (t *PetHandlerTest) TestUpdateGrpcErr() {
 	assert.Equal(t.T(), http.StatusServiceUnavailable, c.StatusCode)
 }
 
-func (t *PetHandlerTest) TestDeleteSuccess() {}
+func (t *PetHandlerTest) TestDeleteSuccess() {
+	petService := &mock.ServiceMock{}
+	imageService := &imageMock.ServiceMock{}
+
+	petService.On("Delete", t.Pet.Id).Return(true, nil)
+
+	c := &mock.ContextMock{}
+	c.On("ID").Return(t.Pet.Id, nil)
+
+	validator, err := validator.NewValidator()
+	if err != nil {
+		log.Error().Err(err).
+			Str("handler", "pet").
+			Msg("Err creating validator")
+		return
+	}
+
+	h := NewHandler(petService, imageService, validator)
+	h.Delete(c)
+
+	assert.True(t.T(), c.V.(bool))
+	assert.Equal(t.T(), http.StatusOK, c.StatusCode)
+}
 
 func (t *PetHandlerTest) TestDeleteNotFound() {}
 
