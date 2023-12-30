@@ -65,6 +65,7 @@ func (t *PetHandlerTest) SetupTest() {
 	t.Pet = t.Pets[0]
 
 	t.PetDto = &dto.PetDto{
+		Id:           t.Pet.Id,
 		Type:         t.Pet.Type,
 		Species:      t.Pet.Species,
 		Name:         t.Pet.Name,
@@ -222,10 +223,70 @@ func (t *PetHandlerTest) TestFindOneGrpcErr() {
 	c := &mock.ContextMock{}
 	c.On("ID").Return(t.Pet.Id, nil)
 
-	validator, _ := validator.NewValidator()
+	validator, err := validator.NewValidator()
+	if err != nil {
+		log.Error().Err(err).
+			Str("handler", "pet").
+			Msg("Err creating validator")
+		return
+	}
 
 	h := NewHandler(petService, imageService, validator)
 	h.FindOne(c)
+
+	assert.Equal(t.T(), want, c.V)
+	assert.Equal(t.T(), http.StatusServiceUnavailable, c.StatusCode)
+}
+
+func (t *PetHandlerTest) TestCreateSuccess() {
+	want := t.Pet
+
+	petService := &mock.ServiceMock{}
+	imageService := &imageMock.ServiceMock{}
+
+	petService.On("Create", t.PetDto).Return(want, nil)
+
+	c := &mock.ContextMock{}
+	c.On("Bind", &dto.PetDto{}).Return(t.PetDto, nil)
+
+	validator, err := validator.NewValidator()
+	if err != nil {
+		log.Error().Err(err).
+			Str("handler", "pet").
+			Msg("Err creating validator")
+		return
+	}
+
+	h := NewHandler(petService, imageService, validator)
+	h.Create(c)
+
+	assert.Equal(t.T(), want, c.V)
+	assert.Equal(t.T(), http.StatusCreated, c.StatusCode)
+}
+
+func (t *PetHandlerTest) TestCreateGrpcErr() {
+	want := t.ServiceDownErr
+
+	petService := &mock.ServiceMock{}
+	imageService := &imageMock.ServiceMock{}
+
+	imageService.On("FindByPetId", t.Pet.Id).Return(nil, t.ServiceDownErr)
+	petService.On("FindOne", t.Pet.Id).Return(nil, t.ServiceDownErr)
+
+	c := &mock.ContextMock{}
+	c.On("Bind", &dto.PetDto{}).Return(t.PetDto, nil)
+
+	validator, err := validator.NewValidator()
+	if err != nil {
+		log.Error().Err(err).
+			Str("handler", "pet").
+			Msg("Err creating validator")
+		return
+	}
+
+	h := NewHandler(petService, imageService, validator)
+	// TODO: fix this
+	h.Create(c)
 
 	assert.Equal(t.T(), want, c.V)
 	assert.Equal(t.T(), http.StatusServiceUnavailable, c.StatusCode)
