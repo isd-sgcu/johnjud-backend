@@ -397,9 +397,60 @@ func (t *PetHandlerTest) TestDeleteSuccess() {
 	assert.Equal(t.T(), http.StatusOK, c.StatusCode)
 }
 
-func (t *PetHandlerTest) TestDeleteNotFound() {}
+func (t *PetHandlerTest) TestDeleteNotFound() {
+	want := t.NotFoundErr
 
-func (t *PetHandlerTest) TestDeleteInvalidID() {}
+	petService := &mock.ServiceMock{}
+	imageService := &imageMock.ServiceMock{}
+
+	petService.On("Delete", t.Pet.Id).Return(false, t.NotFoundErr)
+
+	c := &mock.ContextMock{}
+	c.On("ID").Return(t.Pet.Id, nil)
+
+	validator, err := validator.NewValidator()
+	if err != nil {
+		log.Error().Err(err).
+			Str("handler", "pet").
+			Msg("Err creating validator")
+		return
+	}
+
+	h := NewHandler(petService, imageService, validator)
+	h.Delete(c)
+
+	assert.Equal(t.T(), want, c.V)
+}
+
+func (t *PetHandlerTest) TestDeleteInvalidID() {
+	want := &dto.ResponseErr{
+		StatusCode: http.StatusBadRequest,
+		Message:    "ID must be the uuid",
+		Data:       nil,
+	}
+
+	petService := &mock.ServiceMock{}
+	imageService := &imageMock.ServiceMock{}
+
+	petService.On("Delete", t.Pet.Id).Return(false, t.NotFoundErr)
+
+	c := &mock.ContextMock{}
+	c.On("ID").Return("", errors.New(want.Message))
+
+	validator, err := validator.NewValidator()
+	if err != nil {
+		log.Error().Err(err).
+			Str("handler", "pet").
+			Msg("Err creating validator")
+		return
+	}
+
+	h := NewHandler(petService, imageService, validator)
+	h.Delete(c)
+
+	assert.Equal(t.T(), want, c.V)
+	assert.Equal(t.T(), http.StatusBadRequest, c.StatusCode)
+}
 
 func (t *PetHandlerTest) TestDeleteGrpcErr() {}
 
