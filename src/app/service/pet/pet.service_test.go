@@ -377,3 +377,16 @@ func (t *PetServiceTest) TestChangeViewNotFound() {
 	assert.False(t.T(), res)
 	assert.Equal(t.T(), want, err)
 }
+
+func (t *PetServiceTest) TestChangeViewGrpcErr() {
+	want := t.ServiceDownErr
+
+	c := &mock.ClientMock{}
+	c.On("ChangeView", t.Pet.Id, !t.Pet.IsVisible).Return(nil, errors.New("Service is down"))
+
+	service := NewService(c)
+	res, err := service.ChangeView(t.Pet.Id, !t.Pet.IsVisible)
+
+	assert.False(t.T(), res)
+	assert.Equal(t.T(), want, err)
+}
