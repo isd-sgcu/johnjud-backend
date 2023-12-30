@@ -36,7 +36,7 @@ type ChangeViewPetReqDto struct {
 	Visible bool   `json:"visible" validate:"required"`
 }
 
-type UpDatePetDto struct {
+type UpdatePetDto struct {
 	Pet *PetDto `json:"pet" validate:"required"`
 	// Type         string     `json:"type" validate:"required"`
 	// Species      string     `json:"species" validate:"required"`
