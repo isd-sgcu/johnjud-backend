@@ -5,6 +5,7 @@ import (
 )
 
 type PetDto struct {
+	Id           string     `json:"type" validate:"required"`
 	Type         string     `json:"type" validate:"required"`
 	Species      string     `json:"species" validate:"required"`
 	Name         string     `json:"name" validate:"required"`
