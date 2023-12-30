@@ -24,7 +24,7 @@ type PetHandlerTest struct {
 	Pet              *proto.Pet
 	Pets             []*proto.Pet
 	PetDto           *dto.PetDto
-	ChangeViewPetDto *dto.UpdatePetDto
+	ChangeViewPetDto *dto.ChangeViewPetDto
 	UpdatedPetDto    *dto.UpdatePetDto
 	BindErr          *dto.ResponseErr
 	NotFoundErr      *dto.ResponseErr
@@ -104,23 +104,9 @@ func (t *PetHandlerTest) SetupTest() {
 		},
 	}
 
-	t.ChangeViewPetDto = &dto.PetDto{
-		Id:           t.Pet.Id,
-		Type:         t.Pet.Type,
-		Species:      t.Pet.Species,
-		Name:         t.Pet.Name,
-		Birthdate:    t.Pet.Birthdate,
-		Gender:       pet.Gender(t.Pet.Gender),
-		Habit:        t.Pet.Habit,
-		Caption:      t.Pet.Caption,
-		Status:       pet.Status(t.Pet.Status),
-		IsSterile:    t.Pet.IsSterile,
-		IsVaccinated: t.Pet.IsVaccinated,
-		IsVisible:    !t.Pet.IsVisible,
-		IsClubPet:    t.Pet.IsClubPet,
-		Background:   t.Pet.Background,
-		Address:      t.Pet.Address,
-		Contact:      t.Pet.Contact,
+	t.ChangeViewPetDto = &dto.ChangeViewPetDto{
+		Id:      t.Pet.Id,
+		Visible: !t.Pet.IsVisible,
 	}
 
 	t.ServiceDownErr = &dto.ResponseErr{
@@ -499,12 +485,10 @@ func (t *PetHandlerTest) TestDeleteGrpcErr() {
 }
 
 func (t *PetHandlerTest) TestChangeViewSuccess() {
-	want := t.ChangeViewPetDto
-
 	petService := &mock.ServiceMock{}
 	imageService := &imageMock.ServiceMock{}
 
-	petService.On("ChangeView", t.Pet.Id).Return(true, nil)
+	petService.On("ChangeView", t.ChangeViewPetDto).Return(true, nil)
 
 	c := &mock.ContextMock{}
 	c.On("ID").Return(t.Pet.Id, nil)
@@ -520,12 +504,58 @@ func (t *PetHandlerTest) TestChangeViewSuccess() {
 	h := NewHandler(petService, imageService, validator)
 	h.ChangeView(c)
 
-	assert.Equal(t.T(), want, c.V)
-	assert.Equal(t.T(), http.StatusServiceUnavailable, c.StatusCode)
+	assert.True(t.T(), c.V.(bool))
+	assert.Equal(t.T(), http.StatusOK, c.StatusCode)
 }
 
-func (t *PetHandlerTest) TestChangeViewNotFound() {}
+func (t *PetHandlerTest) TestChangeViewNotFound() {
+	want := t.NotFoundErr
 
-func (t *PetHandlerTest) TestChangeViewGrpcErr() {}
+	petService := &mock.ServiceMock{}
+	imageService := &imageMock.ServiceMock{}
 
-func (t *PetHandlerTest) TestChangeViewInternalErr() {}
+	petService.On("ChangeView", t.ChangeViewPetDto).Return(false, t.NotFoundErr)
+
+	c := &mock.ContextMock{}
+	c.On("ID").Return(t.Pet.Id, nil)
+
+	validator, err := validator.NewValidator()
+	if err != nil {
+		log.Error().Err(err).
+			Str("handler", "pet").
+			Msg("Err creating validator")
+		return
+	}
+
+	h := NewHandler(petService, imageService, validator)
+	h.ChangeView(c)
+
+	assert.Equal(t.T(), http.StatusNotFound, c.StatusCode)
+	assert.Equal(t.T(), want, c.V)
+}
+
+func (t *PetHandlerTest) TestChangeViewGrpcErr() {
+	want := t.ServiceDownErr
+
+	petService := &mock.ServiceMock{}
+	imageService := &imageMock.ServiceMock{}
+
+	petService.On("ChangeView", t.ChangeViewPetDto).Return(false, t.ServiceDownErr)
+
+	c := &mock.ContextMock{}
+	c.On("ID").Return(t.Pet.Id, nil)
+
+	validator, err := validator.NewValidator()
+	if err != nil {
+		log.Error().Err(err).
+			Str("handler", "pet").
+			Msg("Err creating validator")
+		return
+	}
+
+	h := NewHandler(petService, imageService, validator)
+	h.ChangeView(c)
+
+	assert.Equal(t.T(), http.StatusServiceUnavailable, c.StatusCode)
+	assert.Equal(t.T(), want, c.V)
+}
