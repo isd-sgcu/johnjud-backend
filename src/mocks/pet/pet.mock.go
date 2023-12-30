@@ -13,6 +13,20 @@ type ServiceMock struct {
 	mock.Mock
 }
 
+func (s *ServiceMock) FindAll() (result []*proto.Pet, err *dto.ResponseErr) {
+	args := s.Called()
+
+	if args.Get(0) != nil {
+		result = args.Get(0).([]*proto.Pet)
+	}
+
+	if args.Get(1) != nil {
+		err = args.Get(1).(*dto.ResponseErr)
+	}
+
+	return
+}
+
 func (s *ServiceMock) FindOne(id string) (result *proto.Pet, err *dto.ResponseErr) {
 	args := s.Called(id)
 
@@ -41,7 +55,7 @@ func (s *ServiceMock) Create(in *dto.PetDto) (result *proto.Pet, err *dto.Respon
 	return
 }
 
-func (s *ServiceMock) Update(id string, in *proto.Pet) (result *proto.Pet, err *dto.ResponseErr) {
+func (s *ServiceMock) Update(id string, in *dto.PetDto) (result *proto.Pet, err *dto.ResponseErr) {
 	args := s.Called(id, in)
 
 	if args.Get(0) != nil {
@@ -143,13 +157,13 @@ func (c *ClientMock) Delete(ctx context.Context, in *proto.DeletePetRequest, opt
 
 type ContextMock struct {
 	mock.Mock
-	V      interface{}
-	Status int
+	V          interface{}
+	StatusCode int
 }
 
-func (c *ContextMock) JSON(status int, v interface{}) {
+func (c *ContextMock) JSON(statusCode int, v interface{}) {
 	c.V = v
-	c.Status = status
+	c.StatusCode = statusCode
 }
 
 func (c *ContextMock) Bind(v interface{}) error {
@@ -165,22 +179,41 @@ func (c *ContextMock) Bind(v interface{}) error {
 	return args.Error(1)
 }
 
-func (c *ContextMock) ID() (string, error) {
+func (c *ContextMock) ID() (id string, err error) {
 	args := c.Called()
 	return args.String(0), args.Error(1)
 }
 
-func (c *ContextMock) Host() string {
-	args := c.Called()
+func (m *ContextMock) UserID() string {
+	args := m.Called()
 	return args.String(0)
 }
 
-func (c *ContextMock) PetID() string {
-	args := c.Called()
+func (m *ContextMock) Param(key string) (string, error) {
+	args := m.Called(key)
+	return args.String(0), args.Error(1)
+}
+
+func (m *ContextMock) Token() string {
+	args := m.Called()
 	return args.String(0)
 }
 
-func (c *ContextMock) Query(key string) string {
-	args := c.Called(key)
+func (m *ContextMock) Method() string {
+	args := m.Called()
 	return args.String(0)
+}
+
+func (m *ContextMock) Path() string {
+	args := m.Called()
+	return args.String(0)
+}
+
+func (m *ContextMock) StoreValue(k string, v string) {
+	m.Called(k, v)
+}
+
+func (m *ContextMock) Next() error {
+	args := m.Called()
+	return args.Error(0)
 }
