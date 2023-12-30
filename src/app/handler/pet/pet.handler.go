@@ -35,7 +35,7 @@ func NewHandler(service Service, imageService ImageService, validate *validator.
 	return &Handler{service, imageService, validate}
 }
 
-func (h *Handler) FindAll(c *router.FiberCtx) {
+func (h *Handler) FindAll(c router.IContext) {
 	request := &dto.FindOnePetDto{}
 	err := c.Bind(request)
 	if err != nil {
@@ -72,7 +72,7 @@ func (h *Handler) FindOne(c router.IContext) {
 	return
 }
 
-func (h *Handler) Create(c *router.FiberCtx) {
+func (h *Handler) Create(c router.IContext) {
 	request := &dto.PetDto{}
 	err := c.Bind(request)
 	if err != nil {
@@ -103,11 +103,11 @@ func (h *Handler) Create(c *router.FiberCtx) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusCreated, response)
 	return
 }
 
-func (h *Handler) Update(c *router.FiberCtx) {
+func (h *Handler) Update(c router.IContext) {
 	// petId := c.petI
 }
 
