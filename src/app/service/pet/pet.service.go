@@ -154,29 +154,29 @@ func (s *Service) Update(id string, in *dto.UpDatePetDto) (result *proto.Pet, er
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	petReq := &proto.UpdatePetRequest{
+	req := &proto.UpdatePetRequest{
 		Pet: &proto.Pet{
 			Id:           id,
-			Type:         in.Type,
-			Species:      in.Species,
-			Name:         in.Name,
-			Birthdate:    in.Birthdate,
-			Gender:       proto.Gender(in.Gender),
-			Habit:        in.Habit,
-			Caption:      in.Caption,
-			Status:       proto.PetStatus(in.Status),
+			Type:         in.Pet.Type,
+			Species:      in.Pet.Species,
+			Name:         in.Pet.Name,
+			Birthdate:    in.Pet.Birthdate,
+			Gender:       proto.Gender(in.Pet.Gender),
+			Habit:        in.Pet.Habit,
+			Caption:      in.Pet.Caption,
+			Status:       proto.PetStatus(in.Pet.Status),
 			ImageUrls:    []string{},
-			IsSterile:    in.IsSterile,
-			IsVaccinated: in.IsVaccinated,
-			IsVisible:    in.IsVisible,
-			IsClubPet:    in.IsClubPet,
-			Background:   in.Background,
-			Address:      in.Address,
-			Contact:      in.Contact,
+			IsSterile:    in.Pet.IsSterile,
+			IsVaccinated: in.Pet.IsVaccinated,
+			IsVisible:    in.Pet.IsVisible,
+			IsClubPet:    in.Pet.IsClubPet,
+			Background:   in.Pet.Background,
+			Address:      in.Pet.Address,
+			Contact:      in.Pet.Contact,
 		},
 	}
 
-	res, errRes := s.petClient.Update(ctx, petReq)
+	res, errRes := s.petClient.Update(ctx, req)
 	if errRes != nil {
 		st, ok := status.FromError(errRes)
 		if ok {
