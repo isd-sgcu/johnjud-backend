@@ -133,6 +133,30 @@ func (t *PetHandlerTest) SetupTest() {
 	}
 }
 
+func (t *PetHandlerTest) TestFindAllSuccess() {
+	want := t.Pets
+
+	petService := &mock.ServiceMock{}
+	imageService := &imageMock.ServiceMock{}
+
+	petService.On("FindAll").Return(want, nil)
+
+	context := &mock.ContextMock{}
+
+	validator, err := validator.NewValidator()
+	if err != nil {
+		log.Error().Err(err).
+			Str("handler", "pet").
+			Msg("Err creating validator")
+	}
+
+	h := NewHandler(petService, imageService, validator)
+	h.FindAll(context)
+
+	assert.Equal(t.T(), want, context.V)
+	assert.Equal(t.T(), http.StatusOK, context.StatusCode)
+}
+
 func (t *PetHandlerTest) TestFindOneSuccess() {
 	want := t.Pet
 
