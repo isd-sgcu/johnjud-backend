@@ -28,7 +28,7 @@ func NewFiberCtx(c *fiber.Ctx) *FiberCtx {
 	return &FiberCtx{c}
 }
 
-func (c *FiberCtx) PetID() string {
+func (c *FiberCtx) UserID() string {
 	return c.Ctx.Locals("UserId").(string)
 }
 
