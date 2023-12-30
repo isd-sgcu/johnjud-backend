@@ -9,9 +9,11 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
 	"github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
+	imageMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/image"
 	mock "github.com/isd-sgcu/johnjud-gateway/src/mocks/pet"
-	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	"github.com/rs/zerolog/log"
+
+	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
@@ -36,6 +38,7 @@ func (t *PetHandlerTest) SetupTest() {
 	var pets []*proto.Pet
 	for i := 0; i <= 3; i++ {
 		pet := &proto.Pet{
+			Id:           faker.UUIDDigit(),
 			Type:         faker.Word(),
 			Species:      faker.Word(),
 			Name:         faker.Name(),
@@ -48,7 +51,7 @@ func (t *PetHandlerTest) SetupTest() {
 			IsVaccinated: true,
 			IsVisible:    true,
 			IsClubPet:    true,
-			ImageUrls:    []string{},
+			ImageUrls:    []string{""},
 			Background:   faker.Paragraph(),
 			Address:      faker.Paragraph(),
 			Contact:      faker.Paragraph(),
@@ -57,6 +60,7 @@ func (t *PetHandlerTest) SetupTest() {
 		pets = append(pets, pet)
 	}
 
+	t.Pets = pets
 	t.Pet = t.Pets[0]
 
 	t.PetDto = &dto.PetDto{
@@ -94,28 +98,80 @@ func (t *PetHandlerTest) SetupTest() {
 		Address:      t.Pet.Address,
 		Contact:      t.Pet.Contact,
 	}
+
+	t.ServiceDownErr = &dto.ResponseErr{
+		StatusCode: http.StatusServiceUnavailable,
+		Message:    "Service is down",
+		Data:       nil,
+	}
+
+	t.NotFoundErr = &dto.ResponseErr{
+		StatusCode: http.StatusNotFound,
+		Message:    "Pet not found",
+		Data:       nil,
+	}
+
+	t.BindErr = &dto.ResponseErr{
+		StatusCode: http.StatusBadRequest,
+		Message:    "Invalid ID",
+	}
+
+	t.InternalErr = &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    "Internal Server Error",
+		Data:       nil,
+	}
 }
 
-func (t *PetHandlerTest) TestFindOnePet() {
+func (t *PetHandlerTest) TestFindOneSuccess() {
 	want := t.Pet
 
-	srv := new(mock.ServiceMock)
-	imageSrv := new(mock.ServiceMock)
-	srv.On("FindOne", t.Pet.Id).Return(want, nil)
+	petService := &mock.ServiceMock{}
+	imageService := &imageMock.ServiceMock{}
 
-	c := &mock.ContextMock{}
-	c.On("ID").Return(t.Pet.Id, nil)
+	petService.On("FindOne", t.Pet.Id).Return(want, nil)
+	imageService.On("FindByPetId", t.Pet.Id).Return(t.Pet.ImageUrls, nil)
 
-	v, err := validator.NewValidator()
+	context := &mock.ContextMock{}
+	context.On("ID").Return(t.Pet.Id, nil)
+
+	validator, err := validator.NewValidator()
 	if err != nil {
 		log.Error().Err(err).
 			Str("handler", "pet").
 			Msg("Err creating validator")
 	}
 
-	h := NewHandler(srv, v)
-	h.FindOne(c)
+	h := NewHandler(petService, imageService, validator)
+	h.FindOne(context)
 
-	assert.Equal(t.T(), want, c.V)
-	assert.Equal(t.T(), http.StatusOK, c.Status)
+	assert.Equal(t.T(), want, context.V)
+	assert.Equal(t.T(), http.StatusOK, context.StatusCode)
+}
+
+func (t *PetHandlerTest) TestFindOneNotFoundErr() {
+	want := t.NotFoundErr
+
+	petService := &mock.ServiceMock{}
+	imageService := &imageMock.ServiceMock{}
+
+	petService.On("FindOne", t.Pet.Id).Return(nil, t.NotFoundErr)
+	imageService.On("FindByPetId", t.Pet.Id).Return(nil, t.NotFoundErr)
+
+	validator, err := validator.NewValidator()
+	if err != nil {
+		log.Error().Err(err).
+			Str("handler", "pet").
+			Msg("Err creating validator")
+		return
+	}
+
+	context := &mock.ContextMock{}
+	context.On("ID").Return(t.Pet.Id, nil)
+
+	h := NewHandler(petService, imageService, validator)
+	h.FindOne(context)
+
+	assert.Equal(t.T(), want, context.V)
+	assert.Equal(t.T(), http.StatusNotFound, context.StatusCode)
 }
