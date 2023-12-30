@@ -209,3 +209,24 @@ func (t *PetHandlerTest) TestFindOneInternalErr() {
 	assert.Equal(t.T(), want, c.V)
 	assert.Equal(t.T(), http.StatusInternalServerError, c.StatusCode)
 }
+
+func (t *PetHandlerTest) TestFindOneGrpcErr() {
+	want := t.ServiceDownErr
+
+	petService := &mock.ServiceMock{}
+	imageService := &imageMock.ServiceMock{}
+
+	imageService.On("FindByPetId", t.Pet.Id).Return(nil, t.NotFoundErr)
+	petService.On("FindOne", t.Pet.Id).Return(nil, t.ServiceDownErr)
+
+	c := &mock.ContextMock{}
+	c.On("ID").Return(t.Pet.Id, nil)
+
+	validator, _ := validator.NewValidator()
+
+	h := NewHandler(petService, imageService, validator)
+	h.FindOne(c)
+
+	assert.Equal(t.T(), want, c.V)
+	assert.Equal(t.T(), http.StatusServiceUnavailable, c.StatusCode)
+}
