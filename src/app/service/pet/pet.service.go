@@ -261,14 +261,15 @@ func (s *Service) Delete(id string) (result bool, err *dto.ResponseErr) {
 	return res.Success, nil
 }
 
-func (s *Service) ChangeView(id string, visible bool) (result bool, err *dto.ResponseErr) {
+func (s *Service) ChangeView(in *dto.ChangeViewPetDto) (result bool, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	res, errRes := s.petClient.ChangeView(ctx, &proto.ChangeViewPetRequest{
-		Id:      id,
-		Visible: visible,
+		Id:      in.Id,
+		Visible: in.Visible,
 	})
+
 	if errRes != nil {
 		st, ok := status.FromError(errRes)
 		if ok {
