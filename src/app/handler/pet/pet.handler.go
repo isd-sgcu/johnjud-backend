@@ -36,10 +36,6 @@ func NewHandler(service Service, imageService ImageService, validate *validator.
 }
 
 func (h *Handler) FindAll(c *router.FiberCtx) {
-
-}
-
-func (h *Handler) FindOne(c *router.FiberCtx) {
 	request := &dto.FindOnePetDto{}
 	err := c.Bind(request)
 	if err != nil {
@@ -51,35 +47,29 @@ func (h *Handler) FindOne(c *router.FiberCtx) {
 		return
 	}
 
-	if err := h.validate.Validate(request); err != nil {
-		var errorMessage []string
-		for _, reqErr := range err {
-			errorMessage = append(errorMessage, reqErr.Message)
-		}
-		c.JSON(http.StatusBadRequest, dto.ResponseErr{
-			StatusCode: http.StatusBadRequest,
-			Message:    constant.InvalidRequestBodyMessage + strings.Join(errorMessage, ", "),
+	c.JSON(http.StatusOK, nil)
+}
+
+func (h *Handler) FindOne(c router.IContext) {
+	id, err := c.ID()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, &dto.ResponseErr{
+			StatusCode: http.StatusInternalServerError,
+			Message:    "Invalid ID",
 			Data:       nil,
 		})
 		return
 	}
 
-	response, respErr := h.service.FindOne(request.Id)
-
+	response, respErr := h.service.FindOne(id)
 	if respErr != nil {
 		c.JSON(respErr.StatusCode, respErr)
 		return
 	}
 
-	imagesResp, respErr := h.imageService.FindByPetId(response.Id)
-
-	if respErr != nil {
-		c.JSON(respErr.StatusCode, respErr)
-	}
-
-	response.ImageUrls = []string{imagesResp.ImageUrl}
-
 	c.JSON(http.StatusOK, response)
+	return
 }
 
 func (h *Handler) Create(c *router.FiberCtx) {
@@ -114,6 +104,7 @@ func (h *Handler) Create(c *router.FiberCtx) {
 	}
 
 	c.JSON(http.StatusOK, response)
+	return
 }
 
 func (h *Handler) Update(c *router.FiberCtx) {
