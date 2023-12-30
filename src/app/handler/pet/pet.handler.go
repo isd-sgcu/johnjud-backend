@@ -23,7 +23,7 @@ type Service interface {
 	FindOne(string) (*proto.Pet, *dto.ResponseErr)
 	Create(*dto.PetDto) (*proto.Pet, *dto.ResponseErr)
 	Update(string, *dto.PetDto) (*proto.Pet, *dto.ResponseErr)
-	ChangeView(string) (*proto.Pet, *dto.ResponseErr)
+	ChangeView(string, bool) (bool, *dto.ResponseErr)
 	Delete(string) (bool, *dto.ResponseErr)
 }
 
