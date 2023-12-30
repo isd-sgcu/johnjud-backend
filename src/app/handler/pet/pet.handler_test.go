@@ -82,21 +82,23 @@ func (t *PetHandlerTest) SetupTest() {
 	}
 
 	t.UpdatedPetReq = &dto.UpDatePetDto{
-		Type:         t.Pet.Type,
-		Species:      t.Pet.Species,
-		Name:         t.Pet.Name,
-		Birthdate:    t.Pet.Birthdate,
-		Gender:       pet.Gender(t.Pet.Gender),
-		Habit:        t.Pet.Habit,
-		Caption:      t.Pet.Caption,
-		Status:       pet.Status(t.Pet.Status),
-		IsSterile:    t.Pet.IsSterile,
-		IsVaccinated: t.Pet.IsVaccinated,
-		IsVisible:    t.Pet.IsVisible,
-		IsClubPet:    t.Pet.IsClubPet,
-		Background:   t.Pet.Background,
-		Address:      t.Pet.Address,
-		Contact:      t.Pet.Contact,
+		Pet: &dto.PetDto{
+			Type:         t.Pet.Type,
+			Species:      t.Pet.Species,
+			Name:         t.Pet.Name,
+			Birthdate:    t.Pet.Birthdate,
+			Gender:       pet.Gender(t.Pet.Gender),
+			Habit:        t.Pet.Habit,
+			Caption:      t.Pet.Caption,
+			Status:       pet.Status(t.Pet.Status),
+			IsSterile:    t.Pet.IsSterile,
+			IsVaccinated: t.Pet.IsVaccinated,
+			IsVisible:    t.Pet.IsVisible,
+			IsClubPet:    t.Pet.IsClubPet,
+			Background:   t.Pet.Background,
+			Address:      t.Pet.Address,
+			Contact:      t.Pet.Contact,
+		},
 	}
 
 	t.ServiceDownErr = &dto.ResponseErr{
