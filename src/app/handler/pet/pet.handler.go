@@ -22,7 +22,7 @@ type Service interface {
 	FindAll() ([]*proto.Pet, *dto.ResponseErr)
 	FindOne(string) (*proto.Pet, *dto.ResponseErr)
 	Create(*dto.PetDto) (*proto.Pet, *dto.ResponseErr)
-	Update(string, *dto.PetDto) (*proto.Pet, *dto.ResponseErr)
+	Update(string, *dto.UpdatePetDto) (*proto.Pet, *dto.ResponseErr)
 	ChangeView(string, bool) (bool, *dto.ResponseErr)
 	Delete(string) (bool, *dto.ResponseErr)
 }
@@ -108,7 +108,33 @@ func (h *Handler) Create(c router.IContext) {
 }
 
 func (h *Handler) Update(c router.IContext) {
-	// petId := c.petI
+	petId, err := c.ID()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, &dto.ResponseErr{
+			StatusCode: http.StatusInternalServerError,
+			Message:    "Invalid ID",
+			Data:       nil,
+		})
+		return
+	}
+
+	petDto := dto.UpdatePetDto{}
+
+	err = c.Bind(&petDto)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+
+	pet, errRes := h.service.Update(petId, &petDto)
+	if errRes != nil {
+		c.JSON(errRes.StatusCode, errRes)
+		return
+	}
+
+	c.JSON(http.StatusOK, pet)
+	return
 }
 
 func (h *Handler) ChangeView(c *router.FiberCtx) {
