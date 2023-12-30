@@ -10,11 +10,11 @@ type ServiceMock struct {
 	mock.Mock
 }
 
-func (s *ServiceMock) FindByPetId(petId string) (result []*proto.Image, err *dto.ResponseErr) {
+func (s *ServiceMock) FindByPetId(petId string) (result *proto.Image, err *dto.ResponseErr) {
 	args := s.Called(petId)
 
 	if args.Get(0) != nil {
-		result = args.Get(0).([]*proto.Image)
+		result = args.Get(0).(*proto.Image)
 	}
 
 	if args.Get(1) != nil {
