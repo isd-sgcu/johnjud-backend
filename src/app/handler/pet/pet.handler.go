@@ -36,18 +36,13 @@ func NewHandler(service Service, imageService ImageService, validate *validator.
 }
 
 func (h *Handler) FindAll(c router.IContext) {
-	request := &dto.FindOnePetDto{}
-	err := c.Bind(request)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ResponseErr{
-			StatusCode: http.StatusBadRequest,
-			Message:    constant.BindingRequestErrorMessage + err.Error(),
-			Data:       nil,
-		})
+	response, respErr := h.service.FindAll()
+	if respErr != nil {
+		c.JSON(respErr.StatusCode, respErr)
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response)
 }
 
 func (h *Handler) FindOne(c router.IContext) {
