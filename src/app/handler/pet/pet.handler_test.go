@@ -1,6 +1,7 @@
 package pet
 
 import (
+	"errors"
 	"math/rand"
 	"net/http"
 	"testing"
@@ -176,4 +177,35 @@ func (t *PetHandlerTest) TestFindOneNotFoundErr() {
 
 	assert.Equal(t.T(), want, context.V)
 	assert.Equal(t.T(), http.StatusNotFound, context.StatusCode)
+}
+
+func (t *PetHandlerTest) TestFindOneInternalErr() {
+	want := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    "Invalid ID",
+		Data:       nil,
+	}
+
+	petService := &mock.ServiceMock{}
+	imageService := &imageMock.ServiceMock{}
+
+	petService.On("FindOne", t.Pet.Id).Return(nil, t.ServiceDownErr)
+	imageService.On("FindByPetId", t.Pet.Id).Return(nil, t.NotFoundErr)
+
+	c := &mock.ContextMock{}
+	c.On("ID").Return("", errors.New("Cannot parse id"))
+
+	validator, err := validator.NewValidator()
+	if err != nil {
+		log.Error().Err(err).
+			Str("handler", "pet").
+			Msg("Err creating validator")
+		return
+	}
+
+	h := NewHandler(petService, imageService, validator)
+	h.FindOne(c)
+
+	assert.Equal(t.T(), want, c.V)
+	assert.Equal(t.T(), http.StatusInternalServerError, c.StatusCode)
 }
