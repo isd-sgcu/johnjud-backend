@@ -83,8 +83,8 @@ func (s *ServiceMock) Delete(in string) (result bool, err *dto.ResponseErr) {
 	return
 }
 
-func (s *ServiceMock) ChangeView(id string, visible bool) (result bool, err *dto.ResponseErr) {
-	args := s.Called(id, visible)
+func (s *ServiceMock) ChangeView(in *dto.ChangeViewPetDto) (result bool, err *dto.ResponseErr) {
+	args := s.Called(in)
 
 	if args.Get(0) != nil {
 		result = args.Get(0).(bool)
@@ -136,7 +136,7 @@ func (c *ClientMock) Update(ctx context.Context, in *proto.UpdatePetRequest, opt
 }
 
 func (c *ClientMock) ChangeView(ctx context.Context, in *proto.ChangeViewPetRequest, opts ...grpc.CallOption) (res *proto.ChangeViewPetResponse, err error) {
-	args := c.Called(in.Id, in.Visible)
+	args := c.Called(in)
 
 	if args.Get(0) != nil {
 		res = args.Get(0).(*proto.ChangeViewPetResponse)
