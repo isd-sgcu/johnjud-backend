@@ -26,7 +26,7 @@ type PetServiceTest struct {
 	PetReq         *proto.Pet
 	UpdatePetReq   *proto.UpdatePetRequest
 	PetDto         *dto.PetDto
-	UpdatePetDto   *dto.UpDatePetDto
+	UpdatePetDto   *dto.UpdatePetDto
 	NotFoundErr    *dto.ResponseErr
 	ServiceDownErr *dto.ResponseErr
 	InternalErr    *dto.ResponseErr
@@ -121,7 +121,7 @@ func (t *PetServiceTest) SetupTest() {
 		Contact:      t.Pet.Contact,
 	}
 
-	t.UpdatePetDto = &dto.UpDatePetDto{
+	t.UpdatePetDto = &dto.UpdatePetDto{
 		Pet: &dto.PetDto{
 			Type:         t.Pet.Type,
 			Species:      t.Pet.Species,
