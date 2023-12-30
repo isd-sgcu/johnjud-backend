@@ -341,10 +341,10 @@ func (t *PetServiceTest) TestDeleteNotFound() {
 }
 
 func (t *PetServiceTest) TestDeleteGrpcErr() {
-	want := t.NotFoundErr
+	want := t.ServiceDownErr
 
 	c := &mock.ClientMock{}
-	c.On("Delete", &proto.DeletePetRequest{Id: t.Pet.Id}).Return(nil, status.Error(codes.NotFound, "Pet not found"))
+	c.On("Delete", &proto.DeletePetRequest{Id: t.Pet.Id}).Return(nil, errors.New("Service is down"))
 
 	service := NewService(c)
 
@@ -363,4 +363,17 @@ func (t *PetServiceTest) TestChangeViewSuccess() {
 
 	assert.Nil(t.T(), err)
 	assert.True(t.T(), res)
+}
+
+func (t *PetServiceTest) TestChangeViewNotFound() {
+	want := t.NotFoundErr
+
+	c := &mock.ClientMock{}
+	c.On("ChangeView", t.Pet.Id, !t.Pet.IsVisible).Return(nil, status.Error(codes.NotFound, "Pet not found"))
+
+	service := NewService(c)
+	res, err := service.ChangeView(t.Pet.Id, !t.Pet.IsVisible)
+
+	assert.False(t.T(), res)
+	assert.Equal(t.T(), want, err)
 }
