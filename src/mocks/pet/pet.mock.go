@@ -126,7 +126,7 @@ func (c *ClientMock) Create(ctx context.Context, in *proto.CreatePetRequest, opt
 }
 
 func (c *ClientMock) Update(ctx context.Context, in *proto.UpdatePetRequest, opts ...grpc.CallOption) (res *proto.UpdatePetResponse, err error) {
-	args := c.Called(in.Pet)
+	args := c.Called(in)
 
 	if args.Get(0) != nil {
 		res = args.Get(0).(*proto.UpdatePetResponse)
