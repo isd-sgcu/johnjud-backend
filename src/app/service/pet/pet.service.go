@@ -7,6 +7,7 @@ import (
 
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
+
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -218,7 +219,9 @@ func (s *Service) Delete(id string) (result bool, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	res, errRes := s.petClient.Delete(ctx, &proto.DeletePetRequest{})
+	res, errRes := s.petClient.Delete(ctx, &proto.DeletePetRequest{
+		Id: id,
+	})
 	if errRes != nil {
 		st, ok := status.FromError(errRes)
 		if ok {
@@ -254,5 +257,52 @@ func (s *Service) Delete(id string) (result bool, err *dto.ResponseErr) {
 			Data:       nil,
 		}
 	}
+	return res.Success, nil
+}
+
+func (s *Service) ChangeView(id string, visible bool) (result bool, err *dto.ResponseErr) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	res, errRes := s.petClient.ChangeView(ctx, &proto.ChangeViewPetRequest{
+		Id:      id,
+		Visible: visible,
+	})
+	if errRes != nil {
+		st, ok := status.FromError(errRes)
+		if ok {
+			switch st.Code() {
+			case codes.NotFound:
+				return false, &dto.ResponseErr{
+					StatusCode: http.StatusNotFound,
+					Message:    st.Message(),
+					Data:       nil,
+				}
+			default:
+				log.Error().
+					Err(errRes).
+					Str("service", "pet").
+					Str("module", "change view").
+					Msg("Error while connecting to service")
+
+				return false, &dto.ResponseErr{
+					StatusCode: http.StatusServiceUnavailable,
+					Message:    "Service is down",
+					Data:       nil,
+				}
+			}
+		}
+		log.Error().
+			Err(errRes).
+			Str("service", "pet").
+			Str("module", "change view").
+			Msg("Error while connecting to service")
+		return false, &dto.ResponseErr{
+			StatusCode: http.StatusServiceUnavailable,
+			Message:    "Service is down",
+			Data:       nil,
+		}
+	}
+
 	return res.Success, nil
 }
