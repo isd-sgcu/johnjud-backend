@@ -148,7 +148,7 @@ func (t *PetServiceTest) SetupTest() {
 	}
 
 	t.NotFoundErr = &dto.ResponseErr{
-		StatusCode: http.StatusServiceUnavailable,
+		StatusCode: http.StatusNotFound,
 		Message:    constant.PetNotFoundMessage,
 		Data:       nil,
 	}
