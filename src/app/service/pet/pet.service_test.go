@@ -21,15 +21,16 @@ import (
 
 type PetServiceTest struct {
 	suite.Suite
-	Pets           []*proto.Pet
-	Pet            *proto.Pet
-	PetReq         *proto.Pet
-	UpdatePetReq   *proto.UpdatePetRequest
-	PetDto         *dto.PetDto
-	UpdatePetDto   *dto.UpdatePetDto
-	NotFoundErr    *dto.ResponseErr
-	ServiceDownErr *dto.ResponseErr
-	InternalErr    *dto.ResponseErr
+	Pets            []*proto.Pet
+	Pet             *proto.Pet
+	PetReq          *proto.Pet
+	UpdatePetReq    *proto.UpdatePetRequest
+	PetDto          *dto.PetDto
+	UpdatePetDto    *dto.UpdatePetDto
+	NotFoundErr     *dto.ResponseErr
+	ServiceDownErr  *dto.ResponseErr
+	InternalErr     *dto.ResponseErr
+	ChangeViewedPet *proto.Pet
 
 	Images        []*image_proto.Image
 	ImageUrls     []string
@@ -161,6 +162,24 @@ func (t *PetServiceTest) SetupTest() {
 			Address:      t.Pet.Address,
 			Contact:      t.Pet.Contact,
 		},
+	}
+
+	t.ChangeViewedPet = &proto.Pet{
+		Type:         t.Pet.Type,
+		Species:      t.Pet.Species,
+		Name:         t.Pet.Name,
+		Birthdate:    t.Pet.Birthdate,
+		Gender:       proto.Gender(t.Pet.Gender),
+		Habit:        t.Pet.Habit,
+		Caption:      t.Pet.Caption,
+		Status:       proto.PetStatus(t.Pet.Status),
+		IsSterile:    t.Pet.IsSterile,
+		IsVaccinated: t.Pet.IsVaccinated,
+		IsVisible:    !t.Pet.IsVisible,
+		IsClubPet:    t.Pet.IsClubPet,
+		Background:   t.Pet.Background,
+		Address:      t.Pet.Address,
+		Contact:      t.Pet.Contact,
 	}
 
 	t.ServiceDownErr = &dto.ResponseErr{
@@ -301,10 +320,10 @@ func (t *PetServiceTest) TestDeleteSuccess() {
 
 	service := NewService(c)
 
-	actual, err := service.Delete(t.Pet.Id)
+	res, err := service.Delete(t.Pet.Id)
 
 	assert.Nil(t.T(), err)
-	assert.True(t.T(), actual)
+	assert.True(t.T(), res)
 }
 
 func (t *PetServiceTest) TestDeleteNotFound() {
@@ -315,9 +334,9 @@ func (t *PetServiceTest) TestDeleteNotFound() {
 
 	service := NewService(c)
 
-	actual, err := service.Delete(t.Pet.Id)
+	res, err := service.Delete(t.Pet.Id)
 
-	assert.False(t.T(), actual)
+	assert.False(t.T(), res)
 	assert.Equal(t.T(), want, err)
 }
 
@@ -329,8 +348,19 @@ func (t *PetServiceTest) TestDeleteGrpcErr() {
 
 	service := NewService(c)
 
-	actual, err := service.Delete(t.Pet.Id)
+	res, err := service.Delete(t.Pet.Id)
 
-	assert.False(t.T(), actual)
+	assert.False(t.T(), res)
 	assert.Equal(t.T(), want, err)
+}
+
+func (t *PetServiceTest) TestChangeViewSuccess() {
+	c := &mock.ClientMock{}
+	c.On("ChangeView", t.Pet.Id, !t.Pet.IsVisible).Return(&proto.ChangeViewPetResponse{Success: true}, nil)
+
+	service := NewService(c)
+	res, err := service.ChangeView(t.Pet.Id, !t.Pet.IsVisible)
+
+	assert.Nil(t.T(), err)
+	assert.True(t.T(), res)
 }
