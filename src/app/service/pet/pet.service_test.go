@@ -267,12 +267,70 @@ func (t *PetServiceTest) TestUpdateSuccess() {
 	assert.Equal(t.T(), want, actual)
 }
 
-func (t *PetServiceTest) TestUpdateNotFound() {}
+func (t *PetServiceTest) TestUpdateNotFound() {
+	want := t.NotFoundErr
 
-func (t *PetServiceTest) TestUpdateGrpcErr() {}
+	c := &mock.ClientMock{}
+	c.On("Update", t.UpdatePetReq).Return(nil, status.Error(codes.NotFound, "Pet not found"))
 
-func (t *PetServiceTest) TestDeleteSuccess() {}
+	service := NewService(c)
 
-func (t *PetServiceTest) TestDeleteNotFound() {}
+	actual, err := service.Update(t.Pet.Id, t.UpdatePetDto)
 
-func (t *PetServiceTest) TestDeleteGrpcErr() {}
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), want, err)
+}
+
+func (t *PetServiceTest) TestUpdateGrpcErr() {
+	want := t.ServiceDownErr
+
+	c := &mock.ClientMock{}
+	c.On("Update", t.UpdatePetReq).Return(nil, errors.New("Service iis down"))
+
+	service := NewService(c)
+
+	actual, err := service.Update(t.Pet.Id, t.UpdatePetDto)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), want, err)
+}
+
+func (t *PetServiceTest) TestDeleteSuccess() {
+	c := &mock.ClientMock{}
+	c.On("Delete", &proto.DeletePetRequest{Id: t.Pet.Id}).Return(&proto.DeletePetResponse{Success: true}, nil)
+
+	service := NewService(c)
+
+	actual, err := service.Delete(t.Pet.Id)
+
+	assert.Nil(t.T(), err)
+	assert.True(t.T(), actual)
+}
+
+func (t *PetServiceTest) TestDeleteNotFound() {
+	want := t.NotFoundErr
+
+	c := &mock.ClientMock{}
+	c.On("Delete", &proto.DeletePetRequest{Id: t.Pet.Id}).Return(nil, status.Error(codes.NotFound, "Pet not found"))
+
+	service := NewService(c)
+
+	actual, err := service.Delete(t.Pet.Id)
+
+	assert.False(t.T(), actual)
+	assert.Equal(t.T(), want, err)
+}
+
+func (t *PetServiceTest) TestDeleteGrpcErr() {
+	want := t.NotFoundErr
+
+	c := &mock.ClientMock{}
+	c.On("Delete", &proto.DeletePetRequest{Id: t.Pet.Id}).Return(nil, status.Error(codes.NotFound, "Pet not found"))
+
+	service := NewService(c)
+
+	actual, err := service.Delete(t.Pet.Id)
+
+	assert.False(t.T(), actual)
+	assert.Equal(t.T(), want, err)
+}
