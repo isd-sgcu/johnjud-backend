@@ -4,7 +4,6 @@ go 1.21.3
 
 require (
 	github.com/arsmn/fiber-swagger/v2 v2.31.1
-	github.com/bxcodec/faker/v4 v4.0.0-beta.3
 	github.com/go-faker/faker/v4 v4.2.0
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
