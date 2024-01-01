@@ -2,7 +2,6 @@ package pet
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -41,6 +40,10 @@ func (s *Service) FindAll() (result []*proto.Pet, err *dto.ResponseErr) {
 			Data:       nil,
 		}
 	}
+	log.Info().
+		Str("service", "pet").
+		Str("module", "find all").
+		Msg("Find pet success")
 	return res.Pets, nil
 }
 
@@ -49,7 +52,6 @@ func (s *Service) FindOne(id string) (result *proto.Pet, err *dto.ResponseErr) {
 	defer cancel()
 
 	res, errRes := s.petClient.FindOne(ctx, &proto.FindOnePetRequest{Id: id})
-	fmt.Println("res: ", res, ", errRes: ", errRes)
 	if errRes != nil {
 		st, ok := status.FromError(errRes)
 		if ok {
