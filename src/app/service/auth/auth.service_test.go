@@ -44,13 +44,13 @@ func (t *AuthServiceTest) SetupTest() {
 }
 
 func (t *AuthServiceTest) TestSignupSuccess() {
-	protoReq := &authProto.SignupRequest{
+	protoReq := &authProto.SignUpRequest{
 		FirstName: t.signupRequestDto.Firstname,
 		LastName:  t.signupRequestDto.Lastname,
 		Email:     t.signupRequestDto.Email,
 		Password:  t.signupRequestDto.Password,
 	}
-	protoResp := &authProto.SignupResponse{
+	protoResp := &authProto.SignUpResponse{
 		Id:        faker.UUIDDigit(),
 		FirstName: t.signupRequestDto.Firstname,
 		LastName:  t.signupRequestDto.Lastname,
@@ -66,7 +66,7 @@ func (t *AuthServiceTest) TestSignupSuccess() {
 
 	client := auth.AuthClientMock{}
 
-	client.On("Signup", protoReq).Return(protoResp, nil)
+	client.On("SignUp", protoReq).Return(protoResp, nil)
 
 	svc := NewService(&client)
 	actual, err := svc.Signup(t.signupRequestDto)
@@ -79,7 +79,7 @@ func (t *AuthServiceTest) TestSignupSuccess() {
 }
 
 func (t *AuthServiceTest) TestSignupConflict() {
-	protoReq := &authProto.SignupRequest{
+	protoReq := &authProto.SignUpRequest{
 		FirstName: t.signupRequestDto.Firstname,
 		LastName:  t.signupRequestDto.Lastname,
 		Email:     t.signupRequestDto.Email,
@@ -94,7 +94,7 @@ func (t *AuthServiceTest) TestSignupConflict() {
 	}
 
 	client := auth.AuthClientMock{}
-	client.On("Signup", protoReq).Return(nil, clientErr)
+	client.On("SignUp", protoReq).Return(nil, clientErr)
 
 	svc := NewService(&client)
 	actual, err := svc.Signup(t.signupRequestDto)
@@ -104,7 +104,7 @@ func (t *AuthServiceTest) TestSignupConflict() {
 }
 
 func (t *AuthServiceTest) TestSignupInternalError() {
-	protoReq := &authProto.SignupRequest{
+	protoReq := &authProto.SignUpRequest{
 		FirstName: t.signupRequestDto.Firstname,
 		LastName:  t.signupRequestDto.Lastname,
 		Email:     t.signupRequestDto.Email,
@@ -119,7 +119,7 @@ func (t *AuthServiceTest) TestSignupInternalError() {
 	}
 
 	client := auth.AuthClientMock{}
-	client.On("Signup", protoReq).Return(nil, clientErr)
+	client.On("SignUp", protoReq).Return(nil, clientErr)
 
 	svc := NewService(&client)
 	actual, err := svc.Signup(t.signupRequestDto)
@@ -129,7 +129,7 @@ func (t *AuthServiceTest) TestSignupInternalError() {
 }
 
 func (t *AuthServiceTest) TestSignupUnavailableService() {
-	protoReq := &authProto.SignupRequest{
+	protoReq := &authProto.SignUpRequest{
 		FirstName: t.signupRequestDto.Firstname,
 		LastName:  t.signupRequestDto.Lastname,
 		Email:     t.signupRequestDto.Email,
@@ -144,7 +144,7 @@ func (t *AuthServiceTest) TestSignupUnavailableService() {
 	}
 
 	client := auth.AuthClientMock{}
-	client.On("Signup", protoReq).Return(nil, clientErr)
+	client.On("SignUp", protoReq).Return(nil, clientErr)
 
 	svc := NewService(&client)
 	actual, err := svc.Signup(t.signupRequestDto)

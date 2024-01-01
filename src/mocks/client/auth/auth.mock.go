@@ -25,9 +25,9 @@ func (m *AuthClientMock) RefreshToken(_ context.Context, in *authProto.RefreshTo
 	return resp, err
 }
 
-func (m *AuthClientMock) Signup(_ context.Context, in *authProto.SignupRequest, _ ...grpc.CallOption) (*authProto.SignupResponse, error) {
+func (m *AuthClientMock) SignUp(_ context.Context, in *authProto.SignUpRequest, _ ...grpc.CallOption) (*authProto.SignUpResponse, error) {
 	args := m.Called(in)
-	resp, _ := args.Get(0).(*authProto.SignupResponse)
+	resp, _ := args.Get(0).(*authProto.SignUpResponse)
 	err, _ := args.Get(1).(error)
 	return resp, err
 }
@@ -35,6 +35,13 @@ func (m *AuthClientMock) Signup(_ context.Context, in *authProto.SignupRequest, 
 func (m *AuthClientMock) SignIn(_ context.Context, in *authProto.SignInRequest, _ ...grpc.CallOption) (*authProto.SignInResponse, error) {
 	args := m.Called(in)
 	resp, _ := args.Get(0).(*authProto.SignInResponse)
+	err, _ := args.Get(1).(error)
+	return resp, err
+}
+
+func (m *AuthClientMock) SignOut(_ context.Context, in *authProto.SignOutRequest, _ ...grpc.CallOption) (*authProto.SignOutResponse, error) {
+	args := m.Called(in)
+	resp, _ := args.Get(0).(*authProto.SignOutResponse)
 	err, _ := args.Get(1).(error)
 	return resp, err
 }
