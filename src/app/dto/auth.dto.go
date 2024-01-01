@@ -30,3 +30,7 @@ type SignInRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,gte=6,lte=30"`
 }
+
+type SignOutResponse struct {
+	IsSuccess bool `json:"is_success"`
+}

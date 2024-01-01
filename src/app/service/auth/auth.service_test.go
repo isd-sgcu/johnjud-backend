@@ -254,6 +254,70 @@ func (t *AuthServiceTest) TestSignInUnavailableService() {
 	assert.Equal(t.T(), expected, err)
 }
 
+func (t *AuthServiceTest) TestSignOutSuccess() {
+	protoReq := &authProto.SignOutRequest{
+		Token: t.token,
+	}
+	protoResp := &authProto.SignOutResponse{
+		IsSuccess: true,
+	}
+
+	expected := &dto.SignOutResponse{IsSuccess: true}
+
+	client := auth.AuthClientMock{}
+	client.On("SignOut", protoReq).Return(protoResp, nil)
+
+	svc := NewService(&client)
+	actual, err := svc.SignOut(t.token)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), expected, actual)
+}
+
+func (t *AuthServiceTest) TestSignOutInternalError() {
+	protoReq := &authProto.SignOutRequest{
+		Token: t.token,
+	}
+	protoErr := status.Error(codes.Internal, "Internal error")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("SignOut", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.SignOut(t.token)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestSignOutUnavailableService() {
+	protoReq := &authProto.SignOutRequest{
+		Token: t.token,
+	}
+	protoErr := status.Error(codes.Unavailable, "Connection lost")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusServiceUnavailable,
+		Message:    constant.UnavailableServiceMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("SignOut", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.SignOut(t.token)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
 func (t *AuthServiceTest) TestValidateSuccess() {}
 
 func (t *AuthServiceTest) TestValidateUnauthorized() {}

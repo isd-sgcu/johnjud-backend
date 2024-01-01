@@ -102,8 +102,34 @@ func (s *Service) SignIn(signIn *dto.SignInRequest) (*dto.Credential, *dto.Respo
 	}, nil
 }
 
-func (s *Service) SignOut(token string) (bool, *dto.ResponseErr) {
-	return false, nil
+func (s *Service) SignOut(token string) (*dto.SignOutResponse, *dto.ResponseErr) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	response, err := s.client.SignOut(ctx, &auth_proto.SignOutRequest{
+		Token: token,
+	})
+	if err != nil {
+		st, _ := status.FromError(err)
+		switch st.Code() {
+		case codes.Unavailable:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusServiceUnavailable,
+				Message:    constant.UnavailableServiceMessage,
+				Data:       nil,
+			}
+		default:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusInternalServerError,
+				Message:    constant.InternalErrorMessage,
+				Data:       nil,
+			}
+		}
+	}
+
+	return &dto.SignOutResponse{
+		IsSuccess: response.IsSuccess,
+	}, nil
 }
 
 func (s *Service) Validate(token string) (*dto.TokenPayloadAuth, *dto.ResponseErr) {
