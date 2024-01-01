@@ -10,9 +10,9 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
-	mock "github.com/isd-sgcu/johnjud-gateway/src/mocks/pet"
-	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
-	image_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
+	petMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/client/pet"
+	petProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
+	imageProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc/codes"
@@ -21,21 +21,23 @@ import (
 
 type PetServiceTest struct {
 	suite.Suite
-	Pets               []*proto.Pet
-	Pet                *proto.Pet
-	PetReq             *proto.Pet
-	UpdatePetReq       *proto.UpdatePetRequest
-	ChangeViewPetReq   *proto.ChangeViewPetRequest
+	Pets               []*petProto.Pet
+	Pet                *petProto.Pet
+	PetReq             *petProto.Pet
+	PetNotVisible      *petProto.Pet
+	UpdatePetReq       *petProto.UpdatePetRequest
+	ChangeViewPetReq   *petProto.ChangeViewPetRequest
 	PetDto             *dto.PetDto
+	CreatePetDto       *dto.CreatePetDto
 	UpdatePetDto       *dto.UpdatePetDto
 	NotFoundErr        *dto.ResponseErr
 	ServiceDownErr     *dto.ResponseErr
 	InternalErr        *dto.ResponseErr
 	ChangeViewedPetDto *dto.ChangeViewPetDto
 
-	Images        []*image_proto.Image
+	Images        []*imageProto.Image
 	ImageUrls     []string
-	ImagesList    [][]*image_proto.Image
+	ImagesList    [][]*imageProto.Image
 	ImageUrlsList [][]string
 }
 
@@ -44,18 +46,18 @@ func TestPetService(t *testing.T) {
 }
 
 func (t *PetServiceTest) SetupTest() {
-	var pets []*proto.Pet
+	var pets []*petProto.Pet
 	for i := 0; i <= 3; i++ {
-		pet := &proto.Pet{
+		pet := &petProto.Pet{
 			Id:           faker.UUIDDigit(),
 			Type:         faker.Word(),
 			Species:      faker.Word(),
 			Name:         faker.Name(),
 			Birthdate:    faker.Word(),
-			Gender:       proto.Gender(rand.Intn(1) + 1),
+			Gender:       petProto.Gender(rand.Intn(1) + 1),
 			Habit:        faker.Paragraph(),
 			Caption:      faker.Paragraph(),
-			Status:       proto.PetStatus(rand.Intn(1) + 1),
+			Status:       petProto.PetStatus(rand.Intn(1) + 1),
 			IsSterile:    true,
 			IsVaccinated: true,
 			IsVisible:    true,
@@ -72,7 +74,7 @@ func (t *PetServiceTest) SetupTest() {
 	t.Pets = pets
 	t.Pet = t.Pets[0]
 
-	t.PetReq = &proto.Pet{
+	t.PetReq = &petProto.Pet{
 		Type:         t.Pet.Type,
 		Species:      t.Pet.Species,
 		Name:         t.Pet.Name,
@@ -85,6 +87,26 @@ func (t *PetServiceTest) SetupTest() {
 		IsSterile:    t.Pet.IsSterile,
 		IsVaccinated: t.Pet.IsVaccinated,
 		IsVisible:    t.Pet.IsVisible,
+		IsClubPet:    t.Pet.IsClubPet,
+		Background:   t.Pet.Background,
+		Address:      t.Pet.Address,
+		Contact:      t.Pet.Contact,
+	}
+
+	t.PetNotVisible = &petProto.Pet{
+		Id:           t.Pet.Id,
+		Type:         t.Pet.Type,
+		Species:      t.Pet.Species,
+		Name:         t.Pet.Name,
+		Birthdate:    t.Pet.Birthdate,
+		Gender:       t.Pet.Gender,
+		Habit:        t.Pet.Habit,
+		Caption:      t.Pet.Caption,
+		Status:       t.Pet.Status,
+		ImageUrls:    t.Pet.ImageUrls,
+		IsSterile:    t.Pet.IsSterile,
+		IsVaccinated: t.Pet.IsVaccinated,
+		IsVisible:    false,
 		IsClubPet:    t.Pet.IsClubPet,
 		Background:   t.Pet.Background,
 		Address:      t.Pet.Address,
@@ -110,6 +132,10 @@ func (t *PetServiceTest) SetupTest() {
 		Contact:      t.Pet.Contact,
 	}
 
+	t.CreatePetDto = &dto.CreatePetDto{
+		Pet: t.PetDto,
+	}
+
 	t.UpdatePetDto = &dto.UpdatePetDto{
 		Pet: &dto.PetDto{
 			Type:         t.Pet.Type,
@@ -130,8 +156,8 @@ func (t *PetServiceTest) SetupTest() {
 		},
 	}
 
-	t.UpdatePetReq = &proto.UpdatePetRequest{
-		Pet: &proto.Pet{
+	t.UpdatePetReq = &petProto.UpdatePetRequest{
+		Pet: &petProto.Pet{
 			Id:           t.Pet.Id,
 			Type:         t.Pet.Type,
 			Species:      t.Pet.Species,
@@ -154,12 +180,12 @@ func (t *PetServiceTest) SetupTest() {
 
 	t.ChangeViewedPetDto = &dto.ChangeViewPetDto{
 		Id:      t.Pet.Id,
-		Visible: !t.Pet.IsVisible,
+		Visible: false,
 	}
 
-	t.ChangeViewPetReq = &proto.ChangeViewPetRequest{
+	t.ChangeViewPetReq = &petProto.ChangeViewPetRequest{
 		Id:      t.Pet.Id,
-		Visible: !t.Pet.IsVisible,
+		Visible: false,
 	}
 
 	t.ServiceDownErr = &dto.ResponseErr{
@@ -182,206 +208,283 @@ func (t *PetServiceTest) SetupTest() {
 }
 
 func (t *PetServiceTest) TestFindAllSuccess() {
-	want := t.Pets
+	protoReq := &petProto.FindAllPetRequest{}
+	protoResp := &petProto.FindAllPetResponse{
+		Pets: t.Pets,
+	}
 
-	c := &mock.ClientMock{}
-	c.On("FindAll", &proto.FindAllPetRequest{}).Return(&proto.FindAllPetResponse{Pets: t.Pets}, nil)
+	expected := t.Pets
 
-	service := NewService(c)
+	client := petMock.PetClientMock{}
+	client.On("FindAll", protoReq).Return(protoResp, nil)
 
-	actual, err := service.FindAll()
+	svc := NewService(&client)
+	actual, err := svc.FindAll()
 
 	assert.Nil(t.T(), err)
-	assert.Equal(t.T(), want, actual)
+	assert.Equal(t.T(), expected, actual)
 }
 
 func (t *PetServiceTest) TestFindOneSuccess() {
-	want := t.Pet
+	protoReq := &petProto.FindOnePetRequest{
+		Id: t.Pet.Id,
+	}
+	protoResp := &petProto.FindOnePetResponse{
+		Pet: t.Pet,
+	}
 
-	c := &mock.ClientMock{}
-	c.On("FindOne", &proto.FindOnePetRequest{Id: t.Pet.Id}).Return(&proto.FindOnePetResponse{Pet: want}, nil)
+	expected := t.Pet
 
-	service := NewService(c)
+	client := petMock.PetClientMock{}
+	client.On("FindOne", protoReq).Return(protoResp, nil)
 
-	actual, err := service.FindOne(t.Pet.Id)
+	svc := NewService(&client)
+	actual, err := svc.FindOne(t.Pet.Id)
 
 	assert.Nil(t.T(), err)
-	assert.Equal(t.T(), want, actual)
+	assert.Equal(t.T(), expected, actual)
 }
 
 func (t *PetServiceTest) TestFindOneNotFound() {
-	want := t.NotFoundErr
+	protoReq := &petProto.FindOnePetRequest{
+		Id: t.Pet.Id,
+	}
 
-	c := &mock.ClientMock{}
-	c.On("FindOne", &proto.FindOnePetRequest{Id: t.Pet.Id}).Return(nil, status.Error(codes.NotFound, "Pet not found"))
+	clientErr := status.Error(codes.NotFound, "Pet not found")
 
-	service := NewService(c)
+	expected := t.NotFoundErr
 
-	actual, err := service.FindOne(t.Pet.Id)
+	client := petMock.PetClientMock{}
+	client.On("FindOne", protoReq).Return(nil, clientErr)
+
+	svc := NewService(&client)
+	actual, err := svc.FindOne(t.Pet.Id)
 
 	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), want, err)
+	assert.Equal(t.T(), expected, err)
 }
 
 func (t *PetServiceTest) TestFindOneGrpcErr() {
-	want := t.ServiceDownErr
+	protoReq := &petProto.FindOnePetRequest{
+		Id: t.Pet.Id,
+	}
 
-	c := &mock.ClientMock{}
-	c.On("FindOne", &proto.FindOnePetRequest{Id: t.Pet.Id}).Return(nil, errors.New(constant.ServiceDownMessage))
+	clientErr := errors.New(constant.ServiceDownMessage)
 
-	service := NewService(c)
+	expected := t.ServiceDownErr
 
-	actual, err := service.FindOne(t.Pet.Id)
+	client := petMock.PetClientMock{}
+	client.On("FindOne", protoReq).Return(nil, clientErr)
+
+	svc := NewService(&client)
+	actual, err := svc.FindOne(t.Pet.Id)
 
 	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), want, err)
+	assert.Equal(t.T(), expected, err)
 }
 
 func (t *PetServiceTest) TestCreateSuccess() {
-	want := t.Pet
+	protoReq := &petProto.CreatePetRequest{
+		Pet: t.PetReq,
+	}
+	protoResp := &petProto.CreatePetResponse{
+		Pet: t.Pet,
+	}
 
-	c := &mock.ClientMock{}
-	c.On("Create", t.PetReq).Return(&proto.CreatePetResponse{Pet: want}, nil)
+	expected := t.Pet
 
-	service := NewService(c)
-	actual, err := service.Create(&dto.CreatePetDto{Pet: t.PetDto})
+	client := &petMock.PetClientMock{}
+	client.On("Create", protoReq).Return(protoResp, nil)
+
+	svc := NewService(client)
+	actual, err := svc.Create(t.CreatePetDto)
 
 	assert.Nil(t.T(), err)
-	assert.Equal(t.T(), want, actual)
+	assert.Equal(t.T(), expected, actual)
 }
 
 func (t *PetServiceTest) TestCreateGrpcErr() {
-	want := t.ServiceDownErr
+	protoReq := &petProto.CreatePetRequest{
+		Pet: t.PetReq,
+	}
+	clientErr := errors.New(constant.ServiceDownMessage)
 
-	c := &mock.ClientMock{}
-	c.On("Create", t.PetReq).Return(nil, errors.New("Service is down"))
+	expected := t.ServiceDownErr
 
-	service := NewService(c)
+	client := &petMock.PetClientMock{}
+	client.On("Create", protoReq).Return(nil, clientErr)
 
-	actual, err := service.Create(&dto.CreatePetDto{Pet: t.PetDto})
+	svc := NewService(client)
+	actual, err := svc.Create(t.CreatePetDto)
 
 	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), want, err)
+	assert.Equal(t.T(), expected, err)
 }
 
 func (t *PetServiceTest) TestUpdateSuccess() {
-	want := t.Pet
+	protoReq := t.UpdatePetReq
+	protoResp := &petProto.UpdatePetResponse{
+		Pet: t.Pet,
+	}
 
-	c := &mock.ClientMock{}
-	c.On("Update", t.UpdatePetReq).Return(&proto.UpdatePetResponse{Pet: want}, nil)
+	expected := t.Pet
 
-	service := NewService(c)
+	client := &petMock.PetClientMock{}
+	client.On("Update", protoReq).Return(protoResp, nil)
 
-	actual, err := service.Update(t.Pet.Id, t.UpdatePetDto)
+	svc := NewService(client)
+	actual, err := svc.Update(t.Pet.Id, t.UpdatePetDto)
 
 	assert.Nil(t.T(), err)
-	assert.Equal(t.T(), want, actual)
+	assert.Equal(t.T(), expected, actual)
 }
 
 func (t *PetServiceTest) TestUpdateNotFound() {
-	want := t.NotFoundErr
+	protoReq := t.UpdatePetReq
+	clientErr := status.Error(codes.NotFound, "Pet not found")
 
-	c := &mock.ClientMock{}
-	c.On("Update", t.UpdatePetReq).Return(nil, status.Error(codes.NotFound, "Pet not found"))
+	expected := t.NotFoundErr
 
-	service := NewService(c)
+	client := &petMock.PetClientMock{}
+	client.On("Update", protoReq).Return(nil, clientErr)
 
-	actual, err := service.Update(t.Pet.Id, t.UpdatePetDto)
+	svc := NewService(client)
+	actual, err := svc.Update(t.Pet.Id, t.UpdatePetDto)
 
 	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), want, err)
+	assert.Equal(t.T(), expected, err)
 }
 
 func (t *PetServiceTest) TestUpdateGrpcErr() {
-	want := t.ServiceDownErr
+	protoReq := t.UpdatePetReq
+	clientErr := errors.New(constant.ServiceDownMessage)
 
-	c := &mock.ClientMock{}
-	c.On("Update", t.UpdatePetReq).Return(nil, errors.New("Service iis down"))
+	expected := t.ServiceDownErr
 
-	service := NewService(c)
+	client := &petMock.PetClientMock{}
+	client.On("Update", protoReq).Return(nil, clientErr)
 
-	actual, err := service.Update(t.Pet.Id, t.UpdatePetDto)
+	svc := NewService(client)
+	actual, err := svc.Update(t.Pet.Id, t.UpdatePetDto)
 
 	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), want, err)
+	assert.Equal(t.T(), expected, err)
 }
 
 func (t *PetServiceTest) TestDeleteSuccess() {
-	c := &mock.ClientMock{}
-	c.On("Delete", &proto.DeletePetRequest{Id: t.Pet.Id}).Return(&proto.DeletePetResponse{Success: true}, nil)
+	protoReq := &petProto.DeletePetRequest{
+		Id: t.Pet.Id,
+	}
+	protoResp := &petProto.DeletePetResponse{
+		Success: true,
+	}
 
-	service := NewService(c)
+	expected := true
 
-	res, err := service.Delete(t.Pet.Id)
+	client := &petMock.PetClientMock{}
+	client.On("Delete", protoReq).Return(protoResp, nil)
+
+	svc := NewService(client)
+	actual, err := svc.Delete(t.Pet.Id)
 
 	assert.Nil(t.T(), err)
-	assert.True(t.T(), res)
+	assert.Equal(t.T(), expected, actual)
 }
 
 func (t *PetServiceTest) TestDeleteNotFound() {
-	want := t.NotFoundErr
+	protoReq := &petProto.DeletePetRequest{
+		Id: t.Pet.Id,
+	}
+	protoResp := &petProto.DeletePetResponse{
+		Success: false,
+	}
+	clientErr := status.Error(codes.NotFound, "Pet not found")
 
-	c := &mock.ClientMock{}
-	c.On("Delete", &proto.DeletePetRequest{Id: t.Pet.Id}).Return(nil, status.Error(codes.NotFound, "Pet not found"))
+	expected := t.NotFoundErr
 
-	service := NewService(c)
+	client := &petMock.PetClientMock{}
+	client.On("Delete", protoReq).Return(protoResp, clientErr)
 
-	res, err := service.Delete(t.Pet.Id)
+	svc := NewService(client)
+	actual, err := svc.Delete(t.Pet.Id)
 
-	assert.False(t.T(), res)
-	assert.Equal(t.T(), want, err)
+	assert.False(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
 }
 
 func (t *PetServiceTest) TestDeleteGrpcErr() {
-	want := t.ServiceDownErr
+	protoReq := &petProto.DeletePetRequest{
+		Id: t.Pet.Id,
+	}
+	protoResp := &petProto.DeletePetResponse{
+		Success: false,
+	}
+	clientErr := errors.New(constant.ServiceDownMessage)
 
-	c := &mock.ClientMock{}
-	c.On("Delete", &proto.DeletePetRequest{Id: t.Pet.Id}).Return(nil, errors.New("Service is down"))
+	expected := t.ServiceDownErr
 
-	service := NewService(c)
+	client := &petMock.PetClientMock{}
+	client.On("Delete", protoReq).Return(protoResp, clientErr)
 
-	res, err := service.Delete(t.Pet.Id)
+	svc := NewService(client)
+	actual, err := svc.Delete(t.Pet.Id)
 
-	assert.False(t.T(), res)
-	assert.Equal(t.T(), want, err)
+	assert.False(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
 }
 
 func (t *PetServiceTest) TestChangeViewSuccess() {
-	c := &mock.ClientMock{}
-	c.On("ChangeView", t.ChangeViewPetReq).Return(&proto.ChangeViewPetResponse{Success: true}, nil)
+	protoReq := t.ChangeViewPetReq
+	protoResp := &petProto.ChangeViewPetResponse{
+		Success: true,
+	}
 
-	service := NewService(c)
+	client := &petMock.PetClientMock{}
+	client.On("ChangeView", protoReq).Return(protoResp, nil)
 
-	res, err := service.ChangeView(t.ChangeViewedPetDto)
+	svc := NewService(client)
+	actual, err := svc.ChangeView(t.ChangeViewedPetDto)
 
 	assert.Nil(t.T(), err)
-	assert.True(t.T(), res)
+	assert.True(t.T(), actual)
 }
 
 func (t *PetServiceTest) TestChangeViewNotFound() {
-	want := t.NotFoundErr
+	protoReq := t.ChangeViewPetReq
+	protoResp := &petProto.ChangeViewPetResponse{
+		Success: false,
+	}
 
-	c := &mock.ClientMock{}
-	c.On("ChangeView", t.ChangeViewPetReq).Return(nil, status.Error(codes.NotFound, "Pet not found"))
+	clientErr := status.Error(codes.NotFound, "Pet not found")
 
-	service := NewService(c)
+	expected := t.NotFoundErr
 
-	res, err := service.ChangeView(t.ChangeViewedPetDto)
+	client := &petMock.PetClientMock{}
+	client.On("ChangeView", protoReq).Return(protoResp, clientErr)
 
-	assert.False(t.T(), res)
-	assert.Equal(t.T(), want, err)
+	svc := NewService(client)
+	actual, err := svc.ChangeView(t.ChangeViewedPetDto)
+
+	assert.False(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
 }
 
 func (t *PetServiceTest) TestChangeViewGrpcErr() {
-	want := t.ServiceDownErr
+	protoReq := t.ChangeViewPetReq
+	protoResp := &petProto.ChangeViewPetResponse{
+		Success: false,
+	}
 
-	c := &mock.ClientMock{}
-	c.On("ChangeView", t.ChangeViewPetReq).Return(nil, errors.New("Service is down"))
+	clientErr := errors.New(constant.ServiceDownMessage)
 
-	service := NewService(c)
+	expected := t.ServiceDownErr
 
-	res, err := service.ChangeView(t.ChangeViewedPetDto)
+	client := &petMock.PetClientMock{}
+	client.On("ChangeView", protoReq).Return(protoResp, clientErr)
 
-	assert.False(t.T(), res)
-	assert.Equal(t.T(), want, err)
+	svc := NewService(client)
+	actual, err := svc.ChangeView(t.ChangeViewedPetDto)
+
+	assert.False(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
 }
