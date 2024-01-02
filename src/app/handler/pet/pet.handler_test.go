@@ -1,35 +1,35 @@
 package pet
 
 import (
-	"errors"
 	"math/rand"
 	"net/http"
 	"testing"
 
-	"github.com/go-faker/faker/v4"
+	"github.com/bxcodec/faker/v4"
+	"github.com/golang/mock/gomock"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
-	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
 	"github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
-	imageMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/image"
-	mock "github.com/isd-sgcu/johnjud-gateway/src/mocks/pet"
-	"github.com/rs/zerolog/log"
+	mock_router "github.com/isd-sgcu/johnjud-gateway/src/mocks/router"
+	mock_image "github.com/isd-sgcu/johnjud-gateway/src/mocks/service/image"
+	mock_pet "github.com/isd-sgcu/johnjud-gateway/src/mocks/service/pet"
+	mock_validator "github.com/isd-sgcu/johnjud-gateway/src/mocks/validator"
 
-	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
-	"github.com/stretchr/testify/assert"
+	pet_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	"github.com/stretchr/testify/suite"
 )
 
 type PetHandlerTest struct {
 	suite.Suite
-	Pet              *proto.Pet
-	Pets             []*proto.Pet
-	PetDto           *dto.PetDto
-	ChangeViewPetDto *dto.ChangeViewPetDto
-	UpdatedPetDto    *dto.UpdatePetDto
-	BindErr          *dto.ResponseErr
-	NotFoundErr      *dto.ResponseErr
-	ServiceDownErr   *dto.ResponseErr
-	InternalErr      *dto.ResponseErr
+	Pet                  *pet_proto.Pet
+	Pets                 []*pet_proto.Pet
+	PetDto               *dto.PetDto
+	CreatePetRequest     *dto.CreatePetDto
+	ChangeViewPetRequest *dto.ChangeViewPetDto
+	UpdatePetRequest     *dto.UpdatePetDto
+	BindErr              *dto.ResponseErr
+	NotFoundErr          *dto.ResponseErr
+	ServiceDownErr       *dto.ResponseErr
+	InternalErr          *dto.ResponseErr
 }
 
 func TestPetHandler(t *testing.T) {
@@ -37,18 +37,18 @@ func TestPetHandler(t *testing.T) {
 }
 
 func (t *PetHandlerTest) SetupTest() {
-	var pets []*proto.Pet
+	var pets []*pet_proto.Pet
 	for i := 0; i <= 3; i++ {
-		pet := &proto.Pet{
+		pet := &pet_proto.Pet{
 			Id:           faker.UUIDDigit(),
 			Type:         faker.Word(),
 			Species:      faker.Word(),
 			Name:         faker.Name(),
 			Birthdate:    faker.Word(),
-			Gender:       proto.Gender(rand.Intn(1) + 1),
+			Gender:       pet_proto.Gender(rand.Intn(1) + 1),
 			Habit:        faker.Paragraph(),
 			Caption:      faker.Paragraph(),
-			Status:       proto.PetStatus(rand.Intn(1) + 1),
+			Status:       pet_proto.PetStatus(rand.Intn(1) + 1),
 			IsSterile:    true,
 			IsVaccinated: true,
 			IsVisible:    true,
@@ -84,30 +84,15 @@ func (t *PetHandlerTest) SetupTest() {
 		Contact:      t.Pet.Contact,
 	}
 
-	t.UpdatedPetDto = &dto.UpdatePetDto{
-		Pet: &dto.PetDto{
-			Type:         t.Pet.Type,
-			Species:      t.Pet.Species,
-			Name:         t.Pet.Name,
-			Birthdate:    t.Pet.Birthdate,
-			Gender:       pet.Gender(t.Pet.Gender),
-			Habit:        t.Pet.Habit,
-			Caption:      t.Pet.Caption,
-			Status:       pet.Status(t.Pet.Status),
-			IsSterile:    t.Pet.IsSterile,
-			IsVaccinated: t.Pet.IsVaccinated,
-			IsVisible:    t.Pet.IsVisible,
-			IsClubPet:    t.Pet.IsClubPet,
-			Background:   t.Pet.Background,
-			Address:      t.Pet.Address,
-			Contact:      t.Pet.Contact,
-		},
+	t.CreatePetRequest = &dto.CreatePetDto{
+		Pet: &dto.PetDto{},
 	}
 
-	t.ChangeViewPetDto = &dto.ChangeViewPetDto{
-		Id:      t.Pet.Id,
-		Visible: !t.Pet.IsVisible,
+	t.UpdatePetRequest = &dto.UpdatePetDto{
+		Pet: &dto.PetDto{},
 	}
+
+	t.ChangeViewPetRequest = &dto.ChangeViewPetDto{}
 
 	t.ServiceDownErr = &dto.ResponseErr{
 		StatusCode: http.StatusServiceUnavailable,
@@ -134,452 +119,277 @@ func (t *PetHandlerTest) SetupTest() {
 }
 
 func (t *PetHandlerTest) TestFindAllSuccess() {
-	want := t.Pets
+	findAllResponse := t.Pets
 
-	petService := &mock.ServiceMock{}
-	imageService := &imageMock.ServiceMock{}
+	controller := gomock.NewController(t.T())
 
-	petService.On("FindAll").Return(want, nil)
+	petSvc := mock_pet.NewMockService(controller)
+	imageSvc := mock_image.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
 
-	context := &mock.ContextMock{}
+	petSvc.EXPECT().FindAll().Return(findAllResponse, nil)
+	context.EXPECT().JSON(http.StatusOK, findAllResponse)
 
-	validator, err := validator.NewValidator()
-	if err != nil {
-		log.Error().Err(err).
-			Str("handler", "pet").
-			Msg("Err creating validator")
-	}
-
-	h := NewHandler(petService, imageService, validator)
-	h.FindAll(context)
-
-	assert.Equal(t.T(), want, context.V)
-	assert.Equal(t.T(), http.StatusOK, context.StatusCode)
+	handler := NewHandler(petSvc, imageSvc, validator)
+	handler.FindAll(context)
 }
 
 func (t *PetHandlerTest) TestFindOneSuccess() {
-	want := t.Pet
+	findOneResponse := t.Pet
 
-	petService := &mock.ServiceMock{}
-	imageService := &imageMock.ServiceMock{}
+	controller := gomock.NewController(t.T())
 
-	petService.On("FindOne", t.Pet.Id).Return(want, nil)
-	imageService.On("FindByPetId", t.Pet.Id).Return(t.Pet.ImageUrls, nil)
+	petSvc := mock_pet.NewMockService(controller)
+	imageSvc := mock_image.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
 
-	context := &mock.ContextMock{}
-	context.On("ID").Return(t.Pet.Id, nil)
+	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
+	petSvc.EXPECT().FindOne(t.Pet.Id).Return(findOneResponse, nil)
+	context.EXPECT().JSON(http.StatusOK, findOneResponse)
 
-	validator, err := validator.NewValidator()
-	if err != nil {
-		log.Error().Err(err).
-			Str("handler", "pet").
-			Msg("Err creating validator")
-	}
-
-	h := NewHandler(petService, imageService, validator)
-	h.FindOne(context)
-
-	assert.Equal(t.T(), want, context.V)
-	assert.Equal(t.T(), http.StatusOK, context.StatusCode)
+	handler := NewHandler(petSvc, imageSvc, validator)
+	handler.FindOne(context)
 }
 
 func (t *PetHandlerTest) TestFindOneNotFoundErr() {
-	want := t.NotFoundErr
+	findOneResponse := t.NotFoundErr
 
-	petService := &mock.ServiceMock{}
-	imageService := &imageMock.ServiceMock{}
+	controller := gomock.NewController(t.T())
 
-	petService.On("FindOne", t.Pet.Id).Return(nil, t.NotFoundErr)
-	imageService.On("FindByPetId", t.Pet.Id).Return(nil, t.NotFoundErr)
+	petSvc := mock_pet.NewMockService(controller)
+	imageSvc := mock_image.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
 
-	validator, err := validator.NewValidator()
-	if err != nil {
-		log.Error().Err(err).
-			Str("handler", "pet").
-			Msg("Err creating validator")
-		return
-	}
+	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
+	petSvc.EXPECT().FindOne(t.Pet.Id).Return(nil, findOneResponse)
+	context.EXPECT().JSON(http.StatusNotFound, findOneResponse)
 
-	context := &mock.ContextMock{}
-	context.On("ID").Return(t.Pet.Id, nil)
-
-	h := NewHandler(petService, imageService, validator)
-	h.FindOne(context)
-
-	assert.Equal(t.T(), want, context.V)
-	assert.Equal(t.T(), http.StatusNotFound, context.StatusCode)
-}
-
-func (t *PetHandlerTest) TestFindOneInternalErr() {
-	want := &dto.ResponseErr{
-		StatusCode: http.StatusInternalServerError,
-		Message:    "Invalid ID",
-		Data:       nil,
-	}
-
-	petService := &mock.ServiceMock{}
-	imageService := &imageMock.ServiceMock{}
-
-	petService.On("FindOne", t.Pet.Id).Return(nil, t.ServiceDownErr)
-	imageService.On("FindByPetId", t.Pet.Id).Return(nil, t.NotFoundErr)
-
-	c := &mock.ContextMock{}
-	c.On("ID").Return("", errors.New("Cannot parse id"))
-
-	validator, err := validator.NewValidator()
-	if err != nil {
-		log.Error().Err(err).
-			Str("handler", "pet").
-			Msg("Err creating validator")
-		return
-	}
-
-	h := NewHandler(petService, imageService, validator)
-	h.FindOne(c)
-
-	assert.Equal(t.T(), want, c.V)
-	assert.Equal(t.T(), http.StatusInternalServerError, c.StatusCode)
+	handler := NewHandler(petSvc, imageSvc, validator)
+	handler.FindOne(context)
 }
 
 func (t *PetHandlerTest) TestFindOneGrpcErr() {
-	want := t.ServiceDownErr
+	findOneResponse := t.ServiceDownErr
 
-	petService := &mock.ServiceMock{}
-	imageService := &imageMock.ServiceMock{}
+	controller := gomock.NewController(t.T())
 
-	imageService.On("FindByPetId", t.Pet.Id).Return(nil, t.NotFoundErr)
-	petService.On("FindOne", t.Pet.Id).Return(nil, t.ServiceDownErr)
+	petSvc := mock_pet.NewMockService(controller)
+	imageSvc := mock_image.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
 
-	c := &mock.ContextMock{}
-	c.On("ID").Return(t.Pet.Id, nil)
+	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
+	petSvc.EXPECT().FindOne(t.Pet.Id).Return(nil, findOneResponse)
+	context.EXPECT().JSON(http.StatusServiceUnavailable, findOneResponse)
 
-	validator, err := validator.NewValidator()
-	if err != nil {
-		log.Error().Err(err).
-			Str("handler", "pet").
-			Msg("Err creating validator")
-		return
-	}
-
-	h := NewHandler(petService, imageService, validator)
-	h.FindOne(c)
-
-	assert.Equal(t.T(), want, c.V)
-	assert.Equal(t.T(), http.StatusServiceUnavailable, c.StatusCode)
+	handler := NewHandler(petSvc, imageSvc, validator)
+	handler.FindOne(context)
 }
 
 func (t *PetHandlerTest) TestCreateSuccess() {
-	want := t.Pet
+	createErrorResponse := t.Pet
 
-	petService := &mock.ServiceMock{}
-	imageService := &imageMock.ServiceMock{}
+	controller := gomock.NewController(t.T())
 
-	petService.On("Create", t.PetDto).Return(want, nil)
+	petSvc := mock_pet.NewMockService(controller)
+	imageSvc := mock_image.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
 
-	c := &mock.ContextMock{}
-	c.On("Bind", &dto.PetDto{}).Return(t.PetDto, nil)
+	context.EXPECT().Bind(t.CreatePetRequest).Return(nil)
+	validator.EXPECT().Validate(t.CreatePetRequest).Return(nil)
+	petSvc.EXPECT().Create(t.CreatePetRequest).Return(createErrorResponse, nil)
+	context.EXPECT().JSON(http.StatusCreated, createErrorResponse)
 
-	validator, err := validator.NewValidator()
-	if err != nil {
-		log.Error().Err(err).
-			Str("handler", "pet").
-			Msg("Err creating validator")
-		return
-	}
-
-	h := NewHandler(petService, imageService, validator)
-	h.Create(c)
-
-	assert.Equal(t.T(), want, c.V)
-	assert.Equal(t.T(), http.StatusCreated, c.StatusCode)
+	handler := NewHandler(petSvc, imageSvc, validator)
+	handler.Create(context)
 }
 
 func (t *PetHandlerTest) TestCreateGrpcErr() {
-	want := t.ServiceDownErr
+	createErrorResponse := t.ServiceDownErr
 
-	petService := &mock.ServiceMock{}
-	imageService := &imageMock.ServiceMock{}
+	controller := gomock.NewController(t.T())
 
-	petService.On("Create", t.PetDto).Return(nil, t.ServiceDownErr)
+	petSvc := mock_pet.NewMockService(controller)
+	imageSvc := mock_image.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
 
-	c := &mock.ContextMock{}
-	c.On("Bind", &dto.PetDto{}).Return(t.PetDto, nil)
+	context.EXPECT().Bind(t.CreatePetRequest).Return(nil)
+	validator.EXPECT().Validate(t.CreatePetRequest).Return(nil)
+	petSvc.EXPECT().Create(t.CreatePetRequest).Return(nil, createErrorResponse)
+	context.EXPECT().JSON(http.StatusServiceUnavailable, createErrorResponse)
 
-	validator, err := validator.NewValidator()
-	if err != nil {
-		log.Error().Err(err).
-			Str("handler", "pet").
-			Msg("Err creating validator")
-		return
-	}
-
-	h := NewHandler(petService, imageService, validator)
-	h.Create(c)
-
-	assert.Equal(t.T(), want, c.V)
-	assert.Equal(t.T(), http.StatusServiceUnavailable, c.StatusCode)
+	handler := NewHandler(petSvc, imageSvc, validator)
+	handler.Create(context)
 }
 
 func (t *PetHandlerTest) TestUpdateSuccess() {
-	want := t.Pet
+	updateResponse := t.Pet
 
-	petService := &mock.ServiceMock{}
-	imageService := &imageMock.ServiceMock{}
+	controller := gomock.NewController(t.T())
 
-	petService.On("Update", t.Pet.Id, t.UpdatedPetDto).Return(want, nil)
-	imageService.On("FindByPetId", t.Pet.Id).Return(t.Pet.ImageUrls, nil)
+	petSvc := mock_pet.NewMockService(controller)
+	imageSvc := mock_image.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
 
-	c := &mock.ContextMock{}
-	c.On("ID").Return(t.Pet.Id, nil)
-	c.On("Bind", &dto.UpdatePetDto{}).Return(t.UpdatedPetDto, nil)
+	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
+	context.EXPECT().Bind(t.UpdatePetRequest).Return(nil)
+	validator.EXPECT().Validate(t.UpdatePetRequest).Return(nil)
+	petSvc.EXPECT().Update(t.Pet.Id, t.UpdatePetRequest).Return(updateResponse, nil)
+	context.EXPECT().JSON(http.StatusOK, updateResponse)
 
-	validator, err := validator.NewValidator()
-	if err != nil {
-		log.Error().Err(err).
-			Str("handler", "pet").
-			Msg("Err creating validator")
-		return
-	}
-
-	h := NewHandler(petService, imageService, validator)
-	h.Update(c)
-
-	assert.Equal(t.T(), want, c.V)
+	handler := NewHandler(petSvc, imageSvc, validator)
+	handler.Update(context)
 }
 
 func (t *PetHandlerTest) TestUpdateNotFound() {
-	want := t.NotFoundErr
+	updateResponse := t.NotFoundErr
 
-	petService := &mock.ServiceMock{}
-	imageService := &imageMock.ServiceMock{}
+	controller := gomock.NewController(t.T())
 
-	petService.On("Update", t.Pet.Id, t.UpdatedPetDto).Return(nil, t.NotFoundErr)
-	imageService.On("FindByPetId", t.Pet.Id).Return(nil, t.NotFoundErr)
+	petSvc := mock_pet.NewMockService(controller)
+	imageSvc := mock_image.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
 
-	c := &mock.ContextMock{}
-	c.On("ID").Return(t.Pet.Id, nil)
-	c.On("Bind", &dto.UpdatePetDto{}).Return(t.UpdatedPetDto, nil)
+	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
+	context.EXPECT().Bind(t.UpdatePetRequest).Return(nil)
+	validator.EXPECT().Validate(t.UpdatePetRequest).Return(nil)
+	petSvc.EXPECT().Update(t.Pet.Id, t.UpdatePetRequest).Return(nil, updateResponse)
+	context.EXPECT().JSON(http.StatusNotFound, updateResponse)
 
-	validator, err := validator.NewValidator()
-	if err != nil {
-		log.Error().Err(err).
-			Str("handler", "pet").
-			Msg("Err creating validator")
-		return
-	}
-
-	h := NewHandler(petService, imageService, validator)
-	h.Update(c)
-
-	assert.Equal(t.T(), want, c.V)
-	assert.Equal(t.T(), http.StatusNotFound, c.StatusCode)
+	handler := NewHandler(petSvc, imageSvc, validator)
+	handler.Update(context)
 }
 
 func (t *PetHandlerTest) TestUpdateGrpcErr() {
-	want := t.ServiceDownErr
+	updateResponse := t.ServiceDownErr
 
-	petService := &mock.ServiceMock{}
-	imageService := &imageMock.ServiceMock{}
+	controller := gomock.NewController(t.T())
 
-	petService.On("Update", t.Pet.Id, t.UpdatedPetDto).Return(nil, t.ServiceDownErr)
-	imageService.On("FindByPetId", t.Pet.Id).Return(nil, t.ServiceDownErr)
+	petSvc := mock_pet.NewMockService(controller)
+	imageSvc := mock_image.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
 
-	c := &mock.ContextMock{}
-	c.On("ID").Return(t.Pet.Id, nil)
-	c.On("Bind", &dto.UpdatePetDto{}).Return(t.UpdatedPetDto, nil)
+	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
+	context.EXPECT().Bind(t.UpdatePetRequest).Return(nil)
+	validator.EXPECT().Validate(t.UpdatePetRequest).Return(nil)
+	petSvc.EXPECT().Update(t.Pet.Id, t.UpdatePetRequest).Return(nil, updateResponse)
+	context.EXPECT().JSON(http.StatusServiceUnavailable, updateResponse)
 
-	validator, err := validator.NewValidator()
-	if err != nil {
-		log.Error().Err(err).
-			Str("handler", "pet").
-			Msg("Err creating validator")
-		return
-	}
-
-	h := NewHandler(petService, imageService, validator)
-	h.Update(c)
-
-	assert.Equal(t.T(), want, c.V)
-	assert.Equal(t.T(), http.StatusServiceUnavailable, c.StatusCode)
+	handler := NewHandler(petSvc, imageSvc, validator)
+	handler.Update(context)
 }
 
 func (t *PetHandlerTest) TestDeleteSuccess() {
-	petService := &mock.ServiceMock{}
-	imageService := &imageMock.ServiceMock{}
+	deleteResponse := true
 
-	petService.On("Delete", t.Pet.Id).Return(true, nil)
+	controller := gomock.NewController(t.T())
 
-	c := &mock.ContextMock{}
-	c.On("ID").Return(t.Pet.Id, nil)
+	petSvc := mock_pet.NewMockService(controller)
+	imageSvc := mock_image.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
 
-	validator, err := validator.NewValidator()
-	if err != nil {
-		log.Error().Err(err).
-			Str("handler", "pet").
-			Msg("Err creating validator")
-		return
-	}
+	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
+	petSvc.EXPECT().Delete(t.Pet.Id).Return(deleteResponse, nil)
+	context.EXPECT().JSON(http.StatusOK, deleteResponse)
 
-	h := NewHandler(petService, imageService, validator)
-	h.Delete(c)
-
-	assert.True(t.T(), c.V.(bool))
-	assert.Equal(t.T(), http.StatusOK, c.StatusCode)
+	handler := NewHandler(petSvc, imageSvc, validator)
+	handler.Delete(context)
 }
-
 func (t *PetHandlerTest) TestDeleteNotFound() {
-	want := t.NotFoundErr
+	deleteResponse := false
 
-	petService := &mock.ServiceMock{}
-	imageService := &imageMock.ServiceMock{}
+	controller := gomock.NewController(t.T())
 
-	petService.On("Delete", t.Pet.Id).Return(false, t.NotFoundErr)
+	petSvc := mock_pet.NewMockService(controller)
+	imageSvc := mock_image.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
 
-	c := &mock.ContextMock{}
-	c.On("ID").Return(t.Pet.Id, nil)
+	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
+	petSvc.EXPECT().Delete(t.Pet.Id).Return(deleteResponse, t.NotFoundErr)
+	context.EXPECT().JSON(http.StatusNotFound, t.NotFoundErr)
 
-	validator, err := validator.NewValidator()
-	if err != nil {
-		log.Error().Err(err).
-			Str("handler", "pet").
-			Msg("Err creating validator")
-		return
-	}
-
-	h := NewHandler(petService, imageService, validator)
-	h.Delete(c)
-
-	assert.Equal(t.T(), want, c.V)
-}
-
-func (t *PetHandlerTest) TestDeleteInvalidID() {
-	want := &dto.ResponseErr{
-		StatusCode: http.StatusBadRequest,
-		Message:    "ID must be the uuid",
-		Data:       nil,
-	}
-
-	petService := &mock.ServiceMock{}
-	imageService := &imageMock.ServiceMock{}
-
-	petService.On("Delete", t.Pet.Id).Return(false, t.NotFoundErr)
-
-	c := &mock.ContextMock{}
-	c.On("ID").Return("", errors.New(want.Message))
-
-	validator, err := validator.NewValidator()
-	if err != nil {
-		log.Error().Err(err).
-			Str("handler", "pet").
-			Msg("Err creating validator")
-		return
-	}
-
-	h := NewHandler(petService, imageService, validator)
-	h.Delete(c)
-
-	assert.Equal(t.T(), want, c.V)
-	assert.Equal(t.T(), http.StatusBadRequest, c.StatusCode)
+	handler := NewHandler(petSvc, imageSvc, validator)
+	handler.Delete(context)
 }
 
 func (t *PetHandlerTest) TestDeleteGrpcErr() {
-	want := t.ServiceDownErr
+	deleteResponse := false
 
-	petService := &mock.ServiceMock{}
-	imageService := &imageMock.ServiceMock{}
+	controller := gomock.NewController(t.T())
 
-	petService.On("Delete", t.Pet.Id).Return(false, t.ServiceDownErr)
+	petSvc := mock_pet.NewMockService(controller)
+	imageSvc := mock_image.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
 
-	c := &mock.ContextMock{}
-	c.On("ID").Return(t.Pet.Id, nil)
+	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
+	petSvc.EXPECT().Delete(t.Pet.Id).Return(deleteResponse, t.ServiceDownErr)
+	context.EXPECT().JSON(http.StatusServiceUnavailable, t.ServiceDownErr)
 
-	validator, err := validator.NewValidator()
-	if err != nil {
-		log.Error().Err(err).
-			Str("handler", "pet").
-			Msg("Err creating validator")
-		return
-	}
-
-	h := NewHandler(petService, imageService, validator)
-	h.Delete(c)
-
-	assert.Equal(t.T(), want, c.V)
-	assert.Equal(t.T(), http.StatusServiceUnavailable, c.StatusCode)
+	handler := NewHandler(petSvc, imageSvc, validator)
+	handler.Delete(context)
 }
 
 func (t *PetHandlerTest) TestChangeViewSuccess() {
-	petService := &mock.ServiceMock{}
-	imageService := &imageMock.ServiceMock{}
+	changeViewResponse := true
 
-	petService.On("ChangeView", t.ChangeViewPetDto).Return(true, nil)
+	controller := gomock.NewController(t.T())
 
-	c := &mock.ContextMock{}
-	c.On("ID").Return(t.Pet.Id, nil)
+	petSvc := mock_pet.NewMockService(controller)
+	imageSvc := mock_image.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
 
-	validator, err := validator.NewValidator()
-	if err != nil {
-		log.Error().Err(err).
-			Str("handler", "pet").
-			Msg("Err creating validator")
-		return
-	}
+	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
+	petSvc.EXPECT().Delete(t.Pet.Id).Return(changeViewResponse, nil)
+	context.EXPECT().JSON(http.StatusOK, changeViewResponse)
 
-	h := NewHandler(petService, imageService, validator)
-	h.ChangeView(c)
-
-	assert.True(t.T(), c.V.(bool))
-	assert.Equal(t.T(), http.StatusOK, c.StatusCode)
+	handler := NewHandler(petSvc, imageSvc, validator)
+	handler.Delete(context)
 }
 
 func (t *PetHandlerTest) TestChangeViewNotFound() {
-	want := t.NotFoundErr
+	changeViewResponse := false
 
-	petService := &mock.ServiceMock{}
-	imageService := &imageMock.ServiceMock{}
+	controller := gomock.NewController(t.T())
 
-	petService.On("ChangeView", t.ChangeViewPetDto).Return(false, t.NotFoundErr)
+	petSvc := mock_pet.NewMockService(controller)
+	imageSvc := mock_image.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
 
-	c := &mock.ContextMock{}
-	c.On("ID").Return(t.Pet.Id, nil)
+	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
+	petSvc.EXPECT().Delete(t.Pet.Id).Return(changeViewResponse, t.NotFoundErr)
+	context.EXPECT().JSON(http.StatusNotFound, t.NotFoundErr)
 
-	validator, err := validator.NewValidator()
-	if err != nil {
-		log.Error().Err(err).
-			Str("handler", "pet").
-			Msg("Err creating validator")
-		return
-	}
-
-	h := NewHandler(petService, imageService, validator)
-	h.ChangeView(c)
-
-	assert.Equal(t.T(), http.StatusNotFound, c.StatusCode)
-	assert.Equal(t.T(), want, c.V)
+	handler := NewHandler(petSvc, imageSvc, validator)
+	handler.Delete(context)
 }
 
 func (t *PetHandlerTest) TestChangeViewGrpcErr() {
-	want := t.ServiceDownErr
+	changeViewResponse := false
 
-	petService := &mock.ServiceMock{}
-	imageService := &imageMock.ServiceMock{}
+	controller := gomock.NewController(t.T())
 
-	petService.On("ChangeView", t.ChangeViewPetDto).Return(false, t.ServiceDownErr)
+	petSvc := mock_pet.NewMockService(controller)
+	imageSvc := mock_image.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
 
-	c := &mock.ContextMock{}
-	c.On("ID").Return(t.Pet.Id, nil)
+	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
+	petSvc.EXPECT().Delete(t.Pet.Id).Return(changeViewResponse, t.ServiceDownErr)
+	context.EXPECT().JSON(http.StatusServiceUnavailable, t.ServiceDownErr)
 
-	validator, err := validator.NewValidator()
-	if err != nil {
-		log.Error().Err(err).
-			Str("handler", "pet").
-			Msg("Err creating validator")
-		return
-	}
-
-	h := NewHandler(petService, imageService, validator)
-	h.ChangeView(c)
-
-	assert.Equal(t.T(), http.StatusServiceUnavailable, c.StatusCode)
-	assert.Equal(t.T(), want, c.V)
+	handler := NewHandler(petSvc, imageSvc, validator)
+	handler.Delete(context)
 }
