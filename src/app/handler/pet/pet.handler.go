@@ -6,15 +6,15 @@ import (
 
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
+	imageSrv "github.com/isd-sgcu/johnjud-gateway/src/app/handler/image"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
 	pet_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
-	image_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 )
 
 type Handler struct {
 	service      Service
-	imageService ImageService
+	imageService imageSrv.Service
 	validate     validator.IDtoValidator
 }
 
@@ -27,11 +27,7 @@ type Service interface {
 	Delete(string) (bool, *dto.ResponseErr)
 }
 
-type ImageService interface {
-	FindByPetId(string) ([]*image_proto.Image, *dto.ResponseErr)
-}
-
-func NewHandler(service Service, imageService ImageService, validate validator.IDtoValidator) *Handler {
+func NewHandler(service Service, imageService imageSrv.Service, validate validator.IDtoValidator) *Handler {
 	return &Handler{service, imageService, validate}
 }
 
