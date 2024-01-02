@@ -21,9 +21,9 @@ type Handler struct {
 type Service interface {
 	FindAll() ([]*pet_proto.Pet, *dto.ResponseErr)
 	FindOne(string) (*pet_proto.Pet, *dto.ResponseErr)
-	Create(*dto.CreatePetDto) (*pet_proto.Pet, *dto.ResponseErr)
-	Update(string, *dto.UpdatePetDto) (*pet_proto.Pet, *dto.ResponseErr)
-	ChangeView(string, *dto.ChangeViewPetDto) (bool, *dto.ResponseErr)
+	Create(*dto.CreatePetRequest) (*pet_proto.Pet, *dto.ResponseErr)
+	Update(string, *dto.UpdatePetRequest) (*pet_proto.Pet, *dto.ResponseErr)
+	ChangeView(string, *dto.ChangeViewPetRequest) (bool, *dto.ResponseErr)
 	Delete(string) (bool, *dto.ResponseErr)
 }
 
@@ -64,7 +64,7 @@ func (h *Handler) FindOne(c router.IContext) {
 }
 
 func (h *Handler) Create(c router.IContext) {
-	request := &dto.CreatePetDto{
+	request := &dto.CreatePetRequest{
 		Pet: &dto.PetDto{},
 	}
 	err := c.Bind(request)
@@ -111,7 +111,7 @@ func (h *Handler) Update(c router.IContext) {
 		return
 	}
 
-	request := &dto.UpdatePetDto{
+	request := &dto.UpdatePetRequest{
 		Pet: &dto.PetDto{},
 	}
 
@@ -159,7 +159,7 @@ func (h *Handler) ChangeView(c router.IContext) {
 		return
 	}
 
-	request := &dto.ChangeViewPetDto{
+	request := &dto.ChangeViewPetRequest{
 		Visible: false,
 	}
 

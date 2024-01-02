@@ -26,13 +26,13 @@ type PetServiceTest struct {
 	UpdatePetReq          *petProto.UpdatePetRequest
 	ChangeViewPetReq      *petProto.ChangeViewPetRequest
 	PetDto                *dto.PetDto
-	CreatePetDto          *dto.CreatePetDto
-	UpdatePetDto          *dto.UpdatePetDto
+	CreatePetDto          *dto.CreatePetRequest
+	UpdatePetDto          *dto.UpdatePetRequest
 	NotFoundErr           *dto.ResponseErr
 	UnavailableServiceErr *dto.ResponseErr
 	InvalidArgumentErr    *dto.ResponseErr
 	InternalErr           *dto.ResponseErr
-	ChangeViewedPetDto    *dto.ChangeViewPetDto
+	ChangeViewedPetDto    *dto.ChangeViewPetRequest
 
 	Images        []*imageProto.Image
 	ImageUrls     []string
@@ -114,11 +114,11 @@ func (t *PetServiceTest) SetupTest() {
 
 	t.PetDto = RawToDto(t.Pet)
 
-	t.CreatePetDto = &dto.CreatePetDto{
+	t.CreatePetDto = &dto.CreatePetRequest{
 		Pet: RawToDto(t.PetReq),
 	}
 
-	t.UpdatePetDto = &dto.UpdatePetDto{
+	t.UpdatePetDto = &dto.UpdatePetRequest{
 		Pet: RawToDto(t.Pet),
 	}
 
@@ -126,7 +126,7 @@ func (t *PetServiceTest) SetupTest() {
 		Pet: t.Pet,
 	}
 
-	t.ChangeViewedPetDto = &dto.ChangeViewPetDto{
+	t.ChangeViewedPetDto = &dto.ChangeViewPetRequest{
 		Visible: false,
 	}
 

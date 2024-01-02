@@ -23,9 +23,9 @@ type PetHandlerTest struct {
 	Pet                  *pet_proto.Pet
 	Pets                 []*pet_proto.Pet
 	PetDto               *dto.PetDto
-	CreatePetRequest     *dto.CreatePetDto
-	ChangeViewPetRequest *dto.ChangeViewPetDto
-	UpdatePetRequest     *dto.UpdatePetDto
+	CreatePetRequest     *dto.CreatePetRequest
+	ChangeViewPetRequest *dto.ChangeViewPetRequest
+	UpdatePetRequest     *dto.UpdatePetRequest
 	BindErr              *dto.ResponseErr
 	NotFoundErr          *dto.ResponseErr
 	ServiceDownErr       *dto.ResponseErr
@@ -84,15 +84,15 @@ func (t *PetHandlerTest) SetupTest() {
 		Contact:      t.Pet.Contact,
 	}
 
-	t.CreatePetRequest = &dto.CreatePetDto{
+	t.CreatePetRequest = &dto.CreatePetRequest{
 		Pet: &dto.PetDto{},
 	}
 
-	t.UpdatePetRequest = &dto.UpdatePetDto{
+	t.UpdatePetRequest = &dto.UpdatePetRequest{
 		Pet: &dto.PetDto{},
 	}
 
-	t.ChangeViewPetRequest = &dto.ChangeViewPetDto{}
+	t.ChangeViewPetRequest = &dto.ChangeViewPetRequest{}
 
 	t.ServiceDownErr = &dto.ResponseErr{
 		StatusCode: http.StatusServiceUnavailable,

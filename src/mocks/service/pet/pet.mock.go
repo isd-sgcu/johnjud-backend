@@ -36,7 +36,7 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 }
 
 // ChangeView mocks base method.
-func (m *MockService) ChangeView(id string, in *dto.ChangeViewPetDto) (bool, *dto.ResponseErr) {
+func (m *MockService) ChangeView(id string, in *dto.ChangeViewPetRequest) (bool, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ChangeView", id, in)
 	ret0, _ := ret[0].(bool)
@@ -51,7 +51,7 @@ func (mr *MockServiceMockRecorder) ChangeView(id, in interface{}) *gomock.Call {
 }
 
 // Create mocks base method.
-func (m *MockService) Create(in *dto.CreatePetDto) (*v1.Pet, *dto.ResponseErr) {
+func (m *MockService) Create(in *dto.CreatePetRequest) (*v1.Pet, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", in)
 	ret0, _ := ret[0].(*v1.Pet)
@@ -111,7 +111,7 @@ func (mr *MockServiceMockRecorder) FindOne(id interface{}) *gomock.Call {
 }
 
 // Update mocks base method.
-func (m *MockService) Update(id string, in *dto.UpdatePetDto) (*v1.Pet, *dto.ResponseErr) {
+func (m *MockService) Update(id string, in *dto.UpdatePetRequest) (*v1.Pet, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", id, in)
 	ret0, _ := ret[0].(*v1.Pet)

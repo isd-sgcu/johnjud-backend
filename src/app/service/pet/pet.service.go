@@ -89,7 +89,7 @@ func (s *Service) FindOne(id string) (result *proto.Pet, err *dto.ResponseErr) {
 	return res.Pet, nil
 }
 
-func (s *Service) Create(in *dto.CreatePetDto) (ressult *proto.Pet, err *dto.ResponseErr) {
+func (s *Service) Create(in *dto.CreatePetRequest) (ressult *proto.Pet, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -138,7 +138,7 @@ func (s *Service) Create(in *dto.CreatePetDto) (ressult *proto.Pet, err *dto.Res
 	return res.Pet, nil
 }
 
-func (s *Service) Update(id string, in *dto.UpdatePetDto) (result *proto.Pet, err *dto.ResponseErr) {
+func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *proto.Pet, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -248,7 +248,7 @@ func (s *Service) Delete(id string) (result bool, err *dto.ResponseErr) {
 	return res.Success, nil
 }
 
-func (s *Service) ChangeView(id string, in *dto.ChangeViewPetDto) (result bool, err *dto.ResponseErr) {
+func (s *Service) ChangeView(id string, in *dto.ChangeViewPetRequest) (result bool, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
