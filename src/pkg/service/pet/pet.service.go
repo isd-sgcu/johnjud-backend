@@ -7,10 +7,10 @@ import (
 )
 
 type Service interface {
-	FindAll() (result []*proto.Pet, err *dto.ResponseErr)
-	FindOne(id string) (result *proto.Pet, err *dto.ResponseErr)
-	Create(in *dto.CreatePetRequest) (ressult *proto.Pet, err *dto.ResponseErr)
-	Update(id string, in *dto.UpdatePetRequest) (result *proto.Pet, err *dto.ResponseErr)
-	Delete(id string) (result bool, err *dto.ResponseErr)
-	ChangeView(id string, in *dto.ChangeViewPetRequest) (result bool, err *dto.ResponseErr)
+	FindAll() ([]*proto.Pet, *dto.ResponseErr)
+	FindOne(string) (*proto.Pet, *dto.ResponseErr)
+	Create(*dto.CreatePetRequest) (*proto.Pet, *dto.ResponseErr)
+	Update(string, *dto.UpdatePetRequest) (*proto.Pet, *dto.ResponseErr)
+	Delete(string) (bool, *dto.ResponseErr)
+	ChangeView(string, *dto.ChangeViewPetRequest) (bool, *dto.ResponseErr)
 }

@@ -6,7 +6,7 @@ import (
 )
 
 type Service interface {
-	FindByPetId(id string) ([]*proto.Image, *dto.ResponseErr)
-	Upload(in *dto.ImageDto) (*proto.Image, *dto.ResponseErr)
-	Delete(id string) (bool, *dto.ResponseErr)
+	FindByPetId(string) ([]*proto.Image, *dto.ResponseErr)
+	Upload(*dto.ImageDto) (*proto.Image, *dto.ResponseErr)
+	Delete(string) (bool, *dto.ResponseErr)
 }
