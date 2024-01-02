@@ -44,7 +44,6 @@ func (h *Handler) FindAll(c router.IContext) {
 
 func (h *Handler) FindOne(c router.IContext) {
 	id, err := c.Param("id")
-
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, &dto.ResponseErr{
 			StatusCode: http.StatusInternalServerError,
@@ -103,7 +102,6 @@ func (h *Handler) Create(c router.IContext) {
 
 func (h *Handler) Update(c router.IContext) {
 	petId, err := c.Param("id")
-
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, &dto.ResponseErr{
 			StatusCode: http.StatusInternalServerError,
