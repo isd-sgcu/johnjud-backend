@@ -7,5 +7,5 @@ const DuplicateEmailMessage = "Duplicate Email"
 const InternalErrorMessage = "Internal Error"
 const UnavailableServiceMessage = "Unavailable Service"
 
-const ServiceDownMessage = "Service is down"
 const PetNotFoundMessage = "Pet not found"
+const InvalidArgument = "Invalid Argument"
