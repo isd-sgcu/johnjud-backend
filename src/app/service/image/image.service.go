@@ -15,7 +15,7 @@ func NewService(client proto.ImageServiceClient) *Service {
 	}
 }
 
-func (s *Service) FindByPetId() ([]*proto.Image, *dto.ResponseErr) {
+func (s *Service) FindByPetId(string) ([]*proto.Image, *dto.ResponseErr) {
 	return nil, nil
 }
 
