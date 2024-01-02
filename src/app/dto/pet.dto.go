@@ -24,7 +24,7 @@ type PetDto struct {
 }
 
 type CreatePetDto struct {
-	Pet *PetDto `json:"pet"`
+	Pet *PetDto `json:"pet" validate:"required"`
 }
 
 type FindAllDto struct {
