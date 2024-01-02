@@ -12,5 +12,5 @@ type Service interface {
 	Create(in *dto.CreatePetDto) (ressult *proto.Pet, err *dto.ResponseErr)
 	Update(id string, in *dto.UpdatePetDto) (result *proto.Pet, err *dto.ResponseErr)
 	Delete(id string) (result bool, err *dto.ResponseErr)
-	ChangeView(in *dto.ChangeViewPetDto) (result bool, err *dto.ResponseErr)
+	ChangeView(id string, in *dto.ChangeViewPetDto) (result bool, err *dto.ResponseErr)
 }
