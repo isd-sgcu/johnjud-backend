@@ -123,6 +123,14 @@ func (h *Handler) SignIn(c router.IContext) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (h *Handler) Signout(c router.IContext) {
+func (h *Handler) SignOut(c router.IContext) {
+	token := c.Token()
 
+	response, respErr := h.service.SignOut(token)
+	if respErr != nil {
+		c.JSON(respErr.StatusCode, respErr)
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
 }
