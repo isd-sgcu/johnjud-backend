@@ -5,7 +5,7 @@ import (
 )
 
 type PetDto struct {
-	Id           string     `json:"id" validate:"required"`
+	Id           string     `json:"id"`
 	Type         string     `json:"type" validate:"required"`
 	Species      string     `json:"species" validate:"required"`
 	Name         string     `json:"name" validate:"required"`
@@ -15,7 +15,7 @@ type PetDto struct {
 	Caption      string     `json:"caption"`
 	Status       pet.Status `json:"status" validate:"required" example:"findhome"`
 	IsSterile    bool       `json:"is_sterile" validate:"required"`
-	IsVaccinated bool       `json:"is_vaccine" validate:"required"`
+	IsVaccinated bool       `json:"is_vaccinated" validate:"required"`
 	IsVisible    bool       `json:"is_visible" validate:"required"`
 	IsClubPet    bool       `json:"is_club_pet" validate:"required"`
 	Background   string     `json:"background"`
@@ -24,7 +24,7 @@ type PetDto struct {
 }
 
 type CreatePetDto struct {
-	Pet *PetDto `json:"pet" validate:"required"`
+	Pet *PetDto `json:"pet"`
 }
 
 type FindAllDto struct {
