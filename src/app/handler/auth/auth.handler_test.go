@@ -250,7 +250,7 @@ func (t *AuthHandlerTest) TestSignOutSuccess() {
 	context := mock_router.NewMockIContext(controller)
 
 	context.EXPECT().Token().Return(token)
-	authSvc.EXPECT().SignOut(token).Return(signOutResponse)
+	authSvc.EXPECT().SignOut(token).Return(signOutResponse, nil)
 	context.EXPECT().JSON(http.StatusOK, signOutResponse)
 
 	handler := NewHandler(authSvc, userSvc, validator)
@@ -276,7 +276,7 @@ func (t *AuthHandlerTest) TestSignOutServiceError() {
 	handler := NewHandler(authSvc, userSvc, validator)
 
 	context.EXPECT().Token().Return(token)
-	authSvc.EXPECT().SignOut(token).Return(errResponse)
+	authSvc.EXPECT().SignOut(token).Return(nil, errResponse)
 	context.EXPECT().JSON(http.StatusInternalServerError, errResponse)
 
 	handler.SignOut(context)
