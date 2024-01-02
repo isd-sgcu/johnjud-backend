@@ -23,23 +23,15 @@ type PetDto struct {
 	Contact      string     `json:"contact"`
 }
 
-type CreatePetDto struct {
+type CreatePetRequest struct {
 	Pet *PetDto `json:"pet" validate:"required"`
 }
 
-type FindAllDto struct {
-	Pets *[]*PetDto `json:"pets" validate:"required"`
-}
-
-type FindOnePetDto struct {
-	Id string `json:"id" validate:"required"`
-}
-
-type ChangeViewPetDto struct {
+type ChangeViewPetRequest struct {
 	Visible bool `json:"visible" validate:"required"`
 }
 
-type UpdatePetDto struct {
+type UpdatePetRequest struct {
 	Pet *PetDto `json:"pet" validate:"required"`
 }
 
