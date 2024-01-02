@@ -24,7 +24,7 @@ func NewService(petClient proto.PetServiceClient) *Service {
 }
 
 func (s *Service) FindAll() (result []*proto.Pet, err *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	res, errRes := s.petClient.FindAll(ctx, &proto.FindAllPetRequest{})
@@ -48,7 +48,7 @@ func (s *Service) FindAll() (result []*proto.Pet, err *dto.ResponseErr) {
 }
 
 func (s *Service) FindOne(id string) (result *proto.Pet, err *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	res, errRes := s.petClient.FindOne(ctx, &proto.FindOnePetRequest{Id: id})
@@ -113,7 +113,7 @@ func (s *Service) FindOne(id string) (result *proto.Pet, err *dto.ResponseErr) {
 }
 
 func (s *Service) Create(in *dto.CreatePetDto) (ressult *proto.Pet, err *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	petDto := &proto.Pet{
@@ -153,7 +153,7 @@ func (s *Service) Create(in *dto.CreatePetDto) (ressult *proto.Pet, err *dto.Res
 }
 
 func (s *Service) Update(id string, in *dto.UpdatePetDto) (result *proto.Pet, err *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	req := &proto.UpdatePetRequest{
@@ -219,7 +219,7 @@ func (s *Service) Update(id string, in *dto.UpdatePetDto) (result *proto.Pet, er
 }
 
 func (s *Service) Delete(id string) (result bool, err *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	res, errRes := s.petClient.Delete(ctx, &proto.DeletePetRequest{
@@ -264,7 +264,7 @@ func (s *Service) Delete(id string) (result bool, err *dto.ResponseErr) {
 }
 
 func (s *Service) ChangeView(id string, in *dto.ChangeViewPetDto) (result bool, err *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	res, errRes := s.petClient.ChangeView(ctx, &proto.ChangeViewPetRequest{
