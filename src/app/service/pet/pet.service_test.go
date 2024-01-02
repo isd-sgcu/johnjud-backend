@@ -179,7 +179,6 @@ func (t *PetServiceTest) SetupTest() {
 	}
 
 	t.ChangeViewedPetDto = &dto.ChangeViewPetDto{
-		Id:      t.Pet.Id,
 		Visible: false,
 	}
 
@@ -443,7 +442,7 @@ func (t *PetServiceTest) TestChangeViewSuccess() {
 	client.On("ChangeView", protoReq).Return(protoResp, nil)
 
 	svc := NewService(client)
-	actual, err := svc.ChangeView(t.ChangeViewedPetDto)
+	actual, err := svc.ChangeView(t.Pet.Id, t.ChangeViewedPetDto)
 
 	assert.Nil(t.T(), err)
 	assert.True(t.T(), actual)
@@ -463,7 +462,7 @@ func (t *PetServiceTest) TestChangeViewNotFound() {
 	client.On("ChangeView", protoReq).Return(protoResp, clientErr)
 
 	svc := NewService(client)
-	actual, err := svc.ChangeView(t.ChangeViewedPetDto)
+	actual, err := svc.ChangeView(t.Pet.Id, t.ChangeViewedPetDto)
 
 	assert.False(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
@@ -483,7 +482,7 @@ func (t *PetServiceTest) TestChangeViewGrpcErr() {
 	client.On("ChangeView", protoReq).Return(protoResp, clientErr)
 
 	svc := NewService(client)
-	actual, err := svc.ChangeView(t.ChangeViewedPetDto)
+	actual, err := svc.ChangeView(t.Pet.Id, t.ChangeViewedPetDto)
 
 	assert.False(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
