@@ -1,7 +1,6 @@
 package pet
 
 import (
-	"errors"
 	"math/rand"
 	"net/http"
 	"testing"
@@ -9,7 +8,6 @@ import (
 	"github.com/go-faker/faker/v4"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
-	"github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
 	petMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/client/pet"
 	petProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	imageProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
@@ -21,19 +19,20 @@ import (
 
 type PetServiceTest struct {
 	suite.Suite
-	Pets               []*petProto.Pet
-	Pet                *petProto.Pet
-	PetReq             *petProto.Pet
-	PetNotVisible      *petProto.Pet
-	UpdatePetReq       *petProto.UpdatePetRequest
-	ChangeViewPetReq   *petProto.ChangeViewPetRequest
-	PetDto             *dto.PetDto
-	CreatePetDto       *dto.CreatePetDto
-	UpdatePetDto       *dto.UpdatePetDto
-	NotFoundErr        *dto.ResponseErr
-	ServiceDownErr     *dto.ResponseErr
-	InternalErr        *dto.ResponseErr
-	ChangeViewedPetDto *dto.ChangeViewPetDto
+	Pets                  []*petProto.Pet
+	Pet                   *petProto.Pet
+	PetReq                *petProto.Pet
+	PetNotVisible         *petProto.Pet
+	UpdatePetReq          *petProto.UpdatePetRequest
+	ChangeViewPetReq      *petProto.ChangeViewPetRequest
+	PetDto                *dto.PetDto
+	CreatePetDto          *dto.CreatePetDto
+	UpdatePetDto          *dto.UpdatePetDto
+	NotFoundErr           *dto.ResponseErr
+	UnavailableServiceErr *dto.ResponseErr
+	InvalidArgumentErr    *dto.ResponseErr
+	InternalErr           *dto.ResponseErr
+	ChangeViewedPetDto    *dto.ChangeViewPetDto
 
 	Images        []*imageProto.Image
 	ImageUrls     []string
@@ -113,69 +112,18 @@ func (t *PetServiceTest) SetupTest() {
 		Contact:      t.Pet.Contact,
 	}
 
-	t.PetDto = &dto.PetDto{
-		Id:           t.Pet.Id,
-		Type:         t.Pet.Type,
-		Species:      t.Pet.Species,
-		Name:         t.Pet.Name,
-		Birthdate:    t.Pet.Birthdate,
-		Gender:       pet.Gender(t.Pet.Gender),
-		Habit:        t.Pet.Habit,
-		Caption:      t.Pet.Caption,
-		Status:       pet.Status(t.Pet.Status),
-		IsSterile:    t.Pet.IsSterile,
-		IsVaccinated: t.Pet.IsVaccinated,
-		IsVisible:    t.Pet.IsVisible,
-		IsClubPet:    t.Pet.IsClubPet,
-		Background:   t.Pet.Background,
-		Address:      t.Pet.Address,
-		Contact:      t.Pet.Contact,
-	}
+	t.PetDto = RawToDto(t.Pet)
 
 	t.CreatePetDto = &dto.CreatePetDto{
-		Pet: t.PetDto,
+		Pet: RawToDto(t.PetReq),
 	}
 
 	t.UpdatePetDto = &dto.UpdatePetDto{
-		Pet: &dto.PetDto{
-			Type:         t.Pet.Type,
-			Species:      t.Pet.Species,
-			Name:         t.Pet.Name,
-			Birthdate:    t.Pet.Birthdate,
-			Gender:       pet.Gender(t.Pet.Gender),
-			Habit:        t.Pet.Habit,
-			Caption:      t.Pet.Caption,
-			Status:       pet.Status(t.Pet.Status),
-			IsSterile:    t.Pet.IsSterile,
-			IsVaccinated: t.Pet.IsVaccinated,
-			IsVisible:    t.Pet.IsVisible,
-			IsClubPet:    t.Pet.IsClubPet,
-			Background:   t.Pet.Background,
-			Address:      t.Pet.Address,
-			Contact:      t.Pet.Contact,
-		},
+		Pet: RawToDto(t.Pet),
 	}
 
 	t.UpdatePetReq = &petProto.UpdatePetRequest{
-		Pet: &petProto.Pet{
-			Id:           t.Pet.Id,
-			Type:         t.Pet.Type,
-			Species:      t.Pet.Species,
-			Name:         t.Pet.Name,
-			Birthdate:    t.Pet.Birthdate,
-			Gender:       t.Pet.Gender,
-			Habit:        t.Pet.Habit,
-			Caption:      t.Pet.Caption,
-			Status:       t.Pet.Status,
-			ImageUrls:    t.Pet.ImageUrls,
-			IsSterile:    t.Pet.IsSterile,
-			IsVaccinated: t.Pet.IsVaccinated,
-			IsVisible:    t.Pet.IsVisible,
-			IsClubPet:    t.Pet.IsClubPet,
-			Background:   t.Pet.Background,
-			Address:      t.Pet.Address,
-			Contact:      t.Pet.Contact,
-		},
+		Pet: t.Pet,
 	}
 
 	t.ChangeViewedPetDto = &dto.ChangeViewPetDto{
@@ -187,9 +135,9 @@ func (t *PetServiceTest) SetupTest() {
 		Visible: false,
 	}
 
-	t.ServiceDownErr = &dto.ResponseErr{
+	t.UnavailableServiceErr = &dto.ResponseErr{
 		StatusCode: http.StatusServiceUnavailable,
-		Message:    constant.ServiceDownMessage,
+		Message:    constant.UnavailableServiceMessage,
 		Data:       nil,
 	}
 
@@ -200,8 +148,14 @@ func (t *PetServiceTest) SetupTest() {
 	}
 
 	t.InternalErr = &dto.ResponseErr{
-		StatusCode: http.StatusServiceUnavailable,
+		StatusCode: http.StatusInternalServerError,
 		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	t.InvalidArgumentErr = &dto.ResponseErr{
+		StatusCode: http.StatusBadRequest,
+		Message:    constant.InvalidArgument,
 		Data:       nil,
 	}
 }
@@ -224,6 +178,23 @@ func (t *PetServiceTest) TestFindAllSuccess() {
 	assert.Equal(t.T(), expected, actual)
 }
 
+func (t *PetServiceTest) TestFindAllUnavailableServiceError() {
+	protoReq := &petProto.FindAllPetRequest{}
+
+	expected := t.UnavailableServiceErr
+
+	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
+
+	client := petMock.PetClientMock{}
+	client.On("FindAll", protoReq).Return(nil, clientErr)
+
+	svc := NewService(&client)
+	actual, err := svc.FindAll()
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
 func (t *PetServiceTest) TestFindOneSuccess() {
 	protoReq := &petProto.FindOnePetRequest{
 		Id: t.Pet.Id,
@@ -244,12 +215,12 @@ func (t *PetServiceTest) TestFindOneSuccess() {
 	assert.Equal(t.T(), expected, actual)
 }
 
-func (t *PetServiceTest) TestFindOneNotFound() {
+func (t *PetServiceTest) TestFindOneNotFoundError() {
 	protoReq := &petProto.FindOnePetRequest{
 		Id: t.Pet.Id,
 	}
 
-	clientErr := status.Error(codes.NotFound, "Pet not found")
+	clientErr := status.Error(codes.NotFound, constant.PetNotFoundMessage)
 
 	expected := t.NotFoundErr
 
@@ -263,14 +234,14 @@ func (t *PetServiceTest) TestFindOneNotFound() {
 	assert.Equal(t.T(), expected, err)
 }
 
-func (t *PetServiceTest) TestFindOneGrpcErr() {
+func (t *PetServiceTest) TestFindOneUnavailableServiceError() {
 	protoReq := &petProto.FindOnePetRequest{
 		Id: t.Pet.Id,
 	}
 
-	clientErr := errors.New(constant.ServiceDownMessage)
+	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
 
-	expected := t.ServiceDownErr
+	expected := t.UnavailableServiceErr
 
 	client := petMock.PetClientMock{}
 	client.On("FindOne", protoReq).Return(nil, clientErr)
@@ -302,13 +273,52 @@ func (t *PetServiceTest) TestCreateSuccess() {
 	assert.Equal(t.T(), expected, actual)
 }
 
-func (t *PetServiceTest) TestCreateGrpcErr() {
+func (t *PetServiceTest) TestCreateInvalidArgumentError() {
 	protoReq := &petProto.CreatePetRequest{
 		Pet: t.PetReq,
 	}
-	clientErr := errors.New(constant.ServiceDownMessage)
 
-	expected := t.ServiceDownErr
+	expected := t.InvalidArgumentErr
+
+	clientErr := status.Error(codes.InvalidArgument, constant.InvalidArgument)
+
+	client := &petMock.PetClientMock{}
+	client.On("Create", protoReq).Return(nil, clientErr)
+
+	svc := NewService(client)
+	actual, err := svc.Create(t.CreatePetDto)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *PetServiceTest) TestCreateInternalError() {
+	protoReq := &petProto.CreatePetRequest{
+		Pet: t.PetReq,
+	}
+
+	expected := t.InternalErr
+
+	clientErr := status.Error(codes.Internal, constant.InternalErrorMessage)
+
+	client := &petMock.PetClientMock{}
+	client.On("Create", protoReq).Return(nil, clientErr)
+
+	svc := NewService(client)
+	actual, err := svc.Create(t.CreatePetDto)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *PetServiceTest) TestCreateUnavailableServiceError() {
+	protoReq := &petProto.CreatePetRequest{
+		Pet: t.PetReq,
+	}
+
+	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
+
+	expected := t.UnavailableServiceErr
 
 	client := &petMock.PetClientMock{}
 	client.On("Create", protoReq).Return(nil, clientErr)
@@ -340,7 +350,7 @@ func (t *PetServiceTest) TestUpdateSuccess() {
 
 func (t *PetServiceTest) TestUpdateNotFound() {
 	protoReq := t.UpdatePetReq
-	clientErr := status.Error(codes.NotFound, "Pet not found")
+	clientErr := status.Error(codes.NotFound, constant.PetNotFoundMessage)
 
 	expected := t.NotFoundErr
 
@@ -354,11 +364,11 @@ func (t *PetServiceTest) TestUpdateNotFound() {
 	assert.Equal(t.T(), expected, err)
 }
 
-func (t *PetServiceTest) TestUpdateGrpcErr() {
+func (t *PetServiceTest) TestUpdateUnavailableServiceError() {
 	protoReq := t.UpdatePetReq
-	clientErr := errors.New(constant.ServiceDownMessage)
+	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
 
-	expected := t.ServiceDownErr
+	expected := t.UnavailableServiceErr
 
 	client := &petMock.PetClientMock{}
 	client.On("Update", protoReq).Return(nil, clientErr)
@@ -397,7 +407,7 @@ func (t *PetServiceTest) TestDeleteNotFound() {
 	protoResp := &petProto.DeletePetResponse{
 		Success: false,
 	}
-	clientErr := status.Error(codes.NotFound, "Pet not found")
+	clientErr := status.Error(codes.NotFound, constant.PetNotFoundMessage)
 
 	expected := t.NotFoundErr
 
@@ -411,16 +421,16 @@ func (t *PetServiceTest) TestDeleteNotFound() {
 	assert.Equal(t.T(), expected, err)
 }
 
-func (t *PetServiceTest) TestDeleteGrpcErr() {
+func (t *PetServiceTest) TestDeleteServiceUnavailableError() {
 	protoReq := &petProto.DeletePetRequest{
 		Id: t.Pet.Id,
 	}
 	protoResp := &petProto.DeletePetResponse{
 		Success: false,
 	}
-	clientErr := errors.New(constant.ServiceDownMessage)
+	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
 
-	expected := t.ServiceDownErr
+	expected := t.UnavailableServiceErr
 
 	client := &petMock.PetClientMock{}
 	client.On("Delete", protoReq).Return(protoResp, clientErr)
@@ -448,13 +458,13 @@ func (t *PetServiceTest) TestChangeViewSuccess() {
 	assert.True(t.T(), actual)
 }
 
-func (t *PetServiceTest) TestChangeViewNotFound() {
+func (t *PetServiceTest) TestChangeViewNotFoundError() {
 	protoReq := t.ChangeViewPetReq
 	protoResp := &petProto.ChangeViewPetResponse{
 		Success: false,
 	}
 
-	clientErr := status.Error(codes.NotFound, "Pet not found")
+	clientErr := status.Error(codes.NotFound, constant.PetNotFoundMessage)
 
 	expected := t.NotFoundErr
 
@@ -468,15 +478,15 @@ func (t *PetServiceTest) TestChangeViewNotFound() {
 	assert.Equal(t.T(), expected, err)
 }
 
-func (t *PetServiceTest) TestChangeViewGrpcErr() {
+func (t *PetServiceTest) TestChangeViewUnavailableServiceError() {
 	protoReq := t.ChangeViewPetReq
 	protoResp := &petProto.ChangeViewPetResponse{
 		Success: false,
 	}
 
-	clientErr := errors.New(constant.ServiceDownMessage)
+	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
 
-	expected := t.ServiceDownErr
+	expected := t.UnavailableServiceErr
 
 	client := &petMock.PetClientMock{}
 	client.On("ChangeView", protoReq).Return(protoResp, clientErr)
