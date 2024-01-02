@@ -8,30 +8,30 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
-	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
+	pet_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	image_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 )
 
 type Handler struct {
 	service      Service
 	imageService ImageService
-	validate     *validator.DtoValidator
+	validate     validator.IDtoValidator
 }
 
 type Service interface {
-	FindAll() ([]*proto.Pet, *dto.ResponseErr)
-	FindOne(string) (*proto.Pet, *dto.ResponseErr)
-	Create(*dto.PetDto) (*proto.Pet, *dto.ResponseErr)
-	Update(string, *dto.UpdatePetDto) (*proto.Pet, *dto.ResponseErr)
-	ChangeView(*dto.ChangeViewPetDto) (bool, *dto.ResponseErr)
+	FindAll() ([]*pet_proto.Pet, *dto.ResponseErr)
+	FindOne(string) (*pet_proto.Pet, *dto.ResponseErr)
+	Create(*dto.CreatePetDto) (*pet_proto.Pet, *dto.ResponseErr)
+	Update(string, *dto.UpdatePetDto) (*pet_proto.Pet, *dto.ResponseErr)
+	ChangeView(string, *dto.ChangeViewPetDto) (bool, *dto.ResponseErr)
 	Delete(string) (bool, *dto.ResponseErr)
 }
 
 type ImageService interface {
-	FindByPetId(string) (*image_proto.Image, *dto.ResponseErr)
+	FindByPetId(string) ([]*image_proto.Image, *dto.ResponseErr)
 }
 
-func NewHandler(service Service, imageService ImageService, validate *validator.DtoValidator) *Handler {
+func NewHandler(service Service, imageService ImageService, validate validator.IDtoValidator) *Handler {
 	return &Handler{service, imageService, validate}
 }
 
@@ -43,10 +43,11 @@ func (h *Handler) FindAll(c router.IContext) {
 	}
 
 	c.JSON(http.StatusOK, response)
+	return
 }
 
 func (h *Handler) FindOne(c router.IContext) {
-	id, err := c.ID()
+	id, err := c.Param("id")
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, &dto.ResponseErr{
@@ -68,7 +69,9 @@ func (h *Handler) FindOne(c router.IContext) {
 }
 
 func (h *Handler) Create(c router.IContext) {
-	request := &dto.PetDto{}
+	request := &dto.CreatePetDto{
+		Pet: &dto.PetDto{},
+	}
 	err := c.Bind(request)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ResponseErr{
@@ -103,7 +106,7 @@ func (h *Handler) Create(c router.IContext) {
 }
 
 func (h *Handler) Update(c router.IContext) {
-	petId, err := c.ID()
+	petId, err := c.Param("id")
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, &dto.ResponseErr{
@@ -114,15 +117,34 @@ func (h *Handler) Update(c router.IContext) {
 		return
 	}
 
-	petDto := dto.UpdatePetDto{}
+	request := &dto.UpdatePetDto{
+		Pet: &dto.PetDto{},
+	}
 
-	err = c.Bind(&petDto)
+	err = c.Bind(request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.BindingRequestErrorMessage + err.Error(),
+			Data:       nil,
+		})
 		return
 	}
 
-	pet, errRes := h.service.Update(petId, &petDto)
+	if err := h.validate.Validate(request); err != nil {
+		var errorMessage []string
+		for _, reqErr := range err {
+			errorMessage = append(errorMessage, reqErr.Message)
+		}
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.InvalidRequestBodyMessage + strings.Join(errorMessage, ", "),
+			Data:       nil,
+		})
+		return
+	}
+
+	pet, errRes := h.service.Update(petId, request)
 	if errRes != nil {
 		c.JSON(errRes.StatusCode, errRes)
 		return
@@ -133,7 +155,7 @@ func (h *Handler) Update(c router.IContext) {
 }
 
 func (h *Handler) ChangeView(c router.IContext) {
-	id, err := c.ID()
+	id, err := c.Param("id")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, &dto.ResponseErr{
 			StatusCode: http.StatusBadRequest,
@@ -143,12 +165,34 @@ func (h *Handler) ChangeView(c router.IContext) {
 		return
 	}
 
-	changeViewPetReqDto := &dto.ChangeViewPetDto{
-		Id:      id,
+	request := &dto.ChangeViewPetDto{
 		Visible: false,
 	}
 
-	res, errRes := h.service.ChangeView(changeViewPetReqDto)
+	err = c.Bind(request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.BindingRequestErrorMessage + err.Error(),
+			Data:       nil,
+		})
+		return
+	}
+
+	if err := h.validate.Validate(request); err != nil {
+		var errorMessage []string
+		for _, reqErr := range err {
+			errorMessage = append(errorMessage, reqErr.Message)
+		}
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.InvalidRequestBodyMessage + strings.Join(errorMessage, ", "),
+			Data:       nil,
+		})
+		return
+	}
+
+	res, errRes := h.service.ChangeView(id, request)
 	if errRes != nil {
 		c.JSON(errRes.StatusCode, errRes)
 		return
@@ -159,7 +203,7 @@ func (h *Handler) ChangeView(c router.IContext) {
 }
 
 func (h *Handler) Delete(c router.IContext) {
-	id, err := c.ID()
+	id, err := c.Param("id")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, &dto.ResponseErr{
 			StatusCode: http.StatusBadRequest,
