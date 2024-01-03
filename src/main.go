@@ -117,7 +117,7 @@ func main() {
 	r.PostAuth("/signup", authHandler.Signup)
 	r.PostAuth("/signin", authHandler.SignIn)
 	r.PostAuth("/signout", authHandler.SignOut)
-	r.PostAuth("/me", authHandler.Validate)
+	//r.PostAuth("/me", authHandler.Validate)
 	r.PostAuth("/refreshToken", authHandler.RefreshToken)
 
 	r.GetHealthCheck("/", hc.HealthCheck)
