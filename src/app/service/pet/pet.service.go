@@ -118,7 +118,25 @@ func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *proto.Pet
 	defer cancel()
 
 	request := &proto.UpdatePetRequest{
-		Pet: DtoToRaw(in.Pet),
+		Pet: &proto.Pet{
+			Id:           id,
+			Type:         in.Pet.Type,
+			Species:      in.Pet.Species,
+			Name:         in.Pet.Name,
+			Birthdate:    in.Pet.Birthdate,
+			Gender:       proto.Gender(in.Pet.Gender),
+			Habit:        in.Pet.Habit,
+			Caption:      in.Pet.Caption,
+			Status:       proto.PetStatus(in.Pet.Status),
+			ImageUrls:    []string{},
+			IsSterile:    in.Pet.IsSterile,
+			IsVaccinated: in.Pet.IsSterile,
+			IsVisible:    in.Pet.IsVaccinated,
+			IsClubPet:    in.Pet.IsClubPet,
+			Background:   in.Pet.Background,
+			Address:      in.Pet.Address,
+			Contact:      in.Pet.Contact,
+		},
 	}
 
 	res, errRes := s.petClient.Update(ctx, request)
