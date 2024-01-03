@@ -30,21 +30,18 @@ func (s *Service) FindAll() (result []*proto.Pet, err *dto.ResponseErr) {
 
 	res, errRes := s.petClient.FindAll(ctx, &proto.FindAllPetRequest{})
 	if errRes != nil {
+		st, _ := status.FromError(errRes)
 		log.Error().
 			Err(errRes).
 			Str("service", "pet").
 			Str("module", "find all").
-			Msg("Error while find all pets")
+			Msg(st.Message())
 		return nil, &dto.ResponseErr{
 			StatusCode: http.StatusServiceUnavailable,
 			Message:    constant.UnavailableServiceMessage,
 			Data:       nil,
 		}
 	}
-	log.Info().
-		Str("service", "pet").
-		Str("module", "find all").
-		Msg("Find pet success")
 	return res.Pets, nil
 }
 
@@ -55,25 +52,19 @@ func (s *Service) FindOne(id string) (result *proto.Pet, err *dto.ResponseErr) {
 	res, errRes := s.petClient.FindOne(ctx, &proto.FindOnePetRequest{Id: id})
 	if errRes != nil {
 		st, _ := status.FromError(errRes)
+		log.Error().
+			Err(errRes).
+			Str("service", "pet").
+			Str("module", "find one").
+			Msg(st.Message())
 		switch st.Code() {
 		case codes.NotFound:
-			log.Error().
-				Err(errRes).
-				Str("service", "pet").
-				Str("module", "find one").
-				Str("pet_id", id).
-				Msg("Not found")
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusNotFound,
 				Message:    constant.PetNotFoundMessage,
 				Data:       nil,
 			}
 		default:
-			log.Error().
-				Err(errRes).
-				Str("service", "pet").
-				Str("pet_id", id).
-				Msg("Error while connecting to service")
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusServiceUnavailable,
 				Message:    constant.UnavailableServiceMessage,
@@ -81,11 +72,6 @@ func (s *Service) FindOne(id string) (result *proto.Pet, err *dto.ResponseErr) {
 			}
 		}
 	}
-	log.Info().
-		Str("service", "pet").
-		Str("module", "find one").
-		Str("pet_id", id).
-		Msg("Find pet success")
 	return res.Pet, nil
 }
 
@@ -98,36 +84,25 @@ func (s *Service) Create(in *dto.CreatePetRequest) (ressult *proto.Pet, err *dto
 	res, errRes := s.petClient.Create(ctx, &proto.CreatePetRequest{Pet: request})
 	if errRes != nil {
 		st, _ := status.FromError(errRes)
+		log.Error().
+			Err(errRes).
+			Str("service", "pet").
+			Str("module", "create").
+			Msg(st.Message())
 		switch st.Code() {
 		case codes.InvalidArgument:
-			log.Error().
-				Err(errRes).
-				Str("service", "user").
-				Str("module", "create").
-				Msg(constant.InvalidArgument)
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusBadRequest,
 				Message:    constant.InvalidArgument,
 				Data:       nil,
 			}
 		case codes.Unavailable:
-			log.Error().
-				Err(errRes).
-				Str("service", "user").
-				Str("module", "create").
-				Msg(constant.UnavailableServiceMessage)
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusServiceUnavailable,
 				Message:    constant.UnavailableServiceMessage,
 				Data:       nil,
 			}
 		default:
-			log.Error().
-				Err(errRes).
-				Str("service", "user").
-				Str("module", "create").
-				Msg(constant.InternalErrorMessage)
-
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusInternalServerError,
 				Message:    constant.InternalErrorMessage,
@@ -149,46 +124,31 @@ func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *proto.Pet
 	res, errRes := s.petClient.Update(ctx, request)
 	if errRes != nil {
 		st, _ := status.FromError(errRes)
+		log.Error().
+			Err(errRes).
+			Str("service", "pet").
+			Str("module", "update").
+			Msg(st.Message())
 		switch st.Code() {
 		case codes.NotFound:
-			log.Error().
-				Err(errRes).
-				Str("service", "pet").
-				Str("module", "update").
-				Msg(constant.PetNotFoundMessage)
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusNotFound,
 				Message:    constant.PetNotFoundMessage,
 				Data:       nil,
 			}
 		case codes.InvalidArgument:
-			log.Error().
-				Err(errRes).
-				Str("service", "pet").
-				Str("module", "update").
-				Msg(constant.InvalidArgument)
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusBadRequest,
 				Message:    constant.InvalidArgument,
 				Data:       nil,
 			}
 		case codes.Unavailable:
-			log.Error().
-				Err(errRes).
-				Str("service", "pet").
-				Str("module", "update").
-				Msg("Error while connecting to service")
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusServiceUnavailable,
 				Message:    constant.UnavailableServiceMessage,
 				Data:       nil,
 			}
 		default:
-			log.Error().
-				Err(errRes).
-				Str("service", "pet").
-				Str("module", "update").
-				Msg(constant.InternalErrorMessage)
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusInternalServerError,
 				Message:    constant.InternalErrorMessage,
@@ -208,37 +168,25 @@ func (s *Service) Delete(id string) (result bool, err *dto.ResponseErr) {
 	})
 	if errRes != nil {
 		st, _ := status.FromError(errRes)
-
+		log.Error().
+			Err(errRes).
+			Str("service", "pet").
+			Str("module", "delete").
+			Msg(st.Message())
 		switch st.Code() {
 		case codes.NotFound:
-			log.Error().
-				Err(errRes).
-				Str("service", "pet").
-				Str("module", "delete").
-				Msg(constant.PetNotFoundMessage)
 			return false, &dto.ResponseErr{
 				StatusCode: http.StatusNotFound,
 				Message:    constant.PetNotFoundMessage,
 				Data:       nil,
 			}
-
 		case codes.Unavailable:
-			log.Error().
-				Err(errRes).
-				Str("service", "pet").
-				Str("module", "delete").
-				Msg(constant.UnavailableServiceMessage)
 			return false, &dto.ResponseErr{
 				StatusCode: http.StatusServiceUnavailable,
 				Message:    constant.UnavailableServiceMessage,
 				Data:       nil,
 			}
 		}
-		log.Error().
-			Err(errRes).
-			Str("service", "pet").
-			Str("module", "delete").
-			Msg(constant.InternalErrorMessage)
 		return false, &dto.ResponseErr{
 			StatusCode: http.StatusInternalServerError,
 			Message:    constant.InternalErrorMessage,
@@ -258,6 +206,11 @@ func (s *Service) ChangeView(id string, in *dto.ChangeViewPetRequest) (result bo
 	})
 	if errRes != nil {
 		st, _ := status.FromError(errRes)
+		log.Error().
+			Err(errRes).
+			Str("service", "pet").
+			Str("module", "change view").
+			Msg(st.Message())
 		switch st.Code() {
 		case codes.NotFound:
 			return false, &dto.ResponseErr{
@@ -266,22 +219,12 @@ func (s *Service) ChangeView(id string, in *dto.ChangeViewPetRequest) (result bo
 				Data:       nil,
 			}
 		case codes.Unavailable:
-			log.Error().
-				Err(errRes).
-				Str("service", "pet").
-				Str("module", "change view").
-				Msg(constant.UnavailableServiceMessage)
 			return false, &dto.ResponseErr{
 				StatusCode: http.StatusServiceUnavailable,
 				Message:    constant.UnavailableServiceMessage,
 				Data:       nil,
 			}
 		default:
-			log.Error().
-				Err(errRes).
-				Str("service", "pet").
-				Str("module", "change view").
-				Msg(constant.InternalErrorMessage)
 			return false, &dto.ResponseErr{
 				StatusCode: http.StatusServiceUnavailable,
 				Message:    constant.InternalErrorMessage,
