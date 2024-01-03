@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"github.com/go-faker/faker/v4"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
@@ -160,7 +161,7 @@ func (t *AuthServiceTest) TestSignupUnknownError() {
 		Email:     t.signupRequestDto.Email,
 		Password:  t.signupRequestDto.Password,
 	}
-	clientErr := status.Error(codes.Unknown, "Unknown error")
+	clientErr := errors.New("Unknown error")
 
 	expected := &dto.ResponseErr{
 		StatusCode: http.StatusInternalServerError,
@@ -284,7 +285,7 @@ func (t *AuthServiceTest) TestSignInUnknownError() {
 		Email:    t.signInDto.Email,
 		Password: t.signInDto.Password,
 	}
-	protoErr := status.Error(codes.Unknown, "Unknown error")
+	protoErr := errors.New("Unknown error")
 
 	expected := &dto.ResponseErr{
 		StatusCode: http.StatusInternalServerError,
@@ -354,6 +355,28 @@ func (t *AuthServiceTest) TestSignOutUnavailableService() {
 	expected := &dto.ResponseErr{
 		StatusCode: http.StatusServiceUnavailable,
 		Message:    constant.UnavailableServiceMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("SignOut", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.SignOut(t.token)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestSignOutUnknownError() {
+	protoReq := &authProto.SignOutRequest{
+		Token: t.token,
+	}
+	protoErr := errors.New("Unknown error")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
 		Data:       nil,
 	}
 

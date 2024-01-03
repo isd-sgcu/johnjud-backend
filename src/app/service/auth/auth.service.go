@@ -148,24 +148,40 @@ func (s *Service) SignOut(token string) (*dto.SignOutResponse, *dto.ResponseErr)
 	})
 	if err != nil {
 		st, ok := status.FromError(err)
+		log.Error().
+			Str("service", "auth").
+			Str("action", "SignOut").
+			Str("token", token).
+			Msg(st.Message())
 		if ok {
 			switch st.Code() {
-			case codes.Unavailable:
-				return nil, &dto.ResponseErr{
-					StatusCode: http.StatusServiceUnavailable,
-					Message:    constant.UnavailableServiceMessage,
-					Data:       nil,
-				}
-			default:
+			case codes.Internal:
 				return nil, &dto.ResponseErr{
 					StatusCode: http.StatusInternalServerError,
 					Message:    constant.InternalErrorMessage,
 					Data:       nil,
 				}
+			default:
+				return nil, &dto.ResponseErr{
+					StatusCode: http.StatusServiceUnavailable,
+					Message:    constant.UnavailableServiceMessage,
+					Data:       nil,
+				}
 			}
+		}
+
+		return nil, &dto.ResponseErr{
+			StatusCode: http.StatusInternalServerError,
+			Message:    constant.InternalErrorMessage,
+			Data:       nil,
 		}
 	}
 
+	log.Info().
+		Str("service", "auth").
+		Str("action", "SignOut").
+		Str("token", token).
+		Msg("sign out successfully")
 	return &dto.SignOutResponse{
 		IsSuccess: response.IsSuccess,
 	}, nil
