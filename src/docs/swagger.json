@@ -129,6 +129,64 @@
                     }
                 }
             }
+        },
+        "/v1/pet/": {
+            "get": {
+                "description": "Return the data of pets if successfully",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "find all pets",
+                "parameters": [
+                    {
+                        "description": "pet dto",
+                        "name": "signup",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.PetDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.PetDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseBadRequestErr"
+                        }
+                    },
+                    "409": {
+                        "description": "Duplicate email",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseConflictErr"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal service error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseInternalErr"
+                        }
+                    },
+                    "503": {
+                        "description": "Service is down",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseServiceDownErr"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -160,6 +218,9 @@
                     "example": "e7e84d54-7518-4..."
                 }
             }
+        },
+        "dto.PetDto": {
+            "type": "object"
         },
         "dto.ResponseBadRequestErr": {
             "type": "object",

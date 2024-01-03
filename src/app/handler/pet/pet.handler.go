@@ -31,6 +31,19 @@ func NewHandler(service Service, imageService imageSrv.Service, validate validat
 	return &Handler{service, imageService, validate}
 }
 
+// FindAll is a function that return all pets in database
+// @Summary find all pets
+// @Description Return the data of pets if successfully
+// @Param signup body dto.PetDto true "pet dto"
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Success 201 {object} dto.PetDto
+// @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
+// @Failure 409 {object} dto.ResponseConflictErr "Duplicate email"
+// @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
+// @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
+// @Router /v1/pet/ [get]
 func (h *Handler) FindAll(c router.IContext) {
 	response, respErr := h.service.FindAll()
 	if respErr != nil {
