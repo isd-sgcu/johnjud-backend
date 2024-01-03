@@ -4,6 +4,7 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/utils"
+	"github.com/isd-sgcu/johnjud-gateway/src/app/utils/auth"
 	"github.com/isd-sgcu/johnjud-gateway/src/config"
 	authPkg "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/auth"
 	"net/http"
@@ -26,9 +27,10 @@ func NewAuthGuard(s authPkg.Service, e map[string]struct{}, conf config.App, ver
 }
 
 func (m *Guard) Use(ctx router.IContext) error {
+	method := ctx.Method()
 	path := ctx.Path()
 	path = utils.TrimInList(path, "/", m.versionList)
-
+	path = auth.FormatPath(method, path)
 	if utils.IsExisted(m.excludes, path) {
 		return ctx.Next()
 	}
