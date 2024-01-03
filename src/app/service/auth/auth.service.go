@@ -82,38 +82,56 @@ func (s *Service) Signup(request *dto.SignupRequest) (*dto.SignupResponse, *dto.
 	}, nil
 }
 
-func (s *Service) SignIn(signIn *dto.SignInRequest) (*dto.Credential, *dto.ResponseErr) {
+func (s *Service) SignIn(request *dto.SignInRequest) (*dto.Credential, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	resp, err := s.client.SignIn(ctx, &auth_proto.SignInRequest{
-		Email:    signIn.Email,
-		Password: signIn.Password,
+		Email:    request.Email,
+		Password: request.Password,
 	})
 	if err != nil {
-		st, _ := status.FromError(err)
-		switch st.Code() {
-		case codes.PermissionDenied:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusForbidden,
-				Message:    constant.IncorrectEmailPasswordMessage,
-				Data:       nil,
+		st, ok := status.FromError(err)
+		log.Error().
+			Str("service", "auth").
+			Str("action", "SignIn").
+			Str("email", request.Email).
+			Msg(st.Message())
+		if ok {
+			switch st.Code() {
+			case codes.PermissionDenied:
+				return nil, &dto.ResponseErr{
+					StatusCode: http.StatusForbidden,
+					Message:    constant.IncorrectEmailPasswordMessage,
+					Data:       nil,
+				}
+			case codes.Internal:
+				return nil, &dto.ResponseErr{
+					StatusCode: http.StatusInternalServerError,
+					Message:    constant.InternalErrorMessage,
+					Data:       nil,
+				}
+			default:
+				return nil, &dto.ResponseErr{
+					StatusCode: http.StatusServiceUnavailable,
+					Message:    constant.UnavailableServiceMessage,
+					Data:       nil,
+				}
 			}
-		case codes.Unavailable:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusServiceUnavailable,
-				Message:    constant.UnavailableServiceMessage,
-				Data:       nil,
-			}
-		default:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
+		}
+
+		return nil, &dto.ResponseErr{
+			StatusCode: http.StatusServiceUnavailable,
+			Message:    constant.UnavailableServiceMessage,
+			Data:       nil,
 		}
 	}
 
+	log.Info().
+		Str("service", "auth").
+		Str("action", "SignIn").
+		Str("email", request.Email).
+		Msg("sign in successfully")
 	return &dto.Credential{
 		AccessToken:  resp.Credential.AccessToken,
 		RefreshToken: resp.Credential.RefreshToken,
@@ -129,19 +147,21 @@ func (s *Service) SignOut(token string) (*dto.SignOutResponse, *dto.ResponseErr)
 		Token: token,
 	})
 	if err != nil {
-		st, _ := status.FromError(err)
-		switch st.Code() {
-		case codes.Unavailable:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusServiceUnavailable,
-				Message:    constant.UnavailableServiceMessage,
-				Data:       nil,
-			}
-		default:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
+		st, ok := status.FromError(err)
+		if ok {
+			switch st.Code() {
+			case codes.Unavailable:
+				return nil, &dto.ResponseErr{
+					StatusCode: http.StatusServiceUnavailable,
+					Message:    constant.UnavailableServiceMessage,
+					Data:       nil,
+				}
+			default:
+				return nil, &dto.ResponseErr{
+					StatusCode: http.StatusInternalServerError,
+					Message:    constant.InternalErrorMessage,
+					Data:       nil,
+				}
 			}
 		}
 	}
