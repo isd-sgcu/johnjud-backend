@@ -188,9 +188,52 @@ func (s *Service) SignOut(token string) (*dto.SignOutResponse, *dto.ResponseErr)
 }
 
 func (s *Service) Validate(token string) (*dto.TokenPayloadAuth, *dto.ResponseErr) {
-	// call authClient.Validate()
-	// handle error: unauthorized, internal error and unavailable service
-	return nil, nil
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	response, err := s.client.Validate(ctx, &auth_proto.ValidateRequest{
+		Token: token,
+	})
+	if err != nil {
+		st, ok := status.FromError(err)
+		log.Error().
+			Str("service", "auth").
+			Str("action", "Validate").
+			Str("token", token).
+			Msg(st.Message())
+		if ok {
+			switch st.Code() {
+			case codes.Unauthenticated:
+				return nil, &dto.ResponseErr{
+					StatusCode: http.StatusUnauthorized,
+					Message:    constant.UnauthorizedMessage,
+					Data:       nil,
+				}
+			default:
+				return nil, &dto.ResponseErr{
+					StatusCode: http.StatusServiceUnavailable,
+					Message:    constant.UnavailableServiceMessage,
+					Data:       nil,
+				}
+			}
+		}
+
+		return nil, &dto.ResponseErr{
+			StatusCode: http.StatusInternalServerError,
+			Message:    constant.InternalErrorMessage,
+			Data:       nil,
+		}
+	}
+
+	log.Info().
+		Str("service", "auth").
+		Str("action", "Validate").
+		Str("token", token).
+		Msg("validate successfully")
+	return &dto.TokenPayloadAuth{
+		UserId: response.UserId,
+		Role:   response.Role,
+	}, nil
 }
 
 func (s *Service) RefreshToken(token string) (*auth_proto.Credential, *dto.ResponseErr) {
