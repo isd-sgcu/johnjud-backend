@@ -121,8 +121,8 @@ func (s *Service) SignIn(request *dto.SignInRequest) (*dto.Credential, *dto.Resp
 		}
 
 		return nil, &dto.ResponseErr{
-			StatusCode: http.StatusServiceUnavailable,
-			Message:    constant.UnavailableServiceMessage,
+			StatusCode: http.StatusInternalServerError,
+			Message:    constant.InternalErrorMessage,
 			Data:       nil,
 		}
 	}
