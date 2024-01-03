@@ -36,7 +36,7 @@ func (m *Guard) Use(ctx router.IContext) error {
 	}
 
 	token := ctx.Token()
-	if token != "" {
+	if token == "" {
 		ctx.JSON(http.StatusUnauthorized, &dto.ResponseErr{
 			StatusCode: http.StatusUnauthorized,
 			Message:    "Invalid token",
