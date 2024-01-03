@@ -232,8 +232,58 @@ func (s *Service) Validate(token string) (*dto.TokenPayloadAuth, *dto.ResponseEr
 	}, nil
 }
 
-func (s *Service) RefreshToken(token string) (*auth_proto.Credential, *dto.ResponseErr) {
-	// call authClient.Validate()
-	// handle error: unauthorized, internal error and unavailable service
-	return nil, nil
+func (s *Service) RefreshToken(request *dto.RefreshTokenRequest) (*dto.Credential, *dto.ResponseErr) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	response, err := s.client.RefreshToken(ctx, &auth_proto.RefreshTokenRequest{
+		RefreshToken: request.RefreshToken,
+	})
+	if err != nil {
+		st, ok := status.FromError(err)
+		log.Error().
+			Str("service", "auth").
+			Str("action", "RefreshToken").
+			Str("token", request.RefreshToken).
+			Msg(st.Message())
+		if ok {
+			switch st.Code() {
+			case codes.InvalidArgument:
+				return nil, &dto.ResponseErr{
+					StatusCode: http.StatusBadRequest,
+					Message:    constant.InvalidTokenMessage,
+					Data:       nil,
+				}
+			case codes.Internal:
+				return nil, &dto.ResponseErr{
+					StatusCode: http.StatusInternalServerError,
+					Message:    constant.InternalErrorMessage,
+					Data:       nil,
+				}
+			default:
+				return nil, &dto.ResponseErr{
+					StatusCode: http.StatusServiceUnavailable,
+					Message:    constant.UnavailableServiceMessage,
+					Data:       nil,
+				}
+			}
+		}
+
+		return nil, &dto.ResponseErr{
+			StatusCode: http.StatusInternalServerError,
+			Message:    constant.InternalErrorMessage,
+			Data:       nil,
+		}
+	}
+
+	log.Info().
+		Str("service", "auth").
+		Str("action", "RefreshToken").
+		Str("token", request.RefreshToken).
+		Msg("Refresh token successfully")
+	return &dto.Credential{
+		AccessToken:  response.Credential.AccessToken,
+		RefreshToken: response.Credential.RefreshToken,
+		ExpiresIn:    int(response.Credential.ExpiresIn),
+	}, nil
 }
