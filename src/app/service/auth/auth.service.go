@@ -5,6 +5,7 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	auth_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"net/http"
@@ -32,29 +33,47 @@ func (s *Service) Signup(request *dto.SignupRequest) (*dto.SignupResponse, *dto.
 		Password:  request.Password,
 	})
 	if err != nil {
-		st, _ := status.FromError(err)
-		switch st.Code() {
-		case codes.AlreadyExists:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusConflict,
-				Message:    constant.DuplicateEmailMessage,
-				Data:       nil,
+		st, ok := status.FromError(err)
+		log.Error().
+			Str("service", "auth").
+			Str("action", "SignUp").
+			Str("email", request.Email).
+			Msg(st.Message())
+		if ok {
+			switch st.Code() {
+			case codes.AlreadyExists:
+				return nil, &dto.ResponseErr{
+					StatusCode: http.StatusConflict,
+					Message:    constant.DuplicateEmailMessage,
+					Data:       nil,
+				}
+			case codes.Internal:
+				return nil, &dto.ResponseErr{
+					StatusCode: http.StatusInternalServerError,
+					Message:    constant.InternalErrorMessage,
+					Data:       nil,
+				}
+			default:
+				return nil, &dto.ResponseErr{
+					StatusCode: http.StatusServiceUnavailable,
+					Message:    constant.UnavailableServiceMessage,
+					Data:       nil,
+				}
 			}
-		case codes.Unavailable:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusServiceUnavailable,
-				Message:    constant.UnavailableServiceMessage,
-				Data:       nil,
-			}
-		default:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
+		}
+
+		return nil, &dto.ResponseErr{
+			StatusCode: http.StatusInternalServerError,
+			Message:    constant.InternalErrorMessage,
+			Data:       nil,
 		}
 	}
 
+	log.Info().
+		Str("service", "auth").
+		Str("action", "SignUp").
+		Str("email", request.Email).
+		Msg("sign up successfully")
 	return &dto.SignupResponse{
 		Id:        resp.Id,
 		Email:     resp.Email,

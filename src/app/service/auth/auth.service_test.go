@@ -153,6 +153,31 @@ func (t *AuthServiceTest) TestSignupUnavailableService() {
 	assert.Equal(t.T(), expected, err)
 }
 
+func (t *AuthServiceTest) TestSignupUnknownError() {
+	protoReq := &authProto.SignUpRequest{
+		FirstName: t.signupRequestDto.Firstname,
+		LastName:  t.signupRequestDto.Lastname,
+		Email:     t.signupRequestDto.Email,
+		Password:  t.signupRequestDto.Password,
+	}
+	clientErr := status.Error(codes.Unknown, "Unknown error")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("SignUp", protoReq).Return(nil, clientErr)
+
+	svc := NewService(&client)
+	actual, err := svc.Signup(t.signupRequestDto)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
 func (t *AuthServiceTest) TestSignInSuccess() {
 	protoReq := &authProto.SignInRequest{
 		Email:    t.signInDto.Email,
