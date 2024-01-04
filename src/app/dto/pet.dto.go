@@ -21,6 +21,7 @@ type PetDto struct {
 	Background   string     `json:"background"`
 	Address      string     `json:"address"`
 	Contact      string     `json:"contact"`
+	AdoptBy      string     `json:"adopt_by"`
 }
 
 type CreatePetRequest struct {
