@@ -81,7 +81,11 @@ func (h *Handler) FindOne(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, dto.ResponseSuccess{
+		StatusCode: http.StatusCreated,
+		Message:    "fine one pet success",
+		Data:       response,
+	})
 	return
 }
 
@@ -98,9 +102,7 @@ func (h *Handler) FindOne(c router.IContext) {
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/pets/create [post]
 func (h *Handler) Create(c router.IContext) {
-	request := &dto.CreatePetRequest{
-		Pet: &dto.PetDto{},
-	}
+	request := &dto.CreatePetRequest{}
 	err := c.Bind(request)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ResponseErr{
@@ -130,7 +132,11 @@ func (h *Handler) Create(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, response)
+	c.JSON(http.StatusCreated, dto.ResponseSuccess{
+		StatusCode: http.StatusCreated,
+		Message:    "create pet success",
+		Data:       response,
+	})
 	return
 }
 
@@ -158,9 +164,7 @@ func (h *Handler) Update(c router.IContext) {
 		return
 	}
 
-	request := &dto.UpdatePetRequest{
-		Pet: &dto.PetDto{},
-	}
+	request := &dto.UpdatePetRequest{}
 
 	err = c.Bind(request)
 	if err != nil {
@@ -191,7 +195,11 @@ func (h *Handler) Update(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, pet)
+	c.JSON(http.StatusOK, dto.ResponseSuccess{
+		StatusCode: http.StatusCreated,
+		Message:    "update pet success",
+		Data:       pet,
+	})
 	return
 }
 
@@ -250,7 +258,11 @@ func (h *Handler) ChangeView(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, res)
+	c.JSON(http.StatusOK, dto.ResponseSuccess{
+		StatusCode: http.StatusCreated,
+		Message:    "change pet success",
+		Data:       res,
+	})
 	return
 }
 
@@ -283,6 +295,10 @@ func (h *Handler) Delete(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, res)
+	c.JSON(http.StatusOK, dto.ResponseSuccess{
+		StatusCode: http.StatusCreated,
+		Message:    "delete pet success",
+		Data:       res,
+	})
 	return
 }
