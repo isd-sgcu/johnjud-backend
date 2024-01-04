@@ -144,8 +144,8 @@ func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *proto.Pet
 			Gender:       proto.Gender(in.Pet.Gender),
 			Habit:        in.Pet.Habit,
 			Caption:      in.Pet.Caption,
+			Images:       []*image_proto.Image{},
 			Status:       proto.PetStatus(in.Pet.Status),
-			ImageUrls:    []string{},
 			IsSterile:    *in.Pet.IsSterile,
 			IsVaccinated: *in.Pet.IsSterile,
 			IsVisible:    *in.Pet.IsVaccinated,
@@ -153,6 +153,7 @@ func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *proto.Pet
 			Background:   in.Pet.Background,
 			Address:      in.Pet.Address,
 			Contact:      in.Pet.Contact,
+			AdoptBy:      in.Pet.AdoptBy,
 		},
 	}
 
@@ -280,8 +281,8 @@ func DtoToRaw(in *dto.PetDto) *proto.Pet {
 		Gender:       proto.Gender(in.Gender),
 		Habit:        in.Habit,
 		Caption:      in.Caption,
+		Images:       []*image_proto.Image{},
 		Status:       proto.PetStatus(in.Status),
-		ImageUrls:    []string{},
 		IsSterile:    *in.IsSterile,
 		IsVaccinated: *in.IsVaccinated,
 		IsVisible:    *in.IsVisible,
@@ -289,6 +290,7 @@ func DtoToRaw(in *dto.PetDto) *proto.Pet {
 		Background:   in.Background,
 		Address:      in.Address,
 		Contact:      in.Contact,
+		AdoptBy:      in.AdoptBy,
 	}
 }
 
@@ -310,5 +312,6 @@ func RawToDto(in *proto.Pet) *dto.PetDto {
 		Background:   in.Background,
 		Address:      in.Address,
 		Contact:      in.Contact,
+		AdoptBy:      in.AdoptBy,
 	}
 }
