@@ -23,7 +23,7 @@ type PetHandlerTest struct {
 	suite.Suite
 	Pet                  *pet_proto.Pet
 	Pets                 []*pet_proto.Pet
-	PetDto               *dto.PetDto
+	PetDto               *dto.PetResponse
 	CreatePetRequest     *dto.CreatePetRequest
 	ChangeViewPetRequest *dto.ChangeViewPetRequest
 	UpdatePetRequest     *dto.UpdatePetRequest
@@ -67,7 +67,7 @@ func (t *PetHandlerTest) SetupTest() {
 	t.Pets = pets
 	t.Pet = t.Pets[0]
 
-	t.PetDto = &dto.PetDto{
+	t.PetDto = &dto.PetResponse{
 		Id:           t.Pet.Id,
 		Type:         t.Pet.Type,
 		Species:      t.Pet.Species,
@@ -87,13 +87,9 @@ func (t *PetHandlerTest) SetupTest() {
 		AdoptBy:      t.Pet.AdoptBy,
 	}
 
-	t.CreatePetRequest = &dto.CreatePetRequest{
-		Pet: &dto.PetDto{},
-	}
+	t.CreatePetRequest = &dto.CreatePetRequest{}
 
-	t.UpdatePetRequest = &dto.UpdatePetRequest{
-		Pet: &dto.PetDto{},
-	}
+	t.UpdatePetRequest = &dto.UpdatePetRequest{}
 
 	t.ChangeViewPetRequest = &dto.ChangeViewPetRequest{}
 
