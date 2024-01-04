@@ -2,12 +2,12 @@ package pet
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
+	utils "github.com/isd-sgcu/johnjud-gateway/src/app/utils/pet"
 	"github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
 	petproto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	imgproto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
@@ -52,7 +52,7 @@ func (s *Service) FindAll() (result []*dto.PetResponse, err *dto.ResponseErr) {
 			Data:       nil,
 		}
 	}
-	imagesList := mockImageList()
+	imagesList := utils.MockImageList(len(res.Pets))
 	findAllResponse := RawToDtoList(res.Pets, imagesList)
 	return findAllResponse, nil
 }
@@ -91,7 +91,7 @@ func (s *Service) FindOne(id string) (result *dto.PetResponse, err *dto.Response
 			}
 		}
 	}
-	images := mockImageList()[0]
+	images := utils.MockImages()
 	findOneResponse := RawToDto(res.Pet, images)
 	return findOneResponse, nil
 }
@@ -131,7 +131,7 @@ func (s *Service) Create(in *dto.CreatePetRequest) (ressult *dto.PetResponse, er
 			}
 		}
 	}
-	images := mockImageList()[0]
+	images := utils.MockImages()
 	createPetResponse := RawToDto(res.Pet, images)
 	return createPetResponse, nil
 }
@@ -140,7 +140,7 @@ func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *dto.PetRe
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	request := UpdateDtoToRaw(in)
+	request := UpdateDtoToRaw(id, in)
 
 	res, errRes := s.petClient.Update(ctx, request)
 	if errRes != nil {
@@ -177,7 +177,7 @@ func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *dto.PetRe
 			}
 		}
 	}
-	images := mockImageList()[0]
+	images := utils.MockImages()
 	updatePetResponse := RawToDto(res.Pet, images)
 	return updatePetResponse, nil
 }
@@ -298,28 +298,51 @@ func CreateDtoToRaw(in *dto.CreatePetRequest) *petproto.CreatePetRequest {
 	}
 }
 
-func UpdateDtoToRaw(in *dto.UpdatePetRequest) *petproto.UpdatePetRequest {
-	return &petproto.UpdatePetRequest{
+func UpdateDtoToRaw(id string, in *dto.UpdatePetRequest) *petproto.UpdatePetRequest {
+	req := &petproto.UpdatePetRequest{
 		Pet: &petproto.Pet{
-			Type:         in.Type,
-			Species:      in.Species,
-			Name:         in.Name,
-			Birthdate:    in.Birthdate,
-			Gender:       petproto.Gender(in.Gender),
-			Habit:        in.Habit,
-			Caption:      in.Caption,
-			Images:       []*imgproto.Image{},
-			Status:       petproto.PetStatus(in.Status),
-			IsSterile:    *in.IsSterile,
-			IsVaccinated: *in.IsVaccinated,
-			IsVisible:    *in.IsVisible,
-			IsClubPet:    *in.IsClubPet,
-			Background:   in.Background,
-			Address:      in.Address,
-			Contact:      in.Contact,
-			AdoptBy:      in.AdoptBy,
+			Id:         id,
+			Type:       in.Type,
+			Species:    in.Species,
+			Name:       in.Name,
+			Birthdate:  in.Birthdate,
+			Gender:     petproto.Gender(in.Gender),
+			Habit:      in.Habit,
+			Caption:    in.Caption,
+			Images:     []*imgproto.Image{},
+			Status:     petproto.PetStatus(in.Status),
+			Background: in.Background,
+			Address:    in.Address,
+			Contact:    in.Contact,
+			AdoptBy:    in.AdoptBy,
 		},
 	}
+
+	if in.IsClubPet == nil {
+		req.Pet.IsClubPet = false
+	} else {
+		req.Pet.IsClubPet = *in.IsClubPet
+	}
+
+	if in.IsSterile == nil {
+		req.Pet.IsSterile = false
+	} else {
+		req.Pet.IsSterile = *in.IsSterile
+	}
+
+	if in.IsVaccinated == nil {
+		req.Pet.IsVaccinated = false
+	} else {
+		req.Pet.IsVaccinated = *in.IsVaccinated
+	}
+
+	if in.IsVisible == nil {
+		req.Pet.IsVisible = false
+	} else {
+		req.Pet.IsVisible = *in.IsVisible
+	}
+
+	return req
 }
 
 func RawToDto(in *petproto.Pet, images []*imgproto.Image) *dto.PetResponse {
@@ -383,23 +406,4 @@ func extractImages(images []*imgproto.Image) []dto.ImageResponse {
 		})
 	}
 	return result
-}
-
-// This function return imagesList from image service
-func mockImageList() [][]*imgproto.Image {
-	var imagesList [][]*imgproto.Image
-	for i := 0; i <= 3; i++ {
-		var images []*imgproto.Image
-		for j := 0; j <= 3; j++ {
-			images = append(images, &imgproto.Image{
-				Id:        fmt.Sprintf("%v%v", i, j),
-				PetId:     fmt.Sprintf("%v%v", i, j),
-				ImageUrl:  fmt.Sprintf("%v%v", i, j),
-				ObjectKey: fmt.Sprintf("%v%v", i, j),
-			})
-		}
-		imagesList = append(imagesList, images)
-	}
-
-	return imagesList
 }
