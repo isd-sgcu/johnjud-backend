@@ -26,6 +26,7 @@ type PetHandlerTest struct {
 	CreatePetRequest     *dto.CreatePetRequest
 	ChangeViewPetRequest *dto.ChangeViewPetRequest
 	UpdatePetRequest     *dto.UpdatePetRequest
+	AdoptByRequest       *dto.AdoptByRequest
 	BindErr              *dto.ResponseErr
 	NotFoundErr          *dto.ResponseErr
 	ServiceDownErr       *dto.ResponseErr
@@ -93,6 +94,8 @@ func (t *PetHandlerTest) SetupTest() {
 	}
 
 	t.ChangeViewPetRequest = &dto.ChangeViewPetRequest{}
+
+	t.AdoptByRequest = &dto.AdoptByRequest{}
 
 	t.ServiceDownErr = &dto.ResponseErr{
 		StatusCode: http.StatusServiceUnavailable,
@@ -388,6 +391,60 @@ func (t *PetHandlerTest) TestChangeViewGrpcErr() {
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
 	petSvc.EXPECT().Delete(t.Pet.Id).Return(changeViewResponse, t.ServiceDownErr)
+	context.EXPECT().JSON(http.StatusServiceUnavailable, t.ServiceDownErr)
+
+	handler := NewHandler(petSvc, imageSvc, validator)
+	handler.Delete(context)
+}
+
+func (t *PetHandlerTest) TestAdoptSuccess() {
+	adoptResponse := true
+
+	controller := gomock.NewController(t.T())
+
+	petSvc := mock_pet.NewMockService(controller)
+	imageSvc := mock_image.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
+
+	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
+	petSvc.EXPECT().Delete(t.Pet.Id).Return(adoptResponse, nil)
+	context.EXPECT().JSON(http.StatusOK, adoptResponse)
+
+	handler := NewHandler(petSvc, imageSvc, validator)
+	handler.Delete(context)
+}
+
+func (t *PetHandlerTest) TestAdoptNotFound() {
+	adoptResponse := false
+
+	controller := gomock.NewController(t.T())
+
+	petSvc := mock_pet.NewMockService(controller)
+	imageSvc := mock_image.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
+
+	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
+	petSvc.EXPECT().Delete(t.Pet.Id).Return(adoptResponse, t.NotFoundErr)
+	context.EXPECT().JSON(http.StatusNotFound, t.NotFoundErr)
+
+	handler := NewHandler(petSvc, imageSvc, validator)
+	handler.Delete(context)
+}
+
+func (t *PetHandlerTest) TestAdoptGrpcErr() {
+	adoptResponse := false
+
+	controller := gomock.NewController(t.T())
+
+	petSvc := mock_pet.NewMockService(controller)
+	imageSvc := mock_image.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
+
+	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
+	petSvc.EXPECT().Delete(t.Pet.Id).Return(adoptResponse, t.ServiceDownErr)
 	context.EXPECT().JSON(http.StatusServiceUnavailable, t.ServiceDownErr)
 
 	handler := NewHandler(petSvc, imageSvc, validator)

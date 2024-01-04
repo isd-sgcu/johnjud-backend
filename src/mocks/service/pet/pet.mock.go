@@ -124,3 +124,16 @@ func (mr *MockServiceMockRecorder) Update(id, in interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockService)(nil).Update), id, in)
 }
+
+func (m *MockService) Adopt(petId string, in *dto.AdoptByRequest) (bool, *dto.ResponseErr) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Adopt", petId, in)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(*dto.ResponseErr)
+	return ret0, ret1
+}
+
+func (mr *MockServiceMockRecorder) Adopt(petId, in interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Adopt", reflect.TypeOf((*MockService)(nil).Adopt), petId, in)
+}

@@ -235,6 +235,53 @@ func (s *Service) ChangeView(id string, in *dto.ChangeViewPetRequest) (result bo
 	return res.Success, nil
 }
 
+func (s *Service) Adopt(petId string, in *dto.AdoptByRequest) (result bool, err *dto.ResponseErr) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	request := &proto.AdoptPetRequest{
+		PetId:  petId,
+		UserId: in.Adopt.UserID,
+	}
+
+	res, errRes := s.petClient.AdoptPet(ctx, request)
+	if errRes != nil {
+		st, _ := status.FromError(errRes)
+		log.Error().
+			Err(errRes).
+			Str("service", "pet").
+			Str("module", "adopt pet").
+			Msg(st.Message())
+		switch st.Code() {
+		case codes.NotFound:
+			return false, &dto.ResponseErr{
+				StatusCode: http.StatusNotFound,
+				Message:    constant.PetNotFoundMessage,
+				Data:       nil,
+			}
+		case codes.InvalidArgument:
+			return false, &dto.ResponseErr{
+				StatusCode: http.StatusBadRequest,
+				Message:    constant.InvalidArgument,
+				Data:       nil,
+			}
+		case codes.Unavailable:
+			return false, &dto.ResponseErr{
+				StatusCode: http.StatusServiceUnavailable,
+				Message:    constant.UnavailableServiceMessage,
+				Data:       nil,
+			}
+		default:
+			return false, &dto.ResponseErr{
+				StatusCode: http.StatusInternalServerError,
+				Message:    constant.InternalErrorMessage,
+				Data:       nil,
+			}
+		}
+	}
+	return res.Success, nil
+}
+
 func DtoToRaw(in *dto.PetDto) *proto.Pet {
 	return &proto.Pet{
 		Id:           in.Id,

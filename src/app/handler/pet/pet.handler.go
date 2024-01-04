@@ -25,6 +25,7 @@ type Service interface {
 	Update(string, *dto.UpdatePetRequest) (*pet_proto.Pet, *dto.ResponseErr)
 	ChangeView(string, *dto.ChangeViewPetRequest) (bool, *dto.ResponseErr)
 	Delete(string) (bool, *dto.ResponseErr)
+	Adopt(string, *dto.AdoptByRequest) (bool, *dto.ResponseErr)
 }
 
 func NewHandler(service Service, imageService imageSrv.Service, validate validator.IDtoValidator) *Handler {
@@ -214,5 +215,53 @@ func (h *Handler) Delete(c router.IContext) {
 	}
 
 	c.JSON(http.StatusOK, res)
+	return
+}
+
+func (h *Handler) Adopt(c router.IContext) {
+	petId, err := c.Param("id")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, &dto.ResponseErr{
+			StatusCode: http.StatusInternalServerError,
+			Message:    "Invalid ID",
+			Data:       nil,
+		})
+		return
+	}
+
+	request := &dto.AdoptByRequest{
+		Adopt: dto.AdoptDto{},
+	}
+
+	err = c.Bind(request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.BindingRequestErrorMessage + err.Error(),
+			Data:       nil,
+		})
+		return
+	}
+
+	if err := h.validate.Validate(request); err != nil {
+		var errorMessage []string
+		for _, reqErr := range err {
+			errorMessage = append(errorMessage, reqErr.Message)
+		}
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.InvalidRequestBodyMessage + strings.Join(errorMessage, ", "),
+			Data:       nil,
+		})
+		return
+	}
+
+	pet, errRes := h.service.Adopt(petId, request)
+	if errRes != nil {
+		c.JSON(errRes.StatusCode, errRes)
+		return
+	}
+
+	c.JSON(http.StatusOK, pet)
 	return
 }

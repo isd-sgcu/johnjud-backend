@@ -69,3 +69,13 @@ func (c *PetClientMock) Delete(ctx context.Context, in *petProto.DeletePetReques
 
 	return res, args.Error(1)
 }
+
+func (c *PetClientMock) AdoptPet(ctx context.Context, in *petProto.AdoptPetRequest, opts ...grpc.CallOption) (res *petProto.AdoptPetResponse, err error) {
+	args := c.Called(in)
+
+	if args.Get(0) != nil {
+		res = args.Get(0).(*petProto.AdoptPetResponse)
+	}
+
+	return res, args.Error(1)
+}
