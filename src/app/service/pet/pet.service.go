@@ -9,6 +9,7 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
 	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
+	image_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -36,12 +37,21 @@ func (s *Service) FindAll() (result []*proto.Pet, err *dto.ResponseErr) {
 			Str("service", "pet").
 			Str("module", "find all").
 			Msg(st.Message())
+		switch st.Code() {
+		case codes.Unavailable:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusServiceUnavailable,
+				Message:    constant.UnavailableServiceMessage,
+				Data:       nil,
+			}
+		}
 		return nil, &dto.ResponseErr{
-			StatusCode: http.StatusServiceUnavailable,
-			Message:    constant.UnavailableServiceMessage,
+			StatusCode: http.StatusInternalServerError,
+			Message:    constant.InternalErrorMessage,
 			Data:       nil,
 		}
 	}
+	_ = &image_proto.Image{}
 	return res.Pets, nil
 }
 
@@ -64,10 +74,17 @@ func (s *Service) FindOne(id string) (result *proto.Pet, err *dto.ResponseErr) {
 				Message:    constant.PetNotFoundMessage,
 				Data:       nil,
 			}
-		default:
+
+		case codes.Unavailable:
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusServiceUnavailable,
 				Message:    constant.UnavailableServiceMessage,
+				Data:       nil,
+			}
+		default:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusInternalServerError,
+				Message:    constant.InternalErrorMessage,
 				Data:       nil,
 			}
 		}
@@ -129,10 +146,10 @@ func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *proto.Pet
 			Caption:      in.Pet.Caption,
 			Status:       proto.PetStatus(in.Pet.Status),
 			ImageUrls:    []string{},
-			IsSterile:    in.Pet.IsSterile,
-			IsVaccinated: in.Pet.IsSterile,
-			IsVisible:    in.Pet.IsVaccinated,
-			IsClubPet:    in.Pet.IsClubPet,
+			IsSterile:    *in.Pet.IsSterile,
+			IsVaccinated: *in.Pet.IsSterile,
+			IsVisible:    *in.Pet.IsVaccinated,
+			IsClubPet:    *in.Pet.IsClubPet,
 			Background:   in.Pet.Background,
 			Address:      in.Pet.Address,
 			Contact:      in.Pet.Contact,
@@ -265,10 +282,10 @@ func DtoToRaw(in *dto.PetDto) *proto.Pet {
 		Caption:      in.Caption,
 		Status:       proto.PetStatus(in.Status),
 		ImageUrls:    []string{},
-		IsSterile:    in.IsSterile,
-		IsVaccinated: in.IsVaccinated,
-		IsVisible:    in.IsVisible,
-		IsClubPet:    in.IsClubPet,
+		IsSterile:    *in.IsSterile,
+		IsVaccinated: *in.IsVaccinated,
+		IsVisible:    *in.IsVisible,
+		IsClubPet:    *in.IsClubPet,
 		Background:   in.Background,
 		Address:      in.Address,
 		Contact:      in.Contact,
@@ -286,10 +303,10 @@ func RawToDto(in *proto.Pet) *dto.PetDto {
 		Habit:        in.Habit,
 		Caption:      in.Caption,
 		Status:       pet.Status(in.Status),
-		IsSterile:    in.IsSterile,
-		IsVaccinated: in.IsVaccinated,
-		IsVisible:    in.IsVisible,
-		IsClubPet:    in.IsClubPet,
+		IsSterile:    &in.IsSterile,
+		IsVaccinated: &in.IsVaccinated,
+		IsVisible:    &in.IsVisible,
+		IsClubPet:    &in.IsClubPet,
 		Background:   in.Background,
 		Address:      in.Address,
 		Contact:      in.Contact,
