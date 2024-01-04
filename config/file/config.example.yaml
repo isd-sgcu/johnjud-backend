@@ -3,7 +3,7 @@ app:
   debug: true
 
 database:
-  host: localhost
+  host: local-db
   port: 5432
   name: johnjud_db
   username: root
