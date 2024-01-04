@@ -86,6 +86,11 @@ definitions:
     - email
     - password
     type: object
+  dto.SignOutResponse:
+    properties:
+      is_success:
+        type: boolean
+    type: object
   dto.SignupRequest:
     properties:
       email:
@@ -160,6 +165,29 @@ paths:
           schema:
             $ref: '#/definitions/dto.ResponseServiceDownErr'
       summary: Sign in user
+      tags:
+      - auth
+  /v1/auth/signout:
+    post:
+      consumes:
+      - application/json
+      description: Return the bool value of success
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SignOutResponse'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Sign out user
       tags:
       - auth
   /v1/auth/signup:

@@ -77,6 +77,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/auth/signout": {
+            "post": {
+                "description": "Return the bool value of success",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Sign out user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.SignOutResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal service error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseInternalErr"
+                        }
+                    },
+                    "503": {
+                        "description": "Service is down",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseServiceDownErr"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/auth/signup": {
             "post": {
                 "description": "Return the data of user if successfully",
@@ -316,6 +351,14 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 30,
                     "minLength": 6
+                }
+            }
+        },
+        "dto.SignOutResponse": {
+            "type": "object",
+            "properties": {
+                "is_success": {
+                    "type": "boolean"
                 }
             }
         },

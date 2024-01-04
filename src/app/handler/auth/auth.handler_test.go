@@ -235,3 +235,49 @@ func (t *AuthHandlerTest) TestSignInServiceError() {
 
 	handler.SignIn(context)
 }
+
+func (t *AuthHandlerTest) TestSignOutSuccess() {
+	token := faker.Word()
+	signOutResponse := &dto.SignOutResponse{
+		IsSuccess: true,
+	}
+
+	controller := gomock.NewController(t.T())
+
+	authSvc := mock_auth.NewMockService(controller)
+	userSvc := mock_user.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
+
+	context.EXPECT().Token().Return(token)
+	authSvc.EXPECT().SignOut(token).Return(signOutResponse, nil)
+	context.EXPECT().JSON(http.StatusOK, signOutResponse)
+
+	handler := NewHandler(authSvc, userSvc, validator)
+
+	handler.SignOut(context)
+}
+
+func (t *AuthHandlerTest) TestSignOutServiceError() {
+	token := faker.Word()
+	errResponse := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	controller := gomock.NewController(t.T())
+
+	authSvc := mock_auth.NewMockService(controller)
+	userSvc := mock_user.NewMockService(controller)
+	validator := mock_validator.NewMockIDtoValidator(controller)
+	context := mock_router.NewMockIContext(controller)
+
+	handler := NewHandler(authSvc, userSvc, validator)
+
+	context.EXPECT().Token().Return(token)
+	authSvc.EXPECT().SignOut(token).Return(nil, errResponse)
+	context.EXPECT().JSON(http.StatusInternalServerError, errResponse)
+
+	handler.SignOut(context)
+}

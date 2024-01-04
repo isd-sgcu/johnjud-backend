@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"github.com/go-faker/faker/v4"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
@@ -44,13 +45,13 @@ func (t *AuthServiceTest) SetupTest() {
 }
 
 func (t *AuthServiceTest) TestSignupSuccess() {
-	protoReq := &authProto.SignupRequest{
+	protoReq := &authProto.SignUpRequest{
 		FirstName: t.signupRequestDto.Firstname,
 		LastName:  t.signupRequestDto.Lastname,
 		Email:     t.signupRequestDto.Email,
 		Password:  t.signupRequestDto.Password,
 	}
-	protoResp := &authProto.SignupResponse{
+	protoResp := &authProto.SignUpResponse{
 		Id:        faker.UUIDDigit(),
 		FirstName: t.signupRequestDto.Firstname,
 		LastName:  t.signupRequestDto.Lastname,
@@ -66,7 +67,7 @@ func (t *AuthServiceTest) TestSignupSuccess() {
 
 	client := auth.AuthClientMock{}
 
-	client.On("Signup", protoReq).Return(protoResp, nil)
+	client.On("SignUp", protoReq).Return(protoResp, nil)
 
 	svc := NewService(&client)
 	actual, err := svc.Signup(t.signupRequestDto)
@@ -79,7 +80,7 @@ func (t *AuthServiceTest) TestSignupSuccess() {
 }
 
 func (t *AuthServiceTest) TestSignupConflict() {
-	protoReq := &authProto.SignupRequest{
+	protoReq := &authProto.SignUpRequest{
 		FirstName: t.signupRequestDto.Firstname,
 		LastName:  t.signupRequestDto.Lastname,
 		Email:     t.signupRequestDto.Email,
@@ -94,7 +95,7 @@ func (t *AuthServiceTest) TestSignupConflict() {
 	}
 
 	client := auth.AuthClientMock{}
-	client.On("Signup", protoReq).Return(nil, clientErr)
+	client.On("SignUp", protoReq).Return(nil, clientErr)
 
 	svc := NewService(&client)
 	actual, err := svc.Signup(t.signupRequestDto)
@@ -104,7 +105,7 @@ func (t *AuthServiceTest) TestSignupConflict() {
 }
 
 func (t *AuthServiceTest) TestSignupInternalError() {
-	protoReq := &authProto.SignupRequest{
+	protoReq := &authProto.SignUpRequest{
 		FirstName: t.signupRequestDto.Firstname,
 		LastName:  t.signupRequestDto.Lastname,
 		Email:     t.signupRequestDto.Email,
@@ -119,7 +120,7 @@ func (t *AuthServiceTest) TestSignupInternalError() {
 	}
 
 	client := auth.AuthClientMock{}
-	client.On("Signup", protoReq).Return(nil, clientErr)
+	client.On("SignUp", protoReq).Return(nil, clientErr)
 
 	svc := NewService(&client)
 	actual, err := svc.Signup(t.signupRequestDto)
@@ -129,7 +130,7 @@ func (t *AuthServiceTest) TestSignupInternalError() {
 }
 
 func (t *AuthServiceTest) TestSignupUnavailableService() {
-	protoReq := &authProto.SignupRequest{
+	protoReq := &authProto.SignUpRequest{
 		FirstName: t.signupRequestDto.Firstname,
 		LastName:  t.signupRequestDto.Lastname,
 		Email:     t.signupRequestDto.Email,
@@ -144,7 +145,32 @@ func (t *AuthServiceTest) TestSignupUnavailableService() {
 	}
 
 	client := auth.AuthClientMock{}
-	client.On("Signup", protoReq).Return(nil, clientErr)
+	client.On("SignUp", protoReq).Return(nil, clientErr)
+
+	svc := NewService(&client)
+	actual, err := svc.Signup(t.signupRequestDto)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestSignupUnknownError() {
+	protoReq := &authProto.SignUpRequest{
+		FirstName: t.signupRequestDto.Firstname,
+		LastName:  t.signupRequestDto.Lastname,
+		Email:     t.signupRequestDto.Email,
+		Password:  t.signupRequestDto.Password,
+	}
+	clientErr := errors.New("Unknown error")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("SignUp", protoReq).Return(nil, clientErr)
 
 	svc := NewService(&client)
 	actual, err := svc.Signup(t.signupRequestDto)
@@ -249,6 +275,116 @@ func (t *AuthServiceTest) TestSignInUnavailableService() {
 
 	svc := NewService(&client)
 	actual, err := svc.SignIn(t.signInDto)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestSignInUnknownError() {
+	protoReq := &authProto.SignInRequest{
+		Email:    t.signInDto.Email,
+		Password: t.signInDto.Password,
+	}
+	protoErr := errors.New("Unknown error")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+
+	client.On("SignIn", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.SignIn(t.signInDto)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestSignOutSuccess() {
+	protoReq := &authProto.SignOutRequest{
+		Token: t.token,
+	}
+	protoResp := &authProto.SignOutResponse{
+		IsSuccess: true,
+	}
+
+	expected := &dto.SignOutResponse{IsSuccess: true}
+
+	client := auth.AuthClientMock{}
+	client.On("SignOut", protoReq).Return(protoResp, nil)
+
+	svc := NewService(&client)
+	actual, err := svc.SignOut(t.token)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), expected, actual)
+}
+
+func (t *AuthServiceTest) TestSignOutInternalError() {
+	protoReq := &authProto.SignOutRequest{
+		Token: t.token,
+	}
+	protoErr := status.Error(codes.Internal, "Internal error")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("SignOut", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.SignOut(t.token)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestSignOutUnavailableService() {
+	protoReq := &authProto.SignOutRequest{
+		Token: t.token,
+	}
+	protoErr := status.Error(codes.Unavailable, "Connection lost")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusServiceUnavailable,
+		Message:    constant.UnavailableServiceMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("SignOut", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.SignOut(t.token)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestSignOutUnknownError() {
+	protoReq := &authProto.SignOutRequest{
+		Token: t.token,
+	}
+	protoErr := errors.New("Unknown error")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("SignOut", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.SignOut(t.token)
 
 	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), expected, err)

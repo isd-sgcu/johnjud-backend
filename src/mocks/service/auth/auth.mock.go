@@ -66,10 +66,10 @@ func (mr *MockServiceMockRecorder) SignIn(arg0 interface{}) *gomock.Call {
 }
 
 // SignOut mocks base method.
-func (m *MockService) SignOut(arg0 string) (bool, *dto.ResponseErr) {
+func (m *MockService) SignOut(arg0 string) (*dto.SignOutResponse, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignOut", arg0)
-	ret0, _ := ret[0].(bool)
+	ret0, _ := ret[0].(*dto.SignOutResponse)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
