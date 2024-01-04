@@ -47,7 +47,7 @@ services:
     volumes:
       - ./config/file:/app/config
     ports:
-      - "3003:3003"
+      - "3004:3004"
 
   local-db:
     image: postgres:15.1-alpine3.17
