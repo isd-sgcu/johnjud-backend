@@ -3,7 +3,6 @@ version: "3.9"
 services:
   # local-auth:
   #   image: ghcr.io/isd-sgcu/johnjud-auth
-  #   platform: linux/amd64
   #   container_name: auth
   #   depends_on:
   #     - local-db
@@ -19,7 +18,6 @@ services:
 
   # local-backend:
   #   image: ghcr.io/isd-sgcu/johnjud-backend
-  #   platform: linux/amd64
   #   container_name: backend
   #   depends_on:
   #     - local-db
@@ -35,7 +33,6 @@ services:
 
   local-file:
     image: ghcr.io/isd-sgcu/johnjud-file
-    platform: linux/amd64
     container_name: file
     depends_on:
       - local-db
