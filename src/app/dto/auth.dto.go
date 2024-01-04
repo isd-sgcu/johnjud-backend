@@ -2,6 +2,7 @@ package dto
 
 type TokenPayloadAuth struct {
 	UserId string `json:"user_id"`
+	Role   string `json:"role"`
 }
 
 type Validate struct {

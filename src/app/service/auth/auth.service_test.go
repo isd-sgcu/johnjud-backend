@@ -390,13 +390,95 @@ func (t *AuthServiceTest) TestSignOutUnknownError() {
 	assert.Equal(t.T(), expected, err)
 }
 
-func (t *AuthServiceTest) TestValidateSuccess() {}
+func (t *AuthServiceTest) TestValidateSuccess() {
+	protoReq := &authProto.ValidateRequest{
+		Token: t.token,
+	}
+	protoResp := &authProto.ValidateResponse{
+		UserId: faker.UUIDDigit(),
+		Role:   "user",
+	}
 
-func (t *AuthServiceTest) TestValidateUnauthorized() {}
+	expected := &dto.TokenPayloadAuth{
+		UserId: protoResp.UserId,
+		Role:   protoResp.Role,
+	}
 
-func (t *AuthServiceTest) TestValidateInternalError() {}
+	client := auth.AuthClientMock{}
+	client.On("Validate", protoReq).Return(protoResp, nil)
 
-func (t *AuthServiceTest) TestValidateUnavailableService() {}
+	svc := NewService(&client)
+	actual, err := svc.Validate(t.token)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), expected, actual)
+}
+
+func (t *AuthServiceTest) TestValidateUnauthorized() {
+	protoReq := &authProto.ValidateRequest{
+		Token: t.token,
+	}
+	protoErr := status.Error(codes.Unauthenticated, "invalid token")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusUnauthorized,
+		Message:    constant.UnauthorizedMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("Validate", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.Validate(t.token)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestValidateUnavailableService() {
+	protoReq := &authProto.ValidateRequest{
+		Token: t.token,
+	}
+	protoErr := status.Error(codes.Unavailable, "connection lost")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusServiceUnavailable,
+		Message:    constant.UnavailableServiceMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("Validate", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.Validate(t.token)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestValidateUnknownError() {
+	protoReq := &authProto.ValidateRequest{
+		Token: t.token,
+	}
+	protoErr := errors.New("Unknown error")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("Validate", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.Validate(t.token)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
 
 func (t *AuthServiceTest) TestRefreshTokenUnauthorized() {}
 

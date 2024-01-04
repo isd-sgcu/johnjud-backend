@@ -100,7 +100,7 @@ func main() {
 	authService := authSrv.NewService(authClient)
 	authHandler := authHdr.NewHandler(authService, userService, v)
 
-	authGuard := guard.NewAuthGuard(authService, auth.ExcludePath, conf.App)
+	authGuard := guard.NewAuthGuard(authService, auth.ExcludePath, conf.App, auth.VersionList)
 
 	imageClient := image_proto.NewImageServiceClient(fileConn)
 	imageService := imageSrv.NewService(imageClient)
