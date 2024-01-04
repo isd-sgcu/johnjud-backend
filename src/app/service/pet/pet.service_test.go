@@ -46,7 +46,20 @@ func TestPetService(t *testing.T) {
 }
 
 func (t *PetServiceTest) SetupTest() {
-	imagesList := mockImageList()
+	// imagesList := mockImageList()
+	var imagesList [][]*imgproto.Image
+	for i := 0; i <= 3; i++ {
+		var images []*imgproto.Image
+		for j := 0; j <= 3; j++ {
+			images = append(images, &imgproto.Image{
+				Id:        faker.UUIDDigit(),
+				PetId:     faker.UUIDDigit(),
+				ImageUrl:  faker.URL(),
+				ObjectKey: faker.Word(),
+			})
+		}
+		imagesList = append(imagesList, images)
+	}
 
 	t.ImagesList = imagesList
 	t.Images = imagesList[0]
@@ -144,7 +157,7 @@ func (t *PetServiceTest) SetupTest() {
 	}
 
 	t.CreatePetReq = CreateDtoToRaw(t.CreatePetDto)
-	t.UpdatePetReq = UpdateDtoToRaw(t.UpdatePetDto)
+	t.UpdatePetReq = UpdateDtoToRaw(t.Pet.Id, t.UpdatePetDto)
 
 	t.ChangeViewPetReq = &petproto.ChangeViewPetRequest{
 		Id:      t.Pet.Id,
