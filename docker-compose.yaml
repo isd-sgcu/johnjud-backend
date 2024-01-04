@@ -1,35 +1,35 @@
 version: "3.9"
 
 services:
-  # local-auth:
-  #   image: ghcr.io/isd-sgcu/johnjud-auth
-  #   container_name: auth
-  #   depends_on:
-  #     - local-db
-  #     - local-cache
-  #   restart: unless-stopped
-  #   networks:
-  #     - johnjud-local
-  #     - database
-  #   volumes:
-  #     - ./config/auth:/app/config
-  #   ports:
-  #     - "3002:3002"
+  local-auth:
+    image: ghcr.io/isd-sgcu/johnjud-auth
+    container_name: auth
+    depends_on:
+      - local-db
+      - local-cache
+    restart: unless-stopped
+    networks:
+      - johnjud-local
+      - database
+    volumes:
+      - ./config/auth:/app/config
+    ports:
+      - "3002:3002"
 
-  # local-backend:
-  #   image: ghcr.io/isd-sgcu/johnjud-backend
-  #   container_name: backend
-  #   depends_on:
-  #     - local-db
-  #     - local-cache
-  #   restart: unless-stopped
-  #   networks:
-  #     - johnjud-local
-  #     - database
-  #   volumes:
-  #     - ./config/backend:/app/config
-  #   ports:
-  #     - "3003:3003"
+  local-backend:
+    image: ghcr.io/isd-sgcu/johnjud-backend
+    container_name: backend
+    depends_on:
+      - local-db
+      - local-cache
+    restart: unless-stopped
+    networks:
+      - johnjud-local
+      - database
+    volumes:
+      - ./config/backend:/app/config
+    ports:
+      - "3003:3003"
 
   local-file:
     image: ghcr.io/isd-sgcu/johnjud-file
