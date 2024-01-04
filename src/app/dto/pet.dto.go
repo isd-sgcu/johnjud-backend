@@ -4,25 +4,30 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
 )
 
+type ImageResponse struct {
+	Id  string `json:"id"`
+	Url string `json:"url"`
+}
+
 type PetResponse struct {
-	Id           string     `json:"id"`
-	Type         string     `json:"type"`
-	Species      string     `json:"species"`
-	Name         string     `json:"name"`
-	Birthdate    string     `json:"birthdate"`
-	Gender       pet.Gender `json:"gender"`
-	Habit        string     `json:"habit"`
-	Caption      string     `json:"caption"`
-	Status       pet.Status `json:"status"`
-	IsSterile    *bool      `json:"is_sterile"`
-	IsVaccinated *bool      `json:"is_vaccinated"`
-	IsVisible    *bool      `json:"is_visible"`
-	IsClubPet    *bool      `json:"is_club_pet"`
-	Background   string     `json:"background"`
-	Address      string     `json:"address"`
-	Contact      string     `json:"contact"`
-	AdoptBy      string     `json:"adopt_by"`
-	Images       []ImageDto `json:"images"`
+	Id           string          `json:"id"`
+	Type         string          `json:"type"`
+	Species      string          `json:"species"`
+	Name         string          `json:"name"`
+	Birthdate    string          `json:"birthdate"`
+	Gender       pet.Gender      `json:"gender"`
+	Habit        string          `json:"habit"`
+	Caption      string          `json:"caption"`
+	Status       pet.Status      `json:"status"`
+	IsSterile    *bool           `json:"is_sterile"`
+	IsVaccinated *bool           `json:"is_vaccinated"`
+	IsVisible    *bool           `json:"is_visible"`
+	IsClubPet    *bool           `json:"is_club_pet"`
+	Background   string          `json:"background"`
+	Address      string          `json:"address"`
+	Contact      string          `json:"contact"`
+	AdoptBy      string          `json:"adopt_by"`
+	Images       []ImageResponse `json:"images"`
 }
 
 type CreatePetRequest struct {

@@ -26,8 +26,7 @@ func NewService(petClient petproto.PetServiceClient) *Service {
 	}
 }
 
-// TODO: change reutnr type to []*dto.PetRespone
-func (s *Service) FindAll() (result []*petproto.Pet, err *dto.ResponseErr) {
+func (s *Service) FindAll() (result []*dto.PetResponse, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -53,8 +52,9 @@ func (s *Service) FindAll() (result []*petproto.Pet, err *dto.ResponseErr) {
 			Data:       nil,
 		}
 	}
-	// findAllResponse := RawToDtoList(res, nil)
-	return res.Pets, nil
+	imagesList := mockImageList()
+	findAllResponse := RawToDtoList(res.Pets, imagesList)
+	return findAllResponse, nil
 }
 
 func (s *Service) FindOne(id string) (result *dto.PetResponse, err *dto.ResponseErr) {
@@ -91,7 +91,8 @@ func (s *Service) FindOne(id string) (result *dto.PetResponse, err *dto.Response
 			}
 		}
 	}
-	findOneResponse := RawToDto(res.Pet)
+	images := mockImageList()[0]
+	findOneResponse := RawToDto(res.Pet, images)
 	return findOneResponse, nil
 }
 
@@ -130,8 +131,8 @@ func (s *Service) Create(in *dto.CreatePetRequest) (ressult *dto.PetResponse, er
 			}
 		}
 	}
-	fmt.Println(res)
-	createPetResponse := RawToDto(res.Pet)
+	images := mockImageList()[0]
+	createPetResponse := RawToDto(res.Pet, images)
 	return createPetResponse, nil
 }
 
@@ -176,8 +177,8 @@ func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *dto.PetRe
 			}
 		}
 	}
-	fmt.Println(res)
-	updatePetResponse := RawToDto(res.Pet)
+	images := mockImageList()[0]
+	updatePetResponse := RawToDto(res.Pet, images)
 	return updatePetResponse, nil
 }
 
@@ -321,7 +322,7 @@ func UpdateDtoToRaw(in *dto.UpdatePetRequest) *petproto.UpdatePetRequest {
 	}
 }
 
-func RawToDto(in *petproto.Pet) *dto.PetResponse {
+func RawToDto(in *petproto.Pet, images []*imgproto.Image) *dto.PetResponse {
 	pet := &dto.PetResponse{
 		Id:           in.Id,
 		Type:         in.Type,
@@ -340,14 +341,14 @@ func RawToDto(in *petproto.Pet) *dto.PetResponse {
 		Address:      in.Address,
 		Contact:      in.Contact,
 		AdoptBy:      in.AdoptBy,
+		Images:       extractImages(images),
 	}
 	return pet
 }
 
-// TODO: add `Images` in &dto.PetResponse
-func RawToDtoList(in []*petproto.Pet, images [][]*imgproto.Image) []*dto.PetResponse {
+func RawToDtoList(in []*petproto.Pet, imagesList [][]*imgproto.Image) []*dto.PetResponse {
 	var resp []*dto.PetResponse
-	for _, p := range in {
+	for i, p := range in {
 		pet := &dto.PetResponse{
 			Id:           p.Id,
 			Type:         p.Type,
@@ -366,8 +367,39 @@ func RawToDtoList(in []*petproto.Pet, images [][]*imgproto.Image) []*dto.PetResp
 			Address:      p.Address,
 			Contact:      p.Contact,
 			AdoptBy:      p.AdoptBy,
+			Images:       extractImages(imagesList[i]),
 		}
 		resp = append(resp, pet)
 	}
 	return resp
+}
+
+func extractImages(images []*imgproto.Image) []dto.ImageResponse {
+	var result []dto.ImageResponse
+	for _, img := range images {
+		result = append(result, dto.ImageResponse{
+			Id:  img.Id,
+			Url: img.ImageUrl,
+		})
+	}
+	return result
+}
+
+// This function return imagesList from image service
+func mockImageList() [][]*imgproto.Image {
+	var imagesList [][]*imgproto.Image
+	for i := 0; i <= 3; i++ {
+		var images []*imgproto.Image
+		for j := 0; j <= 3; j++ {
+			images = append(images, &imgproto.Image{
+				Id:        fmt.Sprintf("%v%v", i, j),
+				PetId:     fmt.Sprintf("%v%v", i, j),
+				ImageUrl:  fmt.Sprintf("%v%v", i, j),
+				ObjectKey: fmt.Sprintf("%v%v", i, j),
+			})
+		}
+		imagesList = append(imagesList, images)
+	}
+
+	return imagesList
 }

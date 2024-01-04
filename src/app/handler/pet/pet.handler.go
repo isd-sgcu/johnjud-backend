@@ -9,7 +9,6 @@ import (
 	imageSrv "github.com/isd-sgcu/johnjud-gateway/src/app/handler/image"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
-	pet_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 )
 
 type Handler struct {
@@ -19,12 +18,12 @@ type Handler struct {
 }
 
 type Service interface {
-	FindAll() ([]*pet_proto.Pet, *dto.ResponseErr)
-	FindOne(string) (*pet_proto.Pet, *dto.ResponseErr)
-	Create(*dto.CreatePetRequest) (*pet_proto.Pet, *dto.ResponseErr)
-	Update(string, *dto.UpdatePetRequest) (*pet_proto.Pet, *dto.ResponseErr)
-	ChangeView(string, *dto.ChangeViewPetRequest) (bool, *dto.ResponseErr)
-	Delete(string) (bool, *dto.ResponseErr)
+	FindAll() ([]*dto.PetResponse, *dto.ResponseErr)
+	FindOne(string) (*dto.PetResponse, *dto.ResponseErr)
+	Create(*dto.CreatePetRequest) (*dto.PetResponse, *dto.ResponseErr)
+	Update(string, *dto.UpdatePetRequest) (*dto.PetResponse, *dto.ResponseErr)
+	ChangeView(string, *dto.ChangeViewPetRequest) (*dto.ChangeViewPetResponse, *dto.ResponseErr)
+	Delete(string) (*dto.DeleteResponse, *dto.ResponseErr)
 }
 
 func NewHandler(service Service, imageService imageSrv.Service, validate validator.IDtoValidator) *Handler {

@@ -37,10 +37,8 @@ type PetServiceTest struct {
 	InternalErr           *dto.ResponseErr
 	ChangeViewedPetDto    *dto.ChangeViewPetRequest
 
-	Images        []*imgproto.Image
-	ImageUrls     []string
-	ImagesList    [][]*imgproto.Image
-	ImageUrlsList [][]string
+	Images     []*imgproto.Image
+	ImagesList [][]*imgproto.Image
 }
 
 func TestPetService(t *testing.T) {
@@ -48,6 +46,11 @@ func TestPetService(t *testing.T) {
 }
 
 func (t *PetServiceTest) SetupTest() {
+	imagesList := mockImageList()
+
+	t.ImagesList = imagesList
+	t.Images = imagesList[0]
+
 	var pets []*petproto.Pet
 	for i := 0; i <= 3; i++ {
 		pet := &petproto.Pet{
@@ -59,7 +62,7 @@ func (t *PetServiceTest) SetupTest() {
 			Gender:       petproto.Gender(rand.Intn(1) + 1),
 			Habit:        faker.Paragraph(),
 			Caption:      faker.Paragraph(),
-			Images:       []*imgproto.Image{},
+			Images:       imagesList[i],
 			Status:       petproto.PetStatus(rand.Intn(1) + 1),
 			IsSterile:    true,
 			IsVaccinated: true,
@@ -98,7 +101,7 @@ func (t *PetServiceTest) SetupTest() {
 		AdoptBy:      t.Pet.AdoptBy,
 	}
 
-	t.PetDto = RawToDto(t.Pet)
+	t.PetDto = RawToDto(t.Pet, t.Pet.Images)
 
 	t.CreatePetDto = &dto.CreatePetRequest{
 		Type:         t.Pet.Type,
@@ -188,7 +191,7 @@ func (t *PetServiceTest) TestFindAllSuccess() {
 		Pets: t.Pets,
 	}
 
-	expected := t.Pets
+	expected := RawToDtoList(t.Pets, t.ImagesList)
 
 	client := petmock.PetClientMock{}
 	client.On("FindAll", protoReq).Return(protoResp, nil)
@@ -225,7 +228,7 @@ func (t *PetServiceTest) TestFindOneSuccess() {
 		Pet: t.Pet,
 	}
 
-	expected := RawToDto(t.Pet)
+	expected := RawToDto(t.Pet, t.Pet.Images)
 
 	client := petmock.PetClientMock{}
 	client.On("FindOne", protoReq).Return(protoResp, nil)
@@ -281,7 +284,7 @@ func (t *PetServiceTest) TestCreateSuccess() {
 		Pet: t.Pet,
 	}
 
-	expected := RawToDto(t.Pet)
+	expected := RawToDto(t.Pet, t.Pet.Images)
 
 	client := &petmock.PetClientMock{}
 	client.On("Create", protoReq).Return(protoResp, nil)
@@ -350,7 +353,7 @@ func (t *PetServiceTest) TestUpdateSuccess() {
 		Pet: t.Pet,
 	}
 
-	expected := RawToDto(t.Pet)
+	expected := RawToDto(t.Pet, t.Pet.Images)
 
 	client := &petmock.PetClientMock{}
 	client.On("Update", protoReq).Return(protoResp, nil)
