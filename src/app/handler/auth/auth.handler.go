@@ -123,6 +123,24 @@ func (h *Handler) SignIn(c router.IContext) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (h *Handler) Signout(c router.IContext) {
+// SignOut is a function that remove token and auth session of user
+// @Summary Sign out user
+// @Description Return the bool value of success
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} dto.SignOutResponse
+// @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
+// @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
+// @Router /v1/auth/signout [post]
+func (h *Handler) SignOut(c router.IContext) {
+	token := c.Token()
 
+	response, respErr := h.service.SignOut(token)
+	if respErr != nil {
+		c.JSON(respErr.StatusCode, respErr)
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
 }
