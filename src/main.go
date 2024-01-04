@@ -126,7 +126,7 @@ func main() {
 	r.GetPet("/:id", petHandler.FindOne)
 	r.PostPet("/create", petHandler.Create)
 	r.PutPet("/:id", petHandler.Update)
-	r.PutPet("/:id/visible", petHandler.Update)
+	r.PutPet("/:id/visible", petHandler.ChangeView)
 	r.DeletePet("/:id", petHandler.Delete)
 
 	v1 := router.NewAPIv1(r, conf.App)
