@@ -246,34 +246,34 @@ func (s *Service) RefreshToken(request *dto.RefreshTokenRequest) (*dto.Credentia
 			Str("action", "RefreshToken").
 			Str("token", request.RefreshToken).
 			Msg(st.Message())
-		if ok {
-			switch st.Code() {
-			case codes.InvalidArgument:
-				return nil, &dto.ResponseErr{
-					StatusCode: http.StatusBadRequest,
-					Message:    constant.InvalidTokenMessage,
-					Data:       nil,
-				}
-			case codes.Internal:
-				return nil, &dto.ResponseErr{
-					StatusCode: http.StatusInternalServerError,
-					Message:    constant.InternalErrorMessage,
-					Data:       nil,
-				}
-			default:
-				return nil, &dto.ResponseErr{
-					StatusCode: http.StatusServiceUnavailable,
-					Message:    constant.UnavailableServiceMessage,
-					Data:       nil,
-				}
+		if !ok {
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusInternalServerError,
+				Message:    constant.InternalErrorMessage,
+				Data:       nil,
+			}
+		}
+		switch st.Code() {
+		case codes.InvalidArgument:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusBadRequest,
+				Message:    constant.InvalidTokenMessage,
+				Data:       nil,
+			}
+		case codes.Internal:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusInternalServerError,
+				Message:    constant.InternalErrorMessage,
+				Data:       nil,
+			}
+		default:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusServiceUnavailable,
+				Message:    constant.UnavailableServiceMessage,
+				Data:       nil,
 			}
 		}
 
-		return nil, &dto.ResponseErr{
-			StatusCode: http.StatusInternalServerError,
-			Message:    constant.InternalErrorMessage,
-			Data:       nil,
-		}
 	}
 
 	log.Info().
