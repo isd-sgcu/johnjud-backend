@@ -116,7 +116,7 @@ func main() {
 
 	r.PostAuth("/signup", authHandler.Signup)
 	r.PostAuth("/signin", authHandler.SignIn)
-	r.PostAuth("/signout", authHandler.Signout)
+	r.PostAuth("/signout", authHandler.SignOut)
 	r.PostAuth("/me", authHandler.Validate)
 	r.PostAuth("/refreshToken", authHandler.RefreshToken)
 
@@ -126,8 +126,8 @@ func main() {
 	r.GetPet("/:id", petHandler.FindOne)
 	r.PostPet("/create", petHandler.Create)
 	r.PutPet("/:id", petHandler.Update)
-	r.PutPet("/:id/visible", petHandler.Update)
 	r.PutPet("/:id/adopt", petHandler.Adopt)
+	r.PutPet("/:id/visible", petHandler.ChangeView)
 	r.DeletePet("/:id", petHandler.Delete)
 
 	v1 := router.NewAPIv1(r, conf.App)

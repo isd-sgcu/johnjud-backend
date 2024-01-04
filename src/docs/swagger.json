@@ -72,6 +72,41 @@
                 }
             }
         },
+        "/v1/auth/signout": {
+            "post": {
+                "description": "Return the bool value of success",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Sign out user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.SignOutResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal service error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseInternalErr"
+                        }
+                    },
+                    "503": {
+                        "description": "Service is down",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseServiceDownErr"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/auth/signup": {
             "post": {
                 "description": "Return the data of user if successfully",
@@ -101,6 +136,64 @@
                         "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/dto.SignupResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseBadRequestErr"
+                        }
+                    },
+                    "409": {
+                        "description": "Duplicate email",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseConflictErr"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal service error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseInternalErr"
+                        }
+                    },
+                    "503": {
+                        "description": "Service is down",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseServiceDownErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/pet/": {
+            "get": {
+                "description": "Return the data of pets if successfully",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "find all pets",
+                "parameters": [
+                    {
+                        "description": "pet dto",
+                        "name": "signup",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.PetDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.PetDto"
                         }
                     },
                     "400": {
@@ -160,6 +253,9 @@
                     "example": "e7e84d54-7518-4..."
                 }
             }
+        },
+        "dto.PetDto": {
+            "type": "object"
         },
         "dto.ResponseBadRequestErr": {
             "type": "object",
@@ -250,6 +346,14 @@
                     "type": "string",
                     "maxLength": 30,
                     "minLength": 6
+                }
+            }
+        },
+        "dto.SignOutResponse": {
+            "type": "object",
+            "properties": {
+                "is_success": {
+                    "type": "boolean"
                 }
             }
         },

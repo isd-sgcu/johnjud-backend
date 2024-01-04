@@ -14,13 +14,14 @@ type PetDto struct {
 	Habit        string     `json:"habit" validate:"required"`
 	Caption      string     `json:"caption"`
 	Status       pet.Status `json:"status" validate:"required" example:"findhome"`
-	IsSterile    bool       `json:"is_sterile" validate:"required"`
-	IsVaccinated bool       `json:"is_vaccinated" validate:"required"`
-	IsVisible    bool       `json:"is_visible" validate:"required"`
-	IsClubPet    bool       `json:"is_club_pet" validate:"required"`
+	IsSterile    *bool      `json:"is_sterile" validate:"required"`
+	IsVaccinated *bool      `json:"is_vaccinated" validate:"required"`
+	IsVisible    *bool      `json:"is_visible" validate:"required"`
+	IsClubPet    *bool      `json:"is_club_pet" validate:"required"`
 	Background   string     `json:"background"`
 	Address      string     `json:"address"`
 	Contact      string     `json:"contact"`
+	AdoptBy      string     `json:"adopt_by"`
 }
 
 type CreatePetRequest struct {

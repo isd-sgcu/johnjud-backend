@@ -25,6 +25,7 @@ type PetServiceTest struct {
 	PetNotVisible         *petProto.Pet
 	UpdatePetReq          *petProto.UpdatePetRequest
 	ChangeViewPetReq      *petProto.ChangeViewPetRequest
+	AdoptReq              *petProto.AdoptPetRequest
 	PetDto                *dto.PetDto
 	CreatePetDto          *dto.CreatePetRequest
 	UpdatePetDto          *dto.UpdatePetRequest
@@ -58,15 +59,16 @@ func (t *PetServiceTest) SetupTest() {
 			Gender:       petProto.Gender(rand.Intn(1) + 1),
 			Habit:        faker.Paragraph(),
 			Caption:      faker.Paragraph(),
+			Images:       []*imageProto.Image{},
 			Status:       petProto.PetStatus(rand.Intn(1) + 1),
 			IsSterile:    true,
 			IsVaccinated: true,
 			IsVisible:    true,
 			IsClubPet:    true,
-			ImageUrls:    []string{},
 			Background:   faker.Paragraph(),
 			Address:      faker.Paragraph(),
 			Contact:      faker.Paragraph(),
+			AdoptBy:      faker.UUIDDigit(),
 		}
 
 		pets = append(pets, pet)
@@ -83,8 +85,8 @@ func (t *PetServiceTest) SetupTest() {
 		Gender:       t.Pet.Gender,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
+		Images:       t.Pet.Images,
 		Status:       t.Pet.Status,
-		ImageUrls:    t.Pet.ImageUrls,
 		IsSterile:    t.Pet.IsSterile,
 		IsVaccinated: t.Pet.IsVaccinated,
 		IsVisible:    t.Pet.IsVisible,
@@ -92,6 +94,7 @@ func (t *PetServiceTest) SetupTest() {
 		Background:   t.Pet.Background,
 		Address:      t.Pet.Address,
 		Contact:      t.Pet.Contact,
+		AdoptBy:      t.Pet.AdoptBy,
 	}
 
 	t.PetNotVisible = &petProto.Pet{
@@ -103,8 +106,8 @@ func (t *PetServiceTest) SetupTest() {
 		Gender:       t.Pet.Gender,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
+		Images:       t.Pet.Images,
 		Status:       t.Pet.Status,
-		ImageUrls:    t.Pet.ImageUrls,
 		IsSterile:    t.Pet.IsSterile,
 		IsVaccinated: t.Pet.IsVaccinated,
 		IsVisible:    false,
@@ -112,6 +115,7 @@ func (t *PetServiceTest) SetupTest() {
 		Background:   t.Pet.Background,
 		Address:      t.Pet.Address,
 		Contact:      t.Pet.Contact,
+		AdoptBy:      t.Pet.AdoptBy,
 	}
 
 	t.PetDto = RawToDto(t.Pet)
@@ -121,7 +125,7 @@ func (t *PetServiceTest) SetupTest() {
 	}
 
 	t.UpdatePetDto = &dto.UpdatePetRequest{
-		Pet: RawToDto(t.Pet),
+		Pet: RawToDto(t.PetReq),
 	}
 
 	t.UpdatePetReq = &petProto.UpdatePetRequest{
@@ -137,16 +141,16 @@ func (t *PetServiceTest) SetupTest() {
 		Visible: false,
 	}
 
-	t.AdoptPetDto = &dto.AdoptByRequest{
+	t.AdoptDto = &dto.AdoptByRequest{
 		Adopt: dto.AdoptDto{
 			PetID:  t.Pet.Id,
-			UserID: faker.UUIDDigit(),
+			UserID: t.Pet.AdoptBy,
 		},
 	}
 
-	t.AdoptPetReq = &petProto.AdoptPetRequest{
+	t.AdoptReq = &petProto.AdoptPetRequest{
 		PetId:  t.Pet.Id,
-		UserId: t.AdoptPetDto.Adopt.UserID,
+		UserId: t.Pet.AdoptBy,
 	}
 
 	t.UnavailableServiceErr = &dto.ResponseErr{

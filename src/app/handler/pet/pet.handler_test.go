@@ -15,6 +15,7 @@ import (
 	mock_validator "github.com/isd-sgcu/johnjud-gateway/src/mocks/validator"
 
 	pet_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
+	image_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -49,15 +50,16 @@ func (t *PetHandlerTest) SetupTest() {
 			Gender:       pet_proto.Gender(rand.Intn(1) + 1),
 			Habit:        faker.Paragraph(),
 			Caption:      faker.Paragraph(),
+			Images:       []*image_proto.Image{},
 			Status:       pet_proto.PetStatus(rand.Intn(1) + 1),
 			IsSterile:    true,
 			IsVaccinated: true,
 			IsVisible:    true,
 			IsClubPet:    true,
-			ImageUrls:    []string{""},
 			Background:   faker.Paragraph(),
 			Address:      faker.Paragraph(),
 			Contact:      faker.Paragraph(),
+			AdoptBy:      "",
 		}
 
 		pets = append(pets, pet)
@@ -76,13 +78,14 @@ func (t *PetHandlerTest) SetupTest() {
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
 		Status:       pet.Status(t.Pet.Status),
-		IsSterile:    t.Pet.IsSterile,
-		IsVaccinated: t.Pet.IsVaccinated,
-		IsVisible:    t.Pet.IsVisible,
-		IsClubPet:    t.Pet.IsClubPet,
+		IsSterile:    &t.Pet.IsSterile,
+		IsVaccinated: &t.Pet.IsVaccinated,
+		IsVisible:    &t.Pet.IsVisible,
+		IsClubPet:    &t.Pet.IsClubPet,
 		Background:   t.Pet.Background,
 		Address:      t.Pet.Address,
 		Contact:      t.Pet.Contact,
+		AdoptBy:      t.Pet.AdoptBy,
 	}
 
 	t.CreatePetRequest = &dto.CreatePetRequest{

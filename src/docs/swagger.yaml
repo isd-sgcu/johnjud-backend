@@ -19,6 +19,8 @@ definitions:
         example: e7e84d54-7518-4...
         type: string
     type: object
+  dto.PetDto:
+    type: object
   dto.ResponseBadRequestErr:
     properties:
       data:
@@ -83,6 +85,11 @@ definitions:
     required:
     - email
     - password
+    type: object
+  dto.SignOutResponse:
+    properties:
+      is_success:
+        type: boolean
     type: object
   dto.SignupRequest:
     properties:
@@ -160,6 +167,29 @@ paths:
       summary: Sign in user
       tags:
       - auth
+  /v1/auth/signout:
+    post:
+      consumes:
+      - application/json
+      description: Return the bool value of success
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SignOutResponse'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Sign out user
+      tags:
+      - auth
   /v1/auth/signup:
     post:
       consumes:
@@ -196,6 +226,44 @@ paths:
           schema:
             $ref: '#/definitions/dto.ResponseServiceDownErr'
       summary: Signup user
+      tags:
+      - auth
+  /v1/pet/:
+    get:
+      consumes:
+      - application/json
+      description: Return the data of pets if successfully
+      parameters:
+      - description: pet dto
+        in: body
+        name: signup
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PetDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.PetDto'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "409":
+          description: Duplicate email
+          schema:
+            $ref: '#/definitions/dto.ResponseConflictErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: find all pets
       tags:
       - auth
 schemes:
