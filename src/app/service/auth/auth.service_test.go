@@ -586,7 +586,7 @@ func (t *AuthServiceTest) TestRefreshTokenUnknownError() {
 	protoErr := errors.New("Unknown error")
 
 	expected := &dto.ResponseErr{
-		StatusCode: http.StatusBadRequest,
+		StatusCode: http.StatusInternalServerError,
 		Message:    constant.InternalErrorMessage,
 		Data:       nil,
 	}
