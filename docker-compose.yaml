@@ -36,7 +36,7 @@ services:
   local-file:
     image: ghcr.io/isd-sgcu/johnjud-file
     platform: linux/amd64
-    container_name: backend
+    container_name: file
     depends_on:
       - local-db
       - local-cache
@@ -45,7 +45,7 @@ services:
       - johnjud-local
       - database
     volumes:
-      - ./config/file:/config
+      - ./config/file:/app/config
     ports:
       - "3003:3003"
 
