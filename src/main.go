@@ -3,27 +3,33 @@ package main
 import (
 	"context"
 	"fmt"
-	authHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/auth"
-	health_check "github.com/isd-sgcu/johnjud-gateway/src/app/handler/health-check"
-	userHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/user"
-	guard "github.com/isd-sgcu/johnjud-gateway/src/app/middleware/auth"
-	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
-	authSrv "github.com/isd-sgcu/johnjud-gateway/src/app/service/auth"
-	userSrv "github.com/isd-sgcu/johnjud-gateway/src/app/service/user"
-	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
-	"github.com/isd-sgcu/johnjud-gateway/src/config"
-	"github.com/isd-sgcu/johnjud-gateway/src/constant/auth"
-	auth_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
-	user_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/user/v1"
-	"github.com/rs/zerolog/log"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"net/http"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 	"time"
+
+	authHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/auth"
+	health_check "github.com/isd-sgcu/johnjud-gateway/src/app/handler/health-check"
+	petHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/pet"
+	userHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/user"
+	guard "github.com/isd-sgcu/johnjud-gateway/src/app/middleware/auth"
+	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
+	authSrv "github.com/isd-sgcu/johnjud-gateway/src/app/service/auth"
+	imageSrv "github.com/isd-sgcu/johnjud-gateway/src/app/service/image"
+	petSrv "github.com/isd-sgcu/johnjud-gateway/src/app/service/pet"
+	userSrv "github.com/isd-sgcu/johnjud-gateway/src/app/service/user"
+	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
+	"github.com/isd-sgcu/johnjud-gateway/src/config"
+	"github.com/isd-sgcu/johnjud-gateway/src/constant/auth"
+	auth_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
+	user_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/user/v1"
+	pet_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
+	image_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
+	"github.com/rs/zerolog/log"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 // @title JohnJud API
@@ -60,13 +66,13 @@ func main() {
 			Msg("Failed to start service")
 	}
 
-	// backendConn, err := grpc.Dial(conf.Service.Backend, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	// if err != nil {
-	// 	log.Fatal().
-	// 		Err(err).
-	// 		Str("service", "johnjud-backend").
-	// 		Msg("Cannot connect to service")
-	// }
+	backendConn, err := grpc.Dial(conf.Service.Backend, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal().
+			Err(err).
+			Str("service", "johnjud-backend").
+			Msg("Cannot connect to service")
+	}
 
 	authConn, err := grpc.Dial(conf.Service.Auth, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -76,13 +82,13 @@ func main() {
 			Msg("Cannot connect to service")
 	}
 
-	// fileConn, err := grpc.Dial(conf.Service.File, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	// if err != nil {
-	// 	log.Fatal().
-	// 		Err(err).
-	// 		Str("service", "johnjud-file").
-	// 		Msg("Cannot connect to service")
-	// }
+	fileConn, err := grpc.Dial(conf.Service.File, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal().
+			Err(err).
+			Str("service", "johnjud-file").
+			Msg("Cannot connect to service")
+	}
 
 	hc := health_check.NewHandler()
 
@@ -96,6 +102,13 @@ func main() {
 
 	authGuard := guard.NewAuthGuard(authService, auth.ExcludePath, conf.App)
 
+	imageClient := image_proto.NewImageServiceClient(fileConn)
+	imageService := imageSrv.NewService(imageClient)
+
+	petClient := pet_proto.NewPetServiceClient(backendConn)
+	petService := petSrv.NewService(petClient)
+	petHandler := petHdr.NewHandler(petService, imageService, v)
+
 	r := router.NewFiberRouter(&authGuard, conf.App)
 
 	r.GetUser("/:id", userHandler.FindOne)
@@ -108,6 +121,13 @@ func main() {
 	r.PostAuth("/refreshToken", authHandler.RefreshToken)
 
 	r.GetHealthCheck("/", hc.HealthCheck)
+
+	r.GetPet("/", petHandler.FindAll)
+	r.GetPet("/:id", petHandler.FindOne)
+	r.PostPet("/create", petHandler.Create)
+	r.PutPet("/:id", petHandler.Update)
+	r.PutPet("/:id/visible", petHandler.ChangeView)
+	r.DeletePet("/:id", petHandler.Delete)
 
 	v1 := router.NewAPIv1(r, conf.App)
 

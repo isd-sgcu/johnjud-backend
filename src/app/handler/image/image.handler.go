@@ -13,7 +13,7 @@ type Handler struct {
 }
 
 type Service interface {
-	FindByPetId() ([]*proto.Image, *dto.ResponseErr)
+	FindByPetId(string) ([]*proto.Image, *dto.ResponseErr)
 	Upload(*dto.ImageDto) (*proto.Image, *dto.ResponseErr)
 	Delete(string) (bool, *dto.ResponseErr)
 }

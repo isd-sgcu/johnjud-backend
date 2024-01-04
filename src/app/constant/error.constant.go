@@ -6,3 +6,6 @@ const IncorrectEmailPasswordMessage = "Incorrect Email or Password"
 const DuplicateEmailMessage = "Duplicate Email"
 const InternalErrorMessage = "Internal Error"
 const UnavailableServiceMessage = "Unavailable Service"
+
+const PetNotFoundMessage = "Pet not found"
+const InvalidArgument = "Invalid Argument"
