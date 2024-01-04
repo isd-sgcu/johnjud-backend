@@ -36,9 +36,9 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 }
 
 // Adopt mocks base method.
-func (m *MockService) Adopt(arg0 *dto.AdoptDto) (bool, *dto.ResponseErr) {
+func (m *MockService) Adopt(arg0 string, arg1 *dto.AdoptByRequest) (bool, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Adopt", arg0)
+	ret := m.ctrl.Call(m, "Adopt", arg0, arg1)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
@@ -138,17 +138,4 @@ func (m *MockService) Update(arg0 string, arg1 *dto.UpdatePetRequest) (*v1.Pet, 
 func (mr *MockServiceMockRecorder) Update(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockService)(nil).Update), arg0, arg1)
-}
-
-func (m *MockService) Adopt(petId string, in *dto.AdoptByRequest) (bool, *dto.ResponseErr) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Adopt", petId, in)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(*dto.ResponseErr)
-	return ret0, ret1
-}
-
-func (mr *MockServiceMockRecorder) Adopt(petId, in interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Adopt", reflect.TypeOf((*MockService)(nil).Adopt), petId, in)
 }

@@ -34,8 +34,7 @@ type PetServiceTest struct {
 	InvalidArgumentErr    *dto.ResponseErr
 	InternalErr           *dto.ResponseErr
 	ChangeViewedPetDto    *dto.ChangeViewPetRequest
-	AdoptPetReq           *petProto.AdoptPetRequest
-	AdoptPetDto           *dto.AdoptByRequest
+	AdoptDto              *dto.AdoptByRequest
 
 	Images        []*imageProto.Image
 	ImageUrls     []string
@@ -517,7 +516,7 @@ func (t *PetServiceTest) TestChangeViewUnavailableServiceError() {
 }
 
 func (t *PetServiceTest) TestAdoptSuccess() {
-	protoReq := t.AdoptPetReq
+	protoReq := t.AdoptReq
 	protoResp := &petProto.AdoptPetResponse{
 		Success: true,
 	}
@@ -526,14 +525,14 @@ func (t *PetServiceTest) TestAdoptSuccess() {
 	client.On("AdoptPet", protoReq).Return(protoResp, nil)
 
 	svc := NewService(client)
-	actual, err := svc.Adopt(t.Pet.Id, t.AdoptPetDto)
+	actual, err := svc.Adopt(t.Pet.Id, t.AdoptDto)
 
 	assert.Nil(t.T(), err)
 	assert.True(t.T(), actual)
 }
 
 func (t *PetServiceTest) TestAdoptNotFoundError() {
-	protoReq := t.AdoptPetReq
+	protoReq := t.AdoptReq
 	protoResp := &petProto.AdoptPetResponse{
 		Success: false,
 	}
@@ -546,14 +545,14 @@ func (t *PetServiceTest) TestAdoptNotFoundError() {
 	client.On("AdoptPet", protoReq).Return(protoResp, clientErr)
 
 	svc := NewService(client)
-	actual, err := svc.Adopt(t.Pet.Id, t.AdoptPetDto)
+	actual, err := svc.Adopt(t.Pet.Id, t.AdoptDto)
 
 	assert.False(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
 }
 
 func (t *PetServiceTest) TestAdoptUnavailableServiceError() {
-	protoReq := t.AdoptPetReq
+	protoReq := t.AdoptReq
 	protoResp := &petProto.AdoptPetResponse{
 		Success: false,
 	}
@@ -566,7 +565,7 @@ func (t *PetServiceTest) TestAdoptUnavailableServiceError() {
 	client.On("AdoptPet", protoReq).Return(protoResp, clientErr)
 
 	svc := NewService(client)
-	actual, err := svc.Adopt(t.Pet.Id, t.AdoptPetDto)
+	actual, err := svc.Adopt(t.Pet.Id, t.AdoptDto)
 
 	assert.False(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
