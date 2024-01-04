@@ -40,7 +40,7 @@ func NewHandler(service Service, imageService imageSrv.Service, validate validat
 // @Success 200 {object} dto.PetDto
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
-// @Router /v1/pet/ [get]
+// @Router /v1/pets/ [get]
 func (h *Handler) FindAll(c router.IContext) {
 	response, respErr := h.service.FindAll()
 	if respErr != nil {
@@ -63,7 +63,7 @@ func (h *Handler) FindAll(c router.IContext) {
 // @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
-// @Router /v1/pet/{id} [get]
+// @Router /v1/pets/{id} [get]
 func (h *Handler) FindOne(c router.IContext) {
 	id, err := c.Param("id")
 	if err != nil {
@@ -96,7 +96,7 @@ func (h *Handler) FindOne(c router.IContext) {
 // @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
-// @Router /v1/pet/create [post]
+// @Router /v1/pets/create [post]
 func (h *Handler) Create(c router.IContext) {
 	request := &dto.CreatePetRequest{
 		Pet: &dto.PetDto{},
@@ -146,7 +146,7 @@ func (h *Handler) Create(c router.IContext) {
 // @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
-// @Router /v1/pet/{id} [put]
+// @Router /v1/pets/{id} [put]
 func (h *Handler) Update(c router.IContext) {
 	petId, err := c.Param("id")
 	if err != nil {
@@ -207,7 +207,7 @@ func (h *Handler) Update(c router.IContext) {
 // @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
-// @Router /v1/pet/ [put]
+// @Router /v1/pets/ [put]
 func (h *Handler) ChangeView(c router.IContext) {
 	id, err := c.Param("id")
 	if err != nil {
@@ -265,7 +265,7 @@ func (h *Handler) ChangeView(c router.IContext) {
 // @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
-// @Router /v1/pet/ [delete]
+// @Router /v1/pets/ [delete]
 func (h *Handler) Delete(c router.IContext) {
 	id, err := c.Param("id")
 	if err != nil {
