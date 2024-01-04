@@ -13,7 +13,7 @@ services:
   #     - johnjud-local
   #     - database
   #   volumes:
-  #     - ./config/auth:/config
+  #     - ./config/auth:/app/config
   #   ports:
   #     - "3002:3002"
 
@@ -29,7 +29,7 @@ services:
   #     - johnjud-local
   #     - database
   #   volumes:
-  #     - ./config/backend:/config
+  #     - ./config/backend:/app/config
   #   ports:
   #     - "3003:3003"
 
