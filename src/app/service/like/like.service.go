@@ -24,7 +24,7 @@ func NewService(client likeProto.LikeServiceClient) *Service {
 	}
 }
 
-func (s *Service) FindByUserId(userId string) ([]*likeProto.Like, *dto.ResponseErr) {
+func (s *Service) FindByUserId(userId string) ([]*dto.LikeResponse, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -38,8 +38,8 @@ func (s *Service) FindByUserId(userId string) ([]*likeProto.Like, *dto.ResponseE
 		switch st.Code() {
 		case codes.NotFound:
 			return nil, &dto.ResponseErr{
-				StatusCode: 0,
-				Message:    "user not found",
+				StatusCode: http.StatusNotFound,
+				Message:    constant.UserNotFoundMessage,
 				Data:       nil,
 			}
 		case codes.Unavailable:
@@ -56,7 +56,7 @@ func (s *Service) FindByUserId(userId string) ([]*likeProto.Like, *dto.ResponseE
 			}
 		}
 	}
-	return res.Likes, nil
+	return utils.ProtoToDtoList(res.Likes), nil
 }
 
 func (s *Service) Create(in *dto.CreateLikeRequest) (*dto.LikeResponse, *dto.ResponseErr) {
@@ -116,7 +116,7 @@ func (s *Service) Delete(id string) (*dto.DeleteLikeResponse, *dto.ResponseErr) 
 		case codes.NotFound:
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusNotFound,
-				Message:    constant.PetNotFoundMessage,
+				Message:    constant.UserNotFoundMessage,
 				Data:       nil,
 			}
 		case codes.Unavailable:
