@@ -17,9 +17,10 @@ import (
 
 type AuthServiceTest struct {
 	suite.Suite
-	signupRequestDto *dto.SignupRequest
-	signInDto        *dto.SignInRequest
-	token            string
+	signupRequestDto    *dto.SignupRequest
+	signInDto           *dto.SignInRequest
+	token               string
+	refreshTokenRequest *dto.RefreshTokenRequest
 }
 
 func TestAuthService(t *testing.T) {
@@ -38,10 +39,14 @@ func (t *AuthServiceTest) SetupTest() {
 		Password: faker.Password(),
 	}
 	token := faker.Word()
+	refreshTokenRequest := &dto.RefreshTokenRequest{
+		RefreshToken: faker.UUIDDigit(),
+	}
 
 	t.signupRequestDto = signupRequestDto
 	t.signInDto = signInDto
 	t.token = token
+	t.refreshTokenRequest = refreshTokenRequest
 }
 
 func (t *AuthServiceTest) TestSignupSuccess() {
@@ -390,16 +395,208 @@ func (t *AuthServiceTest) TestSignOutUnknownError() {
 	assert.Equal(t.T(), expected, err)
 }
 
-func (t *AuthServiceTest) TestValidateSuccess() {}
+func (t *AuthServiceTest) TestValidateSuccess() {
+	protoReq := &authProto.ValidateRequest{
+		Token: t.token,
+	}
+	protoResp := &authProto.ValidateResponse{
+		UserId: faker.UUIDDigit(),
+		Role:   "user",
+	}
 
-func (t *AuthServiceTest) TestValidateUnauthorized() {}
+	expected := &dto.TokenPayloadAuth{
+		UserId: protoResp.UserId,
+		Role:   protoResp.Role,
+	}
 
-func (t *AuthServiceTest) TestValidateInternalError() {}
+	client := auth.AuthClientMock{}
+	client.On("Validate", protoReq).Return(protoResp, nil)
 
-func (t *AuthServiceTest) TestValidateUnavailableService() {}
+	svc := NewService(&client)
+	actual, err := svc.Validate(t.token)
 
-func (t *AuthServiceTest) TestRefreshTokenUnauthorized() {}
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), expected, actual)
+}
 
-func (t *AuthServiceTest) TestRefreshTokenInternalError() {}
+func (t *AuthServiceTest) TestValidateUnauthorized() {
+	protoReq := &authProto.ValidateRequest{
+		Token: t.token,
+	}
+	protoErr := status.Error(codes.Unauthenticated, "invalid token")
 
-func (t *AuthServiceTest) TestRefreshTokenUnavailableService() {}
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusUnauthorized,
+		Message:    constant.UnauthorizedMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("Validate", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.Validate(t.token)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestValidateUnavailableService() {
+	protoReq := &authProto.ValidateRequest{
+		Token: t.token,
+	}
+	protoErr := status.Error(codes.Unavailable, "connection lost")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusServiceUnavailable,
+		Message:    constant.UnavailableServiceMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("Validate", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.Validate(t.token)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestValidateUnknownError() {
+	protoReq := &authProto.ValidateRequest{
+		Token: t.token,
+	}
+	protoErr := errors.New("Unknown error")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("Validate", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.Validate(t.token)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestRefreshTokenSuccess() {
+	protoReq := &authProto.RefreshTokenRequest{
+		RefreshToken: t.refreshTokenRequest.RefreshToken,
+	}
+	protoResp := &authProto.RefreshTokenResponse{
+		Credential: &authProto.Credential{
+			AccessToken:  faker.Word(),
+			RefreshToken: faker.UUIDDigit(),
+			ExpiresIn:    3600,
+		},
+	}
+
+	expected := &dto.Credential{
+		AccessToken:  protoResp.Credential.AccessToken,
+		RefreshToken: protoResp.Credential.RefreshToken,
+		ExpiresIn:    int(protoResp.Credential.ExpiresIn),
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("RefreshToken", protoReq).Return(protoResp, nil)
+
+	svc := NewService(&client)
+	actual, err := svc.RefreshToken(t.refreshTokenRequest)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), expected, actual)
+}
+
+func (t *AuthServiceTest) TestRefreshTokenInvalidToken() {
+	protoReq := &authProto.RefreshTokenRequest{
+		RefreshToken: t.refreshTokenRequest.RefreshToken,
+	}
+	protoErr := status.Error(codes.InvalidArgument, "Invalid token")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusBadRequest,
+		Message:    constant.InvalidTokenMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("RefreshToken", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.RefreshToken(t.refreshTokenRequest)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestRefreshTokenInternalError() {
+	protoReq := &authProto.RefreshTokenRequest{
+		RefreshToken: t.refreshTokenRequest.RefreshToken,
+	}
+	protoErr := status.Error(codes.Internal, "Internal error")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("RefreshToken", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.RefreshToken(t.refreshTokenRequest)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestRefreshTokenUnavailableService() {
+	protoReq := &authProto.RefreshTokenRequest{
+		RefreshToken: t.refreshTokenRequest.RefreshToken,
+	}
+	protoErr := status.Error(codes.Unavailable, "Connection lost")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusServiceUnavailable,
+		Message:    constant.UnavailableServiceMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("RefreshToken", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.RefreshToken(t.refreshTokenRequest)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestRefreshTokenUnknownError() {
+	protoReq := &authProto.RefreshTokenRequest{
+		RefreshToken: t.refreshTokenRequest.RefreshToken,
+	}
+	protoErr := errors.New("Unknown error")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("RefreshToken", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.RefreshToken(t.refreshTokenRequest)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
