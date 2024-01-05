@@ -51,7 +51,7 @@ func (s *Service) FindAll() (result []*dto.PetResponse, err *dto.ResponseErr) {
 		}
 	}
 	imagesList := utils.MockImageList(len(res.Pets))
-	findAllResponse := utils.RawToDtoList(res.Pets, imagesList)
+	findAllResponse := utils.ProtoToDtoList(res.Pets, imagesList)
 	return findAllResponse, nil
 }
 
@@ -94,7 +94,7 @@ func (s *Service) FindOne(id string) (result *dto.PetResponse, err *dto.Response
 	return findOneResponse, nil
 }
 
-func (s *Service) Create(in *dto.CreatePetRequest) (ressult *dto.PetResponse, err *dto.ResponseErr) {
+func (s *Service) Create(in *dto.CreatePetRequest) (result *dto.PetResponse, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
