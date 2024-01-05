@@ -125,7 +125,7 @@ func (t *PetHandlerTest) SetupTest() {
 }
 
 func (t *PetHandlerTest) TestFindAllSuccess() {
-	findAllResponse := utils.RawToDtoList(t.Pets, t.ImagesList)
+	findAllResponse := utils.ProtoToDtoList(t.Pets, t.ImagesList)
 	expectedResponse := dto.ResponseSuccess{
 		StatusCode: http.StatusOK,
 		Message:    petconst.FindAllPetSuccessMessage,
