@@ -277,7 +277,7 @@ func (s *Service) Adopt(petId string, in *dto.AdoptByRequest) (result bool, err 
 
 	request := &proto.AdoptPetRequest{
 		PetId:  petId,
-		UserId: in.Adopt.UserID,
+		UserId: in.UserID,
 	}
 
 	res, errRes := s.petClient.AdoptPet(ctx, request)

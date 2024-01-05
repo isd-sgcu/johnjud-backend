@@ -141,10 +141,8 @@ func (t *PetServiceTest) SetupTest() {
 	}
 
 	t.AdoptDto = &dto.AdoptByRequest{
-		Adopt: dto.AdoptDto{
-			PetID:  t.Pet.Id,
-			UserID: t.Pet.AdoptBy,
-		},
+		PetID:  t.Pet.Id,
+		UserID: t.Pet.AdoptBy,
 	}
 
 	t.AdoptReq = &petProto.AdoptPetRequest{

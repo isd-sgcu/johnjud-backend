@@ -6,5 +6,6 @@ type AdoptDto struct {
 }
 
 type AdoptByRequest struct {
-	Adopt AdoptDto `json:"adopt" validate:"required"`
+	UserID string `json:"user_id" validate:"required"`
+	PetID  string `json:"pet_id" validate:"required"`
 }
