@@ -196,29 +196,24 @@ func (s *Service) Delete(id string) (result *dto.DeleteResponse, err *dto.Respon
 			Msg(st.Message())
 		switch st.Code() {
 		case codes.NotFound:
-			return &dto.DeleteResponse{
-					Success: false,
-				}, &dto.ResponseErr{
-					StatusCode: http.StatusNotFound,
-					Message:    constant.PetNotFoundMessage,
-					Data:       nil,
-				}
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusNotFound,
+				Message:    constant.PetNotFoundMessage,
+				Data:       nil,
+			}
 		case codes.Unavailable:
-			return &dto.DeleteResponse{
-					Success: false,
-				}, &dto.ResponseErr{
-					StatusCode: http.StatusServiceUnavailable,
-					Message:    constant.UnavailableServiceMessage,
-					Data:       nil,
-				}
-		}
-		return &dto.DeleteResponse{
-				Success: false,
-			}, &dto.ResponseErr{
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusServiceUnavailable,
+				Message:    constant.UnavailableServiceMessage,
+				Data:       nil,
+			}
+		default:
+			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusInternalServerError,
 				Message:    constant.InternalErrorMessage,
 				Data:       nil,
 			}
+		}
 	}
 	return &dto.DeleteResponse{
 		Success: res.Success,
