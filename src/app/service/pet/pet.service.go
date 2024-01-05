@@ -90,7 +90,7 @@ func (s *Service) FindOne(id string) (result *dto.PetResponse, err *dto.Response
 		}
 	}
 	images := utils.MockImageList(1)[0]
-	findOneResponse := utils.RawToDto(res.Pet, images)
+	findOneResponse := utils.ProtoToDto(res.Pet, images)
 	return findOneResponse, nil
 }
 
@@ -98,7 +98,7 @@ func (s *Service) Create(in *dto.CreatePetRequest) (ressult *dto.PetResponse, er
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	request := utils.CreateDtoToRaw(in)
+	request := utils.CreateDtoToProto(in)
 
 	res, errRes := s.petClient.Create(ctx, request)
 	if errRes != nil {
@@ -130,7 +130,7 @@ func (s *Service) Create(in *dto.CreatePetRequest) (ressult *dto.PetResponse, er
 		}
 	}
 	images := utils.MockImageList(1)[0]
-	createPetResponse := utils.RawToDto(res.Pet, images)
+	createPetResponse := utils.ProtoToDto(res.Pet, images)
 	return createPetResponse, nil
 }
 
@@ -138,7 +138,7 @@ func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *dto.PetRe
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	request := utils.UpdateDtoToRaw(id, in)
+	request := utils.UpdateDtoToProto(id, in)
 
 	res, errRes := s.petClient.Update(ctx, request)
 	if errRes != nil {
@@ -176,7 +176,7 @@ func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *dto.PetRe
 		}
 	}
 	images := utils.MockImageList(1)[0]
-	updatePetResponse := utils.RawToDto(res.Pet, images)
+	updatePetResponse := utils.ProtoToDto(res.Pet, images)
 	return updatePetResponse, nil
 }
 

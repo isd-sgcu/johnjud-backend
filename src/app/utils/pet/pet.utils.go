@@ -27,7 +27,7 @@ func MockImageList(n int) [][]*imgproto.Image {
 	return imagesList
 }
 
-func RawToDto(in *petproto.Pet, images []*imgproto.Image) *dto.PetResponse {
+func ProtoToDto(in *petproto.Pet, images []*imgproto.Image) *dto.PetResponse {
 	pet := &dto.PetResponse{
 		Id:           in.Id,
 		Type:         in.Type,
@@ -51,7 +51,7 @@ func RawToDto(in *petproto.Pet, images []*imgproto.Image) *dto.PetResponse {
 	return pet
 }
 
-func CreateDtoToRaw(in *dto.CreatePetRequest) *petproto.CreatePetRequest {
+func CreateDtoToProto(in *dto.CreatePetRequest) *petproto.CreatePetRequest {
 	return &petproto.CreatePetRequest{
 		Pet: &petproto.Pet{
 			Type:         in.Type,
@@ -75,7 +75,7 @@ func CreateDtoToRaw(in *dto.CreatePetRequest) *petproto.CreatePetRequest {
 	}
 }
 
-func UpdateDtoToRaw(id string, in *dto.UpdatePetRequest) *petproto.UpdatePetRequest {
+func UpdateDtoToProto(id string, in *dto.UpdatePetRequest) *petproto.UpdatePetRequest {
 	req := &petproto.UpdatePetRequest{
 		Pet: &petproto.Pet{
 			Id:         id,

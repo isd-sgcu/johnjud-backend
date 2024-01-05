@@ -147,7 +147,7 @@ func (t *PetHandlerTest) TestFindAllSuccess() {
 }
 
 func (t *PetHandlerTest) TestFindOneSuccess() {
-	findOneResponse := utils.RawToDto(t.Pet, t.Images)
+	findOneResponse := utils.ProtoToDto(t.Pet, t.Images)
 	expectedResponse := dto.ResponseSuccess{
 		StatusCode: http.StatusOK,
 		Message:    petconst.FindOnePetSuccessMessage,
@@ -206,7 +206,7 @@ func (t *PetHandlerTest) TestFindOneGrpcErr() {
 }
 
 func (t *PetHandlerTest) TestCreateSuccess() {
-	createResponse := utils.RawToDto(t.Pet, t.Images)
+	createResponse := utils.ProtoToDto(t.Pet, t.Images)
 	expectedResponse := dto.ResponseSuccess{
 		StatusCode: http.StatusCreated,
 		Message:    petconst.CreatePetSuccessMessage,
@@ -249,7 +249,7 @@ func (t *PetHandlerTest) TestCreateGrpcErr() {
 }
 
 func (t *PetHandlerTest) TestUpdateSuccess() {
-	updateResponse := utils.RawToDto(t.Pet, t.Images)
+	updateResponse := utils.ProtoToDto(t.Pet, t.Images)
 	expectedResponse := dto.ResponseSuccess{
 		StatusCode: http.StatusOK,
 		Message:    petconst.UpdatePetSuccessMessage,
