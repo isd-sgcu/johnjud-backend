@@ -10,23 +10,23 @@ import (
 	"syscall"
 	"time"
 
-	authHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/auth"
-	health_check "github.com/isd-sgcu/johnjud-gateway/src/app/handler/health-check"
-	petHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/pet"
-	userHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/user"
+	authhdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/auth"
+	healthcheck "github.com/isd-sgcu/johnjud-gateway/src/app/handler/healthcheck"
+	pethdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/pet"
+	userhdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/user"
 	guard "github.com/isd-sgcu/johnjud-gateway/src/app/middleware/auth"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
-	authSrv "github.com/isd-sgcu/johnjud-gateway/src/app/service/auth"
-	imageSrv "github.com/isd-sgcu/johnjud-gateway/src/app/service/image"
-	petSrv "github.com/isd-sgcu/johnjud-gateway/src/app/service/pet"
-	userSrv "github.com/isd-sgcu/johnjud-gateway/src/app/service/user"
+	authsvc "github.com/isd-sgcu/johnjud-gateway/src/app/service/auth"
+	imagesvc "github.com/isd-sgcu/johnjud-gateway/src/app/service/image"
+	petsvc "github.com/isd-sgcu/johnjud-gateway/src/app/service/pet"
+	usersvc "github.com/isd-sgcu/johnjud-gateway/src/app/service/user"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
 	"github.com/isd-sgcu/johnjud-gateway/src/config"
 	"github.com/isd-sgcu/johnjud-gateway/src/constant/auth"
-	auth_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
-	user_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/user/v1"
-	pet_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
-	image_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
+	authproto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
+	userproto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/user/v1"
+	petproto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
+	imageproto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -90,24 +90,24 @@ func main() {
 			Msg("Cannot connect to service")
 	}
 
-	hc := health_check.NewHandler()
+	hc := healthcheck.NewHandler()
 
-	userClient := user_proto.NewUserServiceClient(authConn)
-	userService := userSrv.NewService(userClient)
-	userHandler := userHdr.NewHandler(userService, v)
+	userClient := userproto.NewUserServiceClient(authConn)
+	userService := usersvc.NewService(userClient)
+	userHandler := userhdr.NewHandler(userService, v)
 
-	authClient := auth_proto.NewAuthServiceClient(authConn)
-	authService := authSrv.NewService(authClient)
-	authHandler := authHdr.NewHandler(authService, userService, v)
+	authClient := authproto.NewAuthServiceClient(authConn)
+	authService := authsvc.NewService(authClient)
+	authHandler := authhdr.NewHandler(authService, userService, v)
 
 	authGuard := guard.NewAuthGuard(authService, auth.ExcludePath, conf.App)
 
-	imageClient := image_proto.NewImageServiceClient(fileConn)
-	imageService := imageSrv.NewService(imageClient)
+	imageClient := imageproto.NewImageServiceClient(fileConn)
+	imageService := imagesvc.NewService(imageClient)
 
-	petClient := pet_proto.NewPetServiceClient(backendConn)
-	petService := petSrv.NewService(petClient)
-	petHandler := petHdr.NewHandler(petService, imageService, v)
+	petClient := petproto.NewPetServiceClient(backendConn)
+	petService := petsvc.NewService(petClient)
+	petHandler := pethdr.NewHandler(petService, imageService, v)
 
 	r := router.NewFiberRouter(&authGuard, conf.App)
 
