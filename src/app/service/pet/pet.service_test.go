@@ -101,7 +101,7 @@ func (t *PetServiceTest) SetupTest() {
 		AdoptBy:      t.Pet.AdoptBy,
 	}
 
-	t.PetDto = RawToDto(t.Pet, t.Pet.Images)
+	t.PetDto = utils.RawToDto(t.Pet, t.Pet.Images)
 
 	t.CreatePetDto = &dto.CreatePetRequest{
 		Type:         t.Pet.Type,
@@ -143,8 +143,8 @@ func (t *PetServiceTest) SetupTest() {
 		AdoptBy:      t.Pet.AdoptBy,
 	}
 
-	t.CreatePetReq = CreateDtoToRaw(t.CreatePetDto)
-	t.UpdatePetReq = UpdateDtoToRaw(t.Pet.Id, t.UpdatePetDto)
+	t.CreatePetReq = utils.CreateDtoToRaw(t.CreatePetDto)
+	t.UpdatePetReq = utils.UpdateDtoToRaw(t.Pet.Id, t.UpdatePetDto)
 
 	t.ChangeViewPetReq = &petproto.ChangeViewPetRequest{
 		Id:      t.Pet.Id,
@@ -191,7 +191,7 @@ func (t *PetServiceTest) TestFindAllSuccess() {
 		Pets: t.Pets,
 	}
 
-	expected := RawToDtoList(t.Pets, t.ImagesList)
+	expected := utils.RawToDtoList(t.Pets, t.ImagesList)
 
 	client := petmock.PetClientMock{}
 	client.On("FindAll", protoReq).Return(protoResp, nil)
@@ -228,7 +228,7 @@ func (t *PetServiceTest) TestFindOneSuccess() {
 		Pet: t.Pet,
 	}
 
-	expected := RawToDto(t.Pet, t.Pet.Images)
+	expected := utils.RawToDto(t.Pet, t.Pet.Images)
 
 	client := petmock.PetClientMock{}
 	client.On("FindOne", protoReq).Return(protoResp, nil)
@@ -284,7 +284,7 @@ func (t *PetServiceTest) TestCreateSuccess() {
 		Pet: t.Pet,
 	}
 
-	expected := RawToDto(t.Pet, t.Pet.Images)
+	expected := utils.RawToDto(t.Pet, t.Pet.Images)
 
 	client := &petmock.PetClientMock{}
 	client.On("Create", protoReq).Return(protoResp, nil)
@@ -353,7 +353,7 @@ func (t *PetServiceTest) TestUpdateSuccess() {
 		Pet: t.Pet,
 	}
 
-	expected := RawToDto(t.Pet, t.Pet.Images)
+	expected := utils.RawToDto(t.Pet, t.Pet.Images)
 
 	client := &petmock.PetClientMock{}
 	client.On("Update", protoReq).Return(protoResp, nil)
