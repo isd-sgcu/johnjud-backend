@@ -68,6 +68,49 @@ func (s *Service) FindOne(id string) (*dto.FindOneUserResponse, *dto.ResponseErr
 	}, nil
 }
 
-func (s *Service) Update(id string, in *dto.UpdateUserRequest) (*proto.User, *dto.ResponseErr) {
-	return nil, nil
+func (s *Service) Update(id string, in *dto.UpdateUserRequest) (*dto.UpdateUserResponse, *dto.ResponseErr) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	response, err := s.client.Update(ctx, &proto.UpdateUserRequest{
+		Id:        id,
+		Firstname: in.Firstname,
+		Lastname:  in.Lastname,
+	})
+	if err != nil {
+		st, _ := status.FromError(err)
+		log.Error().
+			Err(err).
+			Str("service", "user").
+			Str("module", "update").
+			Msg(st.Message())
+		switch st.Code() {
+		case codes.NotFound:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusNotFound,
+				Message:    constant.UserNotFoundMessage,
+				Data:       nil,
+			}
+
+		case codes.Unavailable:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusServiceUnavailable,
+				Message:    constant.UnavailableServiceMessage,
+				Data:       nil,
+			}
+		default:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusInternalServerError,
+				Message:    constant.InternalErrorMessage,
+				Data:       nil,
+			}
+		}
+	}
+
+	return &dto.UpdateUserResponse{
+		Id:        response.User.Id,
+		Firstname: response.User.Firstname,
+		Lastname:  response.User.Lastname,
+		Email:     response.User.Email,
+	}, nil
 }

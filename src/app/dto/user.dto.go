@@ -12,3 +12,10 @@ type UpdateUserRequest struct {
 	Firstname string `json:"firstname" validate:"required"`
 	Lastname  string `json:"lastname" validate:"required"`
 }
+
+type UpdateUserResponse struct {
+	Id        string `json:"id"`
+	Email     string `json:"email"`
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+}
