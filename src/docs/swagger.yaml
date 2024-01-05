@@ -19,13 +19,6 @@ definitions:
         example: e7e84d54-7518-4...
         type: string
     type: object
-  dto.RefreshTokenRequest:
-    properties:
-      refresh_token:
-        type: string
-    required:
-    - refresh_token
-    type: object
   dto.PetDto:
     type: object
   dto.ResponseBadRequestErr:
@@ -79,16 +72,6 @@ definitions:
         type: string
       status_code:
         example: 503
-        type: integer
-    type: object
-  dto.ResponseUnauthorizedErr:
-    properties:
-      data: {}
-      message:
-        example: Invalid token
-        type: string
-      status_code:
-        example: 401
         type: integer
     type: object
   dto.SignInRequest:
@@ -145,44 +128,6 @@ info:
   title: JohnJud API
   version: "1.0"
 paths:
-  /v1/auth/refreshToken:
-    post:
-      consumes:
-      - application/json
-      description: Return the credential
-      parameters:
-      - description: refreshToken request dto
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.RefreshTokenRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.Credential'
-        "400":
-          description: Invalid token
-          schema:
-            $ref: '#/definitions/dto.ResponseBadRequestErr'
-        "401":
-          description: Invalid token
-          schema:
-            $ref: '#/definitions/dto.ResponseUnauthorizedErr'
-        "500":
-          description: Internal service error
-          schema:
-            $ref: '#/definitions/dto.ResponseInternalErr'
-        "503":
-          description: Service is down
-          schema:
-            $ref: '#/definitions/dto.ResponseServiceDownErr'
-      summary: Refresh token
-      tags:
-      - auth
   /v1/auth/signin:
     post:
       consumes:
@@ -234,10 +179,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dto.SignOutResponse'
-        "401":
-          description: Invalid token
-          schema:
-            $ref: '#/definitions/dto.ResponseUnauthorizedErr'
         "500":
           description: Internal service error
           schema:

@@ -57,10 +57,3 @@ func (st *Status) UnmarshalJSON(data []byte) error {
 		return errors.New("invalid gender")
 	}
 }
-
-const FindAllPetSuccessMessage = "find all pets success"
-const FindOnePetSuccessMessage = "find one pet success"
-const CreatePetSuccessMessage = "create pet success"
-const UpdatePetSuccessMessage = "update pet success"
-const ChangeViewPetSuccessMessage = "change view pet success"
-const DeletePetSuccessMessage = "delete pet success"

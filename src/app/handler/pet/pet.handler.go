@@ -9,7 +9,7 @@ import (
 	imageSvc "github.com/isd-sgcu/johnjud-gateway/src/app/handler/image"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
-	petconst "github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
+	petProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 )
 
 type Handler struct {
@@ -19,12 +19,12 @@ type Handler struct {
 }
 
 type Service interface {
-	FindAll() ([]*dto.PetResponse, *dto.ResponseErr)
-	FindOne(string) (*dto.PetResponse, *dto.ResponseErr)
-	Create(*dto.CreatePetRequest) (*dto.PetResponse, *dto.ResponseErr)
-	Update(string, *dto.UpdatePetRequest) (*dto.PetResponse, *dto.ResponseErr)
-	ChangeView(string, *dto.ChangeViewPetRequest) (*dto.ChangeViewPetResponse, *dto.ResponseErr)
-	Delete(string) (*dto.DeleteResponse, *dto.ResponseErr)
+	FindAll() ([]*petProto.Pet, *dto.ResponseErr)
+	FindOne(string) (*petProto.Pet, *dto.ResponseErr)
+	Create(*dto.CreatePetRequest) (*petProto.Pet, *dto.ResponseErr)
+	Update(string, *dto.UpdatePetRequest) (*petProto.Pet, *dto.ResponseErr)
+	ChangeView(string, *dto.ChangeViewPetRequest) (bool, *dto.ResponseErr)
+	Delete(string) (bool, *dto.ResponseErr)
 }
 
 func NewHandler(service Service, imageService imageSvc.Service, validate validator.IDtoValidator) *Handler {
@@ -48,11 +48,7 @@ func (h *Handler) FindAll(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petconst.FindAllPetSuccessMessage,
-		Data:       response,
-	})
+	c.JSON(http.StatusOK, response)
 	return
 }
 
@@ -71,7 +67,7 @@ func (h *Handler) FindAll(c router.IContext) {
 func (h *Handler) FindOne(c router.IContext) {
 	id, err := c.Param("id")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ResponseErr{
+		c.JSON(http.StatusInternalServerError, &dto.ResponseErr{
 			StatusCode: http.StatusInternalServerError,
 			Message:    "Invalid ID",
 			Data:       nil,
@@ -85,11 +81,7 @@ func (h *Handler) FindOne(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petconst.FindOnePetSuccessMessage,
-		Data:       response,
-	})
+	c.JSON(http.StatusOK, response)
 	return
 }
 
@@ -106,7 +98,9 @@ func (h *Handler) FindOne(c router.IContext) {
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/pets/create [post]
 func (h *Handler) Create(c router.IContext) {
-	request := &dto.CreatePetRequest{}
+	request := &dto.CreatePetRequest{
+		Pet: &dto.PetDto{},
+	}
 	err := c.Bind(request)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ResponseErr{
@@ -136,11 +130,7 @@ func (h *Handler) Create(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, dto.ResponseSuccess{
-		StatusCode: http.StatusCreated,
-		Message:    petconst.CreatePetSuccessMessage,
-		Data:       response,
-	})
+	c.JSON(http.StatusCreated, response)
 	return
 }
 
@@ -168,7 +158,9 @@ func (h *Handler) Update(c router.IContext) {
 		return
 	}
 
-	request := &dto.UpdatePetRequest{}
+	request := &dto.UpdatePetRequest{
+		Pet: &dto.PetDto{},
+	}
 
 	err = c.Bind(request)
 	if err != nil {
@@ -199,11 +191,7 @@ func (h *Handler) Update(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petconst.UpdatePetSuccessMessage,
-		Data:       pet,
-	})
+	c.JSON(http.StatusOK, pet)
 	return
 }
 
@@ -223,7 +211,7 @@ func (h *Handler) Update(c router.IContext) {
 func (h *Handler) ChangeView(c router.IContext) {
 	id, err := c.Param("id")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+		c.JSON(http.StatusBadRequest, &dto.ResponseErr{
 			StatusCode: http.StatusBadRequest,
 			Message:    err.Error(),
 			Data:       nil,
@@ -262,11 +250,7 @@ func (h *Handler) ChangeView(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petconst.ChangeViewPetSuccessMessage,
-		Data:       res,
-	})
+	c.JSON(http.StatusOK, res)
 	return
 }
 
@@ -285,7 +269,7 @@ func (h *Handler) ChangeView(c router.IContext) {
 func (h *Handler) Delete(c router.IContext) {
 	id, err := c.Param("id")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+		c.JSON(http.StatusBadRequest, &dto.ResponseErr{
 			StatusCode: http.StatusBadRequest,
 			Message:    err.Error(),
 			Data:       nil,
@@ -299,10 +283,6 @@ func (h *Handler) Delete(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petconst.DeletePetSuccessMessage,
-		Data:       res,
-	})
+	c.JSON(http.StatusOK, res)
 	return
 }

@@ -9,6 +9,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	dto "github.com/isd-sgcu/johnjud-gateway/src/app/dto"
+	v1 "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
 )
 
 // MockService is a mock of Service interface.
@@ -35,10 +36,10 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 }
 
 // RefreshToken mocks base method.
-func (m *MockService) RefreshToken(arg0 *dto.RefreshTokenRequest) (*dto.Credential, *dto.ResponseErr) {
+func (m *MockService) RefreshToken(arg0 string) (*v1.Credential, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RefreshToken", arg0)
-	ret0, _ := ret[0].(*dto.Credential)
+	ret0, _ := ret[0].(*v1.Credential)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }

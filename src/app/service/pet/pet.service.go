@@ -7,28 +7,29 @@ import (
 
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
-	utils "github.com/isd-sgcu/johnjud-gateway/src/app/utils/pet"
-	petproto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
+	"github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
+	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
+	imageProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 type Service struct {
-	petClient petproto.PetServiceClient
+	petClient proto.PetServiceClient
 }
 
-func NewService(petClient petproto.PetServiceClient) *Service {
+func NewService(petClient proto.PetServiceClient) *Service {
 	return &Service{
 		petClient: petClient,
 	}
 }
 
-func (s *Service) FindAll() (result []*dto.PetResponse, err *dto.ResponseErr) {
+func (s *Service) FindAll() (result []*proto.Pet, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	res, errRes := s.petClient.FindAll(ctx, &petproto.FindAllPetRequest{})
+	res, errRes := s.petClient.FindAll(ctx, &proto.FindAllPetRequest{})
 	if errRes != nil {
 		st, _ := status.FromError(errRes)
 		log.Error().
@@ -50,16 +51,15 @@ func (s *Service) FindAll() (result []*dto.PetResponse, err *dto.ResponseErr) {
 			Data:       nil,
 		}
 	}
-	imagesList := utils.MockImageList(len(res.Pets))
-	findAllResponse := utils.RawToDtoList(res.Pets, imagesList)
-	return findAllResponse, nil
+	_ = &imageProto.Image{}
+	return res.Pets, nil
 }
 
-func (s *Service) FindOne(id string) (result *dto.PetResponse, err *dto.ResponseErr) {
+func (s *Service) FindOne(id string) (result *proto.Pet, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	res, errRes := s.petClient.FindOne(ctx, &petproto.FindOnePetRequest{Id: id})
+	res, errRes := s.petClient.FindOne(ctx, &proto.FindOnePetRequest{Id: id})
 	if errRes != nil {
 		st, _ := status.FromError(errRes)
 		log.Error().
@@ -89,18 +89,16 @@ func (s *Service) FindOne(id string) (result *dto.PetResponse, err *dto.Response
 			}
 		}
 	}
-	images := utils.MockImageList(1)[0]
-	findOneResponse := utils.ProtoToDto(res.Pet, images)
-	return findOneResponse, nil
+	return res.Pet, nil
 }
 
-func (s *Service) Create(in *dto.CreatePetRequest) (ressult *dto.PetResponse, err *dto.ResponseErr) {
+func (s *Service) Create(in *dto.CreatePetRequest) (ressult *proto.Pet, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	request := utils.CreateDtoToProto(in)
+	request := DtoToRaw(in.Pet)
 
-	res, errRes := s.petClient.Create(ctx, request)
+	res, errRes := s.petClient.Create(ctx, &proto.CreatePetRequest{Pet: request})
 	if errRes != nil {
 		st, _ := status.FromError(errRes)
 		log.Error().
@@ -129,16 +127,35 @@ func (s *Service) Create(in *dto.CreatePetRequest) (ressult *dto.PetResponse, er
 			}
 		}
 	}
-	images := utils.MockImageList(1)[0]
-	createPetResponse := utils.ProtoToDto(res.Pet, images)
-	return createPetResponse, nil
+	return res.Pet, nil
 }
 
-func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *dto.PetResponse, err *dto.ResponseErr) {
+func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *proto.Pet, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	request := utils.UpdateDtoToProto(id, in)
+	request := &proto.UpdatePetRequest{
+		Pet: &proto.Pet{
+			Id:           id,
+			Type:         in.Pet.Type,
+			Species:      in.Pet.Species,
+			Name:         in.Pet.Name,
+			Birthdate:    in.Pet.Birthdate,
+			Gender:       proto.Gender(in.Pet.Gender),
+			Habit:        in.Pet.Habit,
+			Caption:      in.Pet.Caption,
+			Images:       []*imageProto.Image{},
+			Status:       proto.PetStatus(in.Pet.Status),
+			IsSterile:    *in.Pet.IsSterile,
+			IsVaccinated: *in.Pet.IsSterile,
+			IsVisible:    *in.Pet.IsVaccinated,
+			IsClubPet:    *in.Pet.IsClubPet,
+			Background:   in.Pet.Background,
+			Address:      in.Pet.Address,
+			Contact:      in.Pet.Contact,
+			AdoptBy:      in.Pet.AdoptBy,
+		},
+	}
 
 	res, errRes := s.petClient.Update(ctx, request)
 	if errRes != nil {
@@ -175,16 +192,14 @@ func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *dto.PetRe
 			}
 		}
 	}
-	images := utils.MockImageList(1)[0]
-	updatePetResponse := utils.ProtoToDto(res.Pet, images)
-	return updatePetResponse, nil
+	return res.Pet, nil
 }
 
-func (s *Service) Delete(id string) (result *dto.DeleteResponse, err *dto.ResponseErr) {
+func (s *Service) Delete(id string) (result bool, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	res, errRes := s.petClient.Delete(ctx, &petproto.DeletePetRequest{
+	res, errRes := s.petClient.Delete(ctx, &proto.DeletePetRequest{
 		Id: id,
 	})
 	if errRes != nil {
@@ -196,40 +211,32 @@ func (s *Service) Delete(id string) (result *dto.DeleteResponse, err *dto.Respon
 			Msg(st.Message())
 		switch st.Code() {
 		case codes.NotFound:
-			return &dto.DeleteResponse{
-					Success: false,
-				}, &dto.ResponseErr{
-					StatusCode: http.StatusNotFound,
-					Message:    constant.PetNotFoundMessage,
-					Data:       nil,
-				}
-		case codes.Unavailable:
-			return &dto.DeleteResponse{
-					Success: false,
-				}, &dto.ResponseErr{
-					StatusCode: http.StatusServiceUnavailable,
-					Message:    constant.UnavailableServiceMessage,
-					Data:       nil,
-				}
-		}
-		return &dto.DeleteResponse{
-				Success: false,
-			}, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
+			return false, &dto.ResponseErr{
+				StatusCode: http.StatusNotFound,
+				Message:    constant.PetNotFoundMessage,
 				Data:       nil,
 			}
+		case codes.Unavailable:
+			return false, &dto.ResponseErr{
+				StatusCode: http.StatusServiceUnavailable,
+				Message:    constant.UnavailableServiceMessage,
+				Data:       nil,
+			}
+		}
+		return false, &dto.ResponseErr{
+			StatusCode: http.StatusInternalServerError,
+			Message:    constant.InternalErrorMessage,
+			Data:       nil,
+		}
 	}
-	return &dto.DeleteResponse{
-		Success: res.Success,
-	}, nil
+	return res.Success, nil
 }
 
-func (s *Service) ChangeView(id string, in *dto.ChangeViewPetRequest) (result *dto.ChangeViewPetResponse, err *dto.ResponseErr) {
+func (s *Service) ChangeView(id string, in *dto.ChangeViewPetRequest) (result bool, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	res, errRes := s.petClient.ChangeView(ctx, &petproto.ChangeViewPetRequest{
+	res, errRes := s.petClient.ChangeView(ctx, &proto.ChangeViewPetRequest{
 		Id:      id,
 		Visible: in.Visible,
 	})
@@ -242,32 +249,69 @@ func (s *Service) ChangeView(id string, in *dto.ChangeViewPetRequest) (result *d
 			Msg(st.Message())
 		switch st.Code() {
 		case codes.NotFound:
-			return &dto.ChangeViewPetResponse{
-					Success: false,
-				}, &dto.ResponseErr{
-					StatusCode: http.StatusNotFound,
-					Message:    constant.PetNotFoundMessage,
-					Data:       nil,
-				}
+			return false, &dto.ResponseErr{
+				StatusCode: http.StatusNotFound,
+				Message:    constant.PetNotFoundMessage,
+				Data:       nil,
+			}
 		case codes.Unavailable:
-			return &dto.ChangeViewPetResponse{
-					Success: false,
-				}, &dto.ResponseErr{
-					StatusCode: http.StatusServiceUnavailable,
-					Message:    constant.UnavailableServiceMessage,
-					Data:       nil,
-				}
+			return false, &dto.ResponseErr{
+				StatusCode: http.StatusServiceUnavailable,
+				Message:    constant.UnavailableServiceMessage,
+				Data:       nil,
+			}
 		default:
-			return &dto.ChangeViewPetResponse{
-					Success: false,
-				}, &dto.ResponseErr{
-					StatusCode: http.StatusServiceUnavailable,
-					Message:    constant.InternalErrorMessage,
-					Data:       nil,
-				}
+			return false, &dto.ResponseErr{
+				StatusCode: http.StatusServiceUnavailable,
+				Message:    constant.InternalErrorMessage,
+				Data:       nil,
+			}
 		}
 	}
-	return &dto.ChangeViewPetResponse{
-		Success: res.Success,
-	}, nil
+	return res.Success, nil
+}
+
+func DtoToRaw(in *dto.PetDto) *proto.Pet {
+	return &proto.Pet{
+		Id:           in.Id,
+		Type:         in.Type,
+		Species:      in.Species,
+		Name:         in.Name,
+		Birthdate:    in.Birthdate,
+		Gender:       proto.Gender(in.Gender),
+		Habit:        in.Habit,
+		Caption:      in.Caption,
+		Images:       []*imageProto.Image{},
+		Status:       proto.PetStatus(in.Status),
+		IsSterile:    *in.IsSterile,
+		IsVaccinated: *in.IsVaccinated,
+		IsVisible:    *in.IsVisible,
+		IsClubPet:    *in.IsClubPet,
+		Background:   in.Background,
+		Address:      in.Address,
+		Contact:      in.Contact,
+		AdoptBy:      in.AdoptBy,
+	}
+}
+
+func RawToDto(in *proto.Pet) *dto.PetDto {
+	return &dto.PetDto{
+		Id:           in.Id,
+		Type:         in.Type,
+		Species:      in.Species,
+		Name:         in.Name,
+		Birthdate:    in.Birthdate,
+		Gender:       pet.Gender(in.Gender),
+		Habit:        in.Habit,
+		Caption:      in.Caption,
+		Status:       pet.Status(in.Status),
+		IsSterile:    &in.IsSterile,
+		IsVaccinated: &in.IsVaccinated,
+		IsVisible:    &in.IsVisible,
+		IsClubPet:    &in.IsClubPet,
+		Background:   in.Background,
+		Address:      in.Address,
+		Contact:      in.Contact,
+		AdoptBy:      in.AdoptBy,
+	}
 }

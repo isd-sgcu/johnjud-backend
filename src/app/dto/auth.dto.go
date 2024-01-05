@@ -2,7 +2,14 @@ package dto
 
 type TokenPayloadAuth struct {
 	UserId string `json:"user_id"`
-	Role   string `json:"role"`
+}
+
+type Validate struct {
+	Token string `json:"token" validate:"jwt"`
+}
+
+type RedeemNewToken struct {
+	RefreshToken string `json:"refresh_token" validate:"required"`
 }
 
 type SignupRequest struct {
@@ -26,8 +33,4 @@ type SignInRequest struct {
 
 type SignOutResponse struct {
 	IsSuccess bool `json:"is_success"`
-}
-
-type RefreshTokenRequest struct {
-	RefreshToken string `json:"refresh_token" validate:"required"`
 }
