@@ -85,10 +85,10 @@ func (s *Service) Update(id string, in *dto.UpdateUserRequest) (*dto.UpdateUserR
 			Str("module", "update").
 			Msg(st.Message())
 		switch st.Code() {
-		case codes.NotFound:
+		case codes.AlreadyExists:
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusNotFound,
-				Message:    constant.UserNotFoundMessage,
+				Message:    constant.DuplicateEmailMessage,
 				Data:       nil,
 			}
 
@@ -112,5 +112,32 @@ func (s *Service) Update(id string, in *dto.UpdateUserRequest) (*dto.UpdateUserR
 		Firstname: response.User.Firstname,
 		Lastname:  response.User.Lastname,
 		Email:     response.User.Email,
+	}, nil
+}
+
+func (s *Service) Delete(id string) (*dto.DeleteUserResponse, *dto.ResponseErr) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	response, err := s.client.Delete(ctx, &proto.DeleteUserRequest{
+		Id: id,
+	})
+	if err != nil {
+		st, _ := status.FromError(err)
+		log.Error().
+			Err(err).
+			Str("service", "user").
+			Str("module", "delete").
+			Msg(st.Message())
+
+		return nil, &dto.ResponseErr{
+			StatusCode: http.StatusInternalServerError,
+			Message:    constant.InternalErrorMessage,
+			Data:       nil,
+		}
+	}
+
+	return &dto.DeleteUserResponse{
+		Success: response.Success,
 	}, nil
 }

@@ -19,3 +19,7 @@ type UpdateUserResponse struct {
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
 }
+
+type DeleteUserResponse struct {
+	Success bool `json:"success" validate:"required"`
+}
