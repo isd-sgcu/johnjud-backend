@@ -14,7 +14,7 @@ type Handler struct {
 
 type Service interface {
 	FindByUserId(string) ([]*proto.Like, *dto.ResponseErr)
-	Create(*dto.LikeDto) (*proto.Like, *dto.ResponseErr)
+	Create(*dto.CreateLikeRequest) (*proto.Like, *dto.ResponseErr)
 	Delete(string) (bool, *dto.ResponseErr)
 }
 
