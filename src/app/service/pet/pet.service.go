@@ -9,7 +9,7 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
 	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
-	image_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
+	imageProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -51,7 +51,7 @@ func (s *Service) FindAll() (result []*proto.Pet, err *dto.ResponseErr) {
 			Data:       nil,
 		}
 	}
-	_ = &image_proto.Image{}
+	_ = &imageProto.Image{}
 	return res.Pets, nil
 }
 
@@ -144,7 +144,7 @@ func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *proto.Pet
 			Gender:       proto.Gender(in.Pet.Gender),
 			Habit:        in.Pet.Habit,
 			Caption:      in.Pet.Caption,
-			Images:       []*image_proto.Image{},
+			Images:       []*imageProto.Image{},
 			Status:       proto.PetStatus(in.Pet.Status),
 			IsSterile:    *in.Pet.IsSterile,
 			IsVaccinated: *in.Pet.IsSterile,
@@ -281,7 +281,7 @@ func DtoToRaw(in *dto.PetDto) *proto.Pet {
 		Gender:       proto.Gender(in.Gender),
 		Habit:        in.Habit,
 		Caption:      in.Caption,
-		Images:       []*image_proto.Image{},
+		Images:       []*imageProto.Image{},
 		Status:       proto.PetStatus(in.Status),
 		IsSterile:    *in.IsSterile,
 		IsVaccinated: *in.IsVaccinated,

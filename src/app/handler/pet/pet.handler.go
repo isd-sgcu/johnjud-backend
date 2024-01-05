@@ -6,28 +6,28 @@ import (
 
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
-	imageSrv "github.com/isd-sgcu/johnjud-gateway/src/app/handler/image"
+	imageSvc "github.com/isd-sgcu/johnjud-gateway/src/app/handler/image"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
-	pet_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
+	petProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 )
 
 type Handler struct {
 	service      Service
-	imageService imageSrv.Service
+	imageService imageSvc.Service
 	validate     validator.IDtoValidator
 }
 
 type Service interface {
-	FindAll() ([]*pet_proto.Pet, *dto.ResponseErr)
-	FindOne(string) (*pet_proto.Pet, *dto.ResponseErr)
-	Create(*dto.CreatePetRequest) (*pet_proto.Pet, *dto.ResponseErr)
-	Update(string, *dto.UpdatePetRequest) (*pet_proto.Pet, *dto.ResponseErr)
+	FindAll() ([]*petProto.Pet, *dto.ResponseErr)
+	FindOne(string) (*petProto.Pet, *dto.ResponseErr)
+	Create(*dto.CreatePetRequest) (*petProto.Pet, *dto.ResponseErr)
+	Update(string, *dto.UpdatePetRequest) (*petProto.Pet, *dto.ResponseErr)
 	ChangeView(string, *dto.ChangeViewPetRequest) (bool, *dto.ResponseErr)
 	Delete(string) (bool, *dto.ResponseErr)
 }
 
-func NewHandler(service Service, imageService imageSrv.Service, validate validator.IDtoValidator) *Handler {
+func NewHandler(service Service, imageService imageSvc.Service, validate validator.IDtoValidator) *Handler {
 	return &Handler{service, imageService, validate}
 }
 
