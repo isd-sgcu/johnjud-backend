@@ -9,6 +9,7 @@ import (
 	imageSrv "github.com/isd-sgcu/johnjud-gateway/src/app/handler/image"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
+	petconst "github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
 )
 
 type Handler struct {
@@ -47,7 +48,11 @@ func (h *Handler) FindAll(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, dto.ResponseSuccess{
+		StatusCode: http.StatusOK,
+		Message:    petconst.FindAllPetSuccessMessage,
+		Data:       response,
+	})
 	return
 }
 
@@ -66,7 +71,7 @@ func (h *Handler) FindAll(c router.IContext) {
 func (h *Handler) FindOne(c router.IContext) {
 	id, err := c.Param("id")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, &dto.ResponseErr{
+		c.JSON(http.StatusInternalServerError, dto.ResponseErr{
 			StatusCode: http.StatusInternalServerError,
 			Message:    "Invalid ID",
 			Data:       nil,
@@ -81,8 +86,8 @@ func (h *Handler) FindOne(c router.IContext) {
 	}
 
 	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusCreated,
-		Message:    "fine one pet success",
+		StatusCode: http.StatusOK,
+		Message:    petconst.FindOnePetSuccessMessage,
 		Data:       response,
 	})
 	return
@@ -133,7 +138,7 @@ func (h *Handler) Create(c router.IContext) {
 
 	c.JSON(http.StatusCreated, dto.ResponseSuccess{
 		StatusCode: http.StatusCreated,
-		Message:    "create pet success",
+		Message:    petconst.CreatePetSuccessMessage,
 		Data:       response,
 	})
 	return
@@ -195,8 +200,8 @@ func (h *Handler) Update(c router.IContext) {
 	}
 
 	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusCreated,
-		Message:    "update pet success",
+		StatusCode: http.StatusOK,
+		Message:    petconst.UpdatePetSuccessMessage,
 		Data:       pet,
 	})
 	return
@@ -218,7 +223,7 @@ func (h *Handler) Update(c router.IContext) {
 func (h *Handler) ChangeView(c router.IContext) {
 	id, err := c.Param("id")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, &dto.ResponseErr{
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
 			StatusCode: http.StatusBadRequest,
 			Message:    err.Error(),
 			Data:       nil,
@@ -258,8 +263,8 @@ func (h *Handler) ChangeView(c router.IContext) {
 	}
 
 	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusCreated,
-		Message:    "change pet success",
+		StatusCode: http.StatusOK,
+		Message:    petconst.ChangeViewPetSuccessMessage,
 		Data:       res,
 	})
 	return
@@ -280,7 +285,7 @@ func (h *Handler) ChangeView(c router.IContext) {
 func (h *Handler) Delete(c router.IContext) {
 	id, err := c.Param("id")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, &dto.ResponseErr{
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
 			StatusCode: http.StatusBadRequest,
 			Message:    err.Error(),
 			Data:       nil,
@@ -295,8 +300,8 @@ func (h *Handler) Delete(c router.IContext) {
 	}
 
 	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusCreated,
-		Message:    "delete pet success",
+		StatusCode: http.StatusOK,
+		Message:    petconst.DeletePetSuccessMessage,
 		Data:       res,
 	})
 	return
