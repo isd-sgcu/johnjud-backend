@@ -191,7 +191,7 @@ func (t *PetServiceTest) TestFindAllSuccess() {
 		Pets: t.Pets,
 	}
 
-	expected := utils.RawToDtoList(t.Pets, t.ImagesList)
+	expected := utils.ProtoToDtoList(t.Pets, t.ImagesList)
 
 	client := petmock.PetClientMock{}
 	client.On("FindAll", protoReq).Return(protoResp, nil)
