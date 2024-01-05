@@ -8,6 +8,7 @@ import (
 	"github.com/go-faker/faker/v4"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
+	utils "github.com/isd-sgcu/johnjud-gateway/src/app/utils/pet"
 	"github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
 	petmock "github.com/isd-sgcu/johnjud-gateway/src/mocks/client/pet"
 	petproto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
@@ -46,21 +47,7 @@ func TestPetService(t *testing.T) {
 }
 
 func (t *PetServiceTest) SetupTest() {
-	// imagesList := mockImageList()
-	var imagesList [][]*imgproto.Image
-	for i := 0; i <= 3; i++ {
-		var images []*imgproto.Image
-		for j := 0; j <= 3; j++ {
-			images = append(images, &imgproto.Image{
-				Id:        faker.UUIDDigit(),
-				PetId:     faker.UUIDDigit(),
-				ImageUrl:  faker.URL(),
-				ObjectKey: faker.Word(),
-			})
-		}
-		imagesList = append(imagesList, images)
-	}
-
+	imagesList := utils.MockImageList(3)
 	t.ImagesList = imagesList
 	t.Images = imagesList[0]
 
