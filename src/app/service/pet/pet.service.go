@@ -91,7 +91,7 @@ func (s *Service) FindOne(id string) (result *dto.PetResponse, err *dto.Response
 			}
 		}
 	}
-	images := utils.MockImages()
+	images := utils.MockImageList(1)[0]
 	findOneResponse := RawToDto(res.Pet, images)
 	return findOneResponse, nil
 }
@@ -131,7 +131,7 @@ func (s *Service) Create(in *dto.CreatePetRequest) (ressult *dto.PetResponse, er
 			}
 		}
 	}
-	images := utils.MockImages()
+	images := utils.MockImageList(1)[0]
 	createPetResponse := RawToDto(res.Pet, images)
 	return createPetResponse, nil
 }
@@ -177,7 +177,7 @@ func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *dto.PetRe
 			}
 		}
 	}
-	images := utils.MockImages()
+	images := utils.MockImageList(1)[0]
 	updatePetResponse := RawToDto(res.Pet, images)
 	return updatePetResponse, nil
 }
