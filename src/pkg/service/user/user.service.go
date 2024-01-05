@@ -6,6 +6,6 @@ import (
 )
 
 type Service interface {
-	FindOne(string) (*user_proto.User, *dto.ResponseErr)
-	Update(string, *dto.UpdateUserDto) (*user_proto.User, *dto.ResponseErr)
+	FindOne(string) (*dto.FindOneUserResponse, *dto.ResponseErr)
+	Update(string, *dto.UpdateUserRequest) (*user_proto.User, *dto.ResponseErr)
 }

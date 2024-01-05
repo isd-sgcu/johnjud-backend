@@ -36,46 +36,46 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 }
 
 // Delete mocks base method.
-func (m *MockService) Delete(id string) (bool, *dto.ResponseErr) {
+func (m *MockService) Delete(arg0 string) (bool, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", id)
+	ret := m.ctrl.Call(m, "Delete", arg0)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockServiceMockRecorder) Delete(id interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) Delete(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockService)(nil).Delete), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockService)(nil).Delete), arg0)
 }
 
 // FindByPetId mocks base method.
-func (m *MockService) FindByPetId(id string) ([]*v1.Image, *dto.ResponseErr) {
+func (m *MockService) FindByPetId(arg0 string) ([]*v1.Image, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByPetId", id)
+	ret := m.ctrl.Call(m, "FindByPetId", arg0)
 	ret0, _ := ret[0].([]*v1.Image)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // FindByPetId indicates an expected call of FindByPetId.
-func (mr *MockServiceMockRecorder) FindByPetId(id interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) FindByPetId(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByPetId", reflect.TypeOf((*MockService)(nil).FindByPetId), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByPetId", reflect.TypeOf((*MockService)(nil).FindByPetId), arg0)
 }
 
 // Upload mocks base method.
-func (m *MockService) Upload(in *dto.ImageDto) (*v1.Image, *dto.ResponseErr) {
+func (m *MockService) Upload(arg0 *dto.ImageDto) (*v1.Image, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Upload", in)
+	ret := m.ctrl.Call(m, "Upload", arg0)
 	ret0, _ := ret[0].(*v1.Image)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // Upload indicates an expected call of Upload.
-func (mr *MockServiceMockRecorder) Upload(in interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) Upload(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Upload", reflect.TypeOf((*MockService)(nil).Upload), in)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Upload", reflect.TypeOf((*MockService)(nil).Upload), arg0)
 }

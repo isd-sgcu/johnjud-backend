@@ -27,7 +27,7 @@ func (s *ServiceMock) FindOne(id string) (result *user_proto.User, err *dto.Resp
 	return
 }
 
-func (s *ServiceMock) Update(id string, in *dto.UpdateUserDto) (result *user_proto.User, err *dto.ResponseErr) {
+func (s *ServiceMock) Update(id string, in *dto.UpdateUserRequest) (result *user_proto.User, err *dto.ResponseErr) {
 	args := s.Called(id, in)
 
 	if args.Get(0) != nil {

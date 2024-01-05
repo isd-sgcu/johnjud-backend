@@ -11,3 +11,5 @@ const UnavailableServiceMessage = "Unavailable Service"
 
 const PetNotFoundMessage = "Pet not found"
 const InvalidArgument = "Invalid Argument"
+
+const UserNotFoundMessage = "User not found"

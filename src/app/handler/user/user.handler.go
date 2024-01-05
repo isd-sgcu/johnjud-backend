@@ -1,11 +1,12 @@
 package user
 
 import (
+	"net/http"
+
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
 	"github.com/isd-sgcu/johnjud-gateway/src/pkg/service/user"
-	"net/http"
 )
 
 type Handler struct {
@@ -41,7 +42,7 @@ func (h *Handler) FindOne(c *router.FiberCtx) {
 func (h *Handler) Update(c *router.FiberCtx) {
 	usrId := c.UserID()
 
-	usrDto := dto.UpdateUserDto{}
+	usrDto := dto.UpdateUserRequest{}
 
 	err := c.Bind(&usrDto)
 	if err != nil {
