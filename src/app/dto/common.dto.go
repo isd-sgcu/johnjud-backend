@@ -67,3 +67,9 @@ type ResponseGatewayTimeoutErr struct {
 	Message    string      `json:"message" example:"Connection timeout"`
 	Data       interface{} `json:"data"`
 }
+
+type ResponseSuccess struct {
+	StatusCode int         `json:"status_code" example:"200"`
+	Message    string      `json:"message" example:"success"`
+	Data       interface{} `json:"data"`
+}

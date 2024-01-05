@@ -18,10 +18,11 @@ import (
 
 type AuthHandlerTest struct {
 	suite.Suite
-	signupRequest *dto.SignupRequest
-	signInRequest *dto.SignInRequest
-	bindErr       error
-	validateErr   []*dto.BadReqErrResponse
+	signupRequest       *dto.SignupRequest
+	signInRequest       *dto.SignInRequest
+	refreshTokenRequest *dto.RefreshTokenRequest
+	bindErr             error
+	validateErr         []*dto.BadReqErrResponse
 }
 
 func TestAuthHandler(t *testing.T) {
@@ -31,6 +32,7 @@ func TestAuthHandler(t *testing.T) {
 func (t *AuthHandlerTest) SetupTest() {
 	signupRequest := &dto.SignupRequest{}
 	signInRequest := &dto.SignInRequest{}
+	refreshTokenRequest := &dto.RefreshTokenRequest{}
 	bindErr := errors.New("Binding request failed")
 	validateErr := []*dto.BadReqErrResponse{
 		{
@@ -47,6 +49,7 @@ func (t *AuthHandlerTest) SetupTest() {
 
 	t.signupRequest = signupRequest
 	t.signInRequest = signInRequest
+	t.refreshTokenRequest = refreshTokenRequest
 	t.bindErr = bindErr
 	t.validateErr = validateErr
 }
@@ -281,4 +284,97 @@ func (t *AuthHandlerTest) TestSignOutServiceError() {
 	context.EXPECT().JSON(http.StatusInternalServerError, errResponse)
 
 	handler.SignOut(context)
+}
+
+func (t *AuthHandlerTest) TestRefreshTokenSuccess() {
+	refreshTokenResponse := &dto.Credential{
+		AccessToken:  faker.Word(),
+		RefreshToken: faker.UUIDDigit(),
+		ExpiresIn:    3600,
+	}
+
+	controller := gomock.NewController(t.T())
+
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
+
+	handler := NewHandler(authSvc, userSvc, validator)
+
+	context.EXPECT().Bind(t.refreshTokenRequest).Return(nil)
+	validator.EXPECT().Validate(t.refreshTokenRequest).Return(nil)
+	authSvc.EXPECT().RefreshToken(t.refreshTokenRequest).Return(refreshTokenResponse, nil)
+	context.EXPECT().JSON(http.StatusOK, refreshTokenResponse)
+
+	handler.RefreshToken(context)
+}
+
+func (t *AuthHandlerTest) TestRefreshTokenBindFailed() {
+	errResponse := dto.ResponseErr{
+		StatusCode: http.StatusBadRequest,
+		Message:    constant.BindingRequestErrorMessage + t.bindErr.Error(),
+		Data:       nil,
+	}
+
+	controller := gomock.NewController(t.T())
+
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
+
+	handler := NewHandler(authSvc, userSvc, validator)
+
+	context.EXPECT().Bind(t.refreshTokenRequest).Return(t.bindErr)
+	context.EXPECT().JSON(http.StatusBadRequest, errResponse)
+
+	handler.RefreshToken(context)
+}
+
+func (t *AuthHandlerTest) TestRefreshTokenValidateFailed() {
+	errResponse := dto.ResponseErr{
+		StatusCode: http.StatusBadRequest,
+		Message:    constant.InvalidRequestBodyMessage + "BadRequestError1, BadRequestError2",
+		Data:       nil,
+	}
+
+	controller := gomock.NewController(t.T())
+
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
+
+	handler := NewHandler(authSvc, userSvc, validator)
+
+	context.EXPECT().Bind(t.refreshTokenRequest).Return(nil)
+	validator.EXPECT().Validate(t.refreshTokenRequest).Return(t.validateErr)
+	context.EXPECT().JSON(http.StatusBadRequest, errResponse)
+
+	handler.RefreshToken(context)
+}
+
+func (t *AuthHandlerTest) TestRefreshTokenServiceError() {
+	refreshTokenErr := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	controller := gomock.NewController(t.T())
+
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
+
+	handler := NewHandler(authSvc, userSvc, validator)
+
+	context.EXPECT().Bind(t.refreshTokenRequest).Return(nil)
+	validator.EXPECT().Validate(t.refreshTokenRequest).Return(nil)
+	authSvc.EXPECT().RefreshToken(t.refreshTokenRequest).Return(nil, refreshTokenErr)
+	context.EXPECT().JSON(http.StatusInternalServerError, refreshTokenErr)
+
+	handler.RefreshToken(context)
 }

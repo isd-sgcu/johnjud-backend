@@ -14,6 +14,8 @@ import (
 	petMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/service/pet"
 	validatorMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/validator"
 
+	utils "github.com/isd-sgcu/johnjud-gateway/src/app/utils/pet"
+	petconst "github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
 	petProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	imageProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 	"github.com/stretchr/testify/suite"
@@ -23,7 +25,7 @@ type PetHandlerTest struct {
 	suite.Suite
 	Pet                  *petProto.Pet
 	Pets                 []*petProto.Pet
-	PetDto               *dto.PetDto
+	PetDto               *dto.PetResponse
 	CreatePetRequest     *dto.CreatePetRequest
 	ChangeViewPetRequest *dto.ChangeViewPetRequest
 	UpdatePetRequest     *dto.UpdatePetRequest
@@ -31,6 +33,8 @@ type PetHandlerTest struct {
 	NotFoundErr          *dto.ResponseErr
 	ServiceDownErr       *dto.ResponseErr
 	InternalErr          *dto.ResponseErr
+	Images               []*imageProto.Image
+	ImagesList           [][]*imageProto.Image
 }
 
 func TestPetHandler(t *testing.T) {
@@ -38,6 +42,9 @@ func TestPetHandler(t *testing.T) {
 }
 
 func (t *PetHandlerTest) SetupTest() {
+	imagesList := utils.MockImageList(3)
+	t.ImagesList = imagesList
+	t.Images = imagesList[0]
 	var pets []*petProto.Pet
 	for i := 0; i <= 3; i++ {
 		pet := &petProto.Pet{
@@ -67,7 +74,7 @@ func (t *PetHandlerTest) SetupTest() {
 	t.Pets = pets
 	t.Pet = t.Pets[0]
 
-	t.PetDto = &dto.PetDto{
+	t.PetDto = &dto.PetResponse{
 		Id:           t.Pet.Id,
 		Type:         t.Pet.Type,
 		Species:      t.Pet.Species,
@@ -87,13 +94,9 @@ func (t *PetHandlerTest) SetupTest() {
 		AdoptBy:      t.Pet.AdoptBy,
 	}
 
-	t.CreatePetRequest = &dto.CreatePetRequest{
-		Pet: &dto.PetDto{},
-	}
+	t.CreatePetRequest = &dto.CreatePetRequest{}
 
-	t.UpdatePetRequest = &dto.UpdatePetRequest{
-		Pet: &dto.PetDto{},
-	}
+	t.UpdatePetRequest = &dto.UpdatePetRequest{}
 
 	t.ChangeViewPetRequest = &dto.ChangeViewPetRequest{}
 
@@ -122,7 +125,12 @@ func (t *PetHandlerTest) SetupTest() {
 }
 
 func (t *PetHandlerTest) TestFindAllSuccess() {
-	findAllResponse := t.Pets
+	findAllResponse := utils.RawToDtoList(t.Pets, t.ImagesList)
+	expectedResponse := dto.ResponseSuccess{
+		StatusCode: http.StatusOK,
+		Message:    petconst.FindAllPetSuccessMessage,
+		Data:       findAllResponse,
+	}
 
 	controller := gomock.NewController(t.T())
 
@@ -132,14 +140,19 @@ func (t *PetHandlerTest) TestFindAllSuccess() {
 	context := routerMock.NewMockIContext(controller)
 
 	petSvc.EXPECT().FindAll().Return(findAllResponse, nil)
-	context.EXPECT().JSON(http.StatusOK, findAllResponse)
+	context.EXPECT().JSON(http.StatusOK, expectedResponse)
 
 	handler := NewHandler(petSvc, imageSvc, validator)
 	handler.FindAll(context)
 }
 
 func (t *PetHandlerTest) TestFindOneSuccess() {
-	findOneResponse := t.Pet
+	findOneResponse := utils.ProtoToDto(t.Pet, t.Images)
+	expectedResponse := dto.ResponseSuccess{
+		StatusCode: http.StatusOK,
+		Message:    petconst.FindOnePetSuccessMessage,
+		Data:       findOneResponse,
+	}
 
 	controller := gomock.NewController(t.T())
 
@@ -150,7 +163,7 @@ func (t *PetHandlerTest) TestFindOneSuccess() {
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
 	petSvc.EXPECT().FindOne(t.Pet.Id).Return(findOneResponse, nil)
-	context.EXPECT().JSON(http.StatusOK, findOneResponse)
+	context.EXPECT().JSON(http.StatusOK, expectedResponse)
 
 	handler := NewHandler(petSvc, imageSvc, validator)
 	handler.FindOne(context)
@@ -193,7 +206,12 @@ func (t *PetHandlerTest) TestFindOneGrpcErr() {
 }
 
 func (t *PetHandlerTest) TestCreateSuccess() {
-	createErrorResponse := t.Pet
+	createResponse := utils.ProtoToDto(t.Pet, t.Images)
+	expectedResponse := dto.ResponseSuccess{
+		StatusCode: http.StatusCreated,
+		Message:    petconst.CreatePetSuccessMessage,
+		Data:       createResponse,
+	}
 
 	controller := gomock.NewController(t.T())
 
@@ -204,8 +222,8 @@ func (t *PetHandlerTest) TestCreateSuccess() {
 
 	context.EXPECT().Bind(t.CreatePetRequest).Return(nil)
 	validator.EXPECT().Validate(t.CreatePetRequest).Return(nil)
-	petSvc.EXPECT().Create(t.CreatePetRequest).Return(createErrorResponse, nil)
-	context.EXPECT().JSON(http.StatusCreated, createErrorResponse)
+	petSvc.EXPECT().Create(t.CreatePetRequest).Return(createResponse, nil)
+	context.EXPECT().JSON(http.StatusCreated, expectedResponse)
 
 	handler := NewHandler(petSvc, imageSvc, validator)
 	handler.Create(context)
@@ -231,7 +249,12 @@ func (t *PetHandlerTest) TestCreateGrpcErr() {
 }
 
 func (t *PetHandlerTest) TestUpdateSuccess() {
-	updateResponse := t.Pet
+	updateResponse := utils.ProtoToDto(t.Pet, t.Images)
+	expectedResponse := dto.ResponseSuccess{
+		StatusCode: http.StatusOK,
+		Message:    petconst.UpdatePetSuccessMessage,
+		Data:       updateResponse,
+	}
 
 	controller := gomock.NewController(t.T())
 
@@ -244,7 +267,7 @@ func (t *PetHandlerTest) TestUpdateSuccess() {
 	context.EXPECT().Bind(t.UpdatePetRequest).Return(nil)
 	validator.EXPECT().Validate(t.UpdatePetRequest).Return(nil)
 	petSvc.EXPECT().Update(t.Pet.Id, t.UpdatePetRequest).Return(updateResponse, nil)
-	context.EXPECT().JSON(http.StatusOK, updateResponse)
+	context.EXPECT().JSON(http.StatusOK, expectedResponse)
 
 	handler := NewHandler(petSvc, imageSvc, validator)
 	handler.Update(context)
@@ -291,7 +314,14 @@ func (t *PetHandlerTest) TestUpdateGrpcErr() {
 }
 
 func (t *PetHandlerTest) TestDeleteSuccess() {
-	deleteResponse := true
+	deleteResponse := &dto.DeleteResponse{
+		Success: true,
+	}
+	expectedResponse := dto.ResponseSuccess{
+		StatusCode: http.StatusOK,
+		Message:    petconst.DeletePetSuccessMessage,
+		Data:       deleteResponse,
+	}
 
 	controller := gomock.NewController(t.T())
 
@@ -302,13 +332,15 @@ func (t *PetHandlerTest) TestDeleteSuccess() {
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
 	petSvc.EXPECT().Delete(t.Pet.Id).Return(deleteResponse, nil)
-	context.EXPECT().JSON(http.StatusOK, deleteResponse)
+	context.EXPECT().JSON(http.StatusOK, expectedResponse)
 
 	handler := NewHandler(petSvc, imageSvc, validator)
 	handler.Delete(context)
 }
 func (t *PetHandlerTest) TestDeleteNotFound() {
-	deleteResponse := false
+	deleteResponse := &dto.DeleteResponse{
+		Success: false,
+	}
 
 	controller := gomock.NewController(t.T())
 
@@ -326,7 +358,9 @@ func (t *PetHandlerTest) TestDeleteNotFound() {
 }
 
 func (t *PetHandlerTest) TestDeleteGrpcErr() {
-	deleteResponse := false
+	deleteResponse := &dto.DeleteResponse{
+		Success: false,
+	}
 
 	controller := gomock.NewController(t.T())
 
@@ -344,7 +378,14 @@ func (t *PetHandlerTest) TestDeleteGrpcErr() {
 }
 
 func (t *PetHandlerTest) TestChangeViewSuccess() {
-	changeViewResponse := true
+	changeViewResponse := &dto.ChangeViewPetResponse{
+		Success: true,
+	}
+	expectedResponse := dto.ResponseSuccess{
+		StatusCode: http.StatusOK,
+		Message:    petconst.ChangeViewPetSuccessMessage,
+		Data:       changeViewResponse,
+	}
 
 	controller := gomock.NewController(t.T())
 
@@ -354,15 +395,19 @@ func (t *PetHandlerTest) TestChangeViewSuccess() {
 	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
-	petSvc.EXPECT().Delete(t.Pet.Id).Return(changeViewResponse, nil)
-	context.EXPECT().JSON(http.StatusOK, changeViewResponse)
+	context.EXPECT().Bind(t.ChangeViewPetRequest).Return(nil)
+	validator.EXPECT().Validate(t.ChangeViewPetRequest).Return(nil)
+	petSvc.EXPECT().ChangeView(t.Pet.Id, t.ChangeViewPetRequest).Return(changeViewResponse, nil)
+	context.EXPECT().JSON(http.StatusOK, expectedResponse)
 
 	handler := NewHandler(petSvc, imageSvc, validator)
-	handler.Delete(context)
+	handler.ChangeView(context)
 }
 
 func (t *PetHandlerTest) TestChangeViewNotFound() {
-	changeViewResponse := false
+	changeViewResponse := &dto.ChangeViewPetResponse{
+		Success: false,
+	}
 
 	controller := gomock.NewController(t.T())
 
@@ -372,15 +417,19 @@ func (t *PetHandlerTest) TestChangeViewNotFound() {
 	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
-	petSvc.EXPECT().Delete(t.Pet.Id).Return(changeViewResponse, t.NotFoundErr)
+	context.EXPECT().Bind(t.ChangeViewPetRequest).Return(nil)
+	validator.EXPECT().Validate(t.ChangeViewPetRequest).Return(nil)
+	petSvc.EXPECT().ChangeView(t.Pet.Id, t.ChangeViewPetRequest).Return(changeViewResponse, t.NotFoundErr)
 	context.EXPECT().JSON(http.StatusNotFound, t.NotFoundErr)
 
 	handler := NewHandler(petSvc, imageSvc, validator)
-	handler.Delete(context)
+	handler.ChangeView(context)
 }
 
 func (t *PetHandlerTest) TestChangeViewGrpcErr() {
-	changeViewResponse := false
+	changeViewResponse := &dto.ChangeViewPetResponse{
+		Success: false,
+	}
 
 	controller := gomock.NewController(t.T())
 
@@ -390,9 +439,11 @@ func (t *PetHandlerTest) TestChangeViewGrpcErr() {
 	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
-	petSvc.EXPECT().Delete(t.Pet.Id).Return(changeViewResponse, t.ServiceDownErr)
+	context.EXPECT().Bind(t.ChangeViewPetRequest).Return(nil)
+	validator.EXPECT().Validate(t.ChangeViewPetRequest).Return(nil)
+	petSvc.EXPECT().ChangeView(t.Pet.Id, t.ChangeViewPetRequest).Return(changeViewResponse, t.ServiceDownErr)
 	context.EXPECT().JSON(http.StatusServiceUnavailable, t.ServiceDownErr)
 
 	handler := NewHandler(petSvc, imageSvc, validator)
-	handler.Delete(context)
+	handler.ChangeView(context)
 }
