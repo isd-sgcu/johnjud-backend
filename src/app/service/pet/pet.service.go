@@ -94,7 +94,7 @@ func (s *Service) FindOne(id string) (result *dto.PetResponse, err *dto.Response
 	return findOneResponse, nil
 }
 
-func (s *Service) Create(in *dto.CreatePetRequest) (ressult *dto.PetResponse, err *dto.ResponseErr) {
+func (s *Service) Create(in *dto.CreatePetRequest) (result *dto.PetResponse, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
