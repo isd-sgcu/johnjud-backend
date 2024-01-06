@@ -76,7 +76,7 @@ func (s *Service) Create(in *dto.CreateLikeRequest) (*dto.LikeResponse, *dto.Res
 		case codes.InvalidArgument:
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusBadRequest,
-				Message:    constant.InvalidArgument,
+				Message:    constant.InvalidArgumentMessage,
 				Data:       nil,
 			}
 		case codes.Unavailable:
