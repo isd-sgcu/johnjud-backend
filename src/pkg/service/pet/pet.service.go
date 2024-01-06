@@ -11,5 +11,5 @@ type Service interface {
 	Update(string, *dto.UpdatePetRequest) (*dto.PetResponse, *dto.ResponseErr)
 	Delete(string) (*dto.DeleteResponse, *dto.ResponseErr)
 	ChangeView(string, *dto.ChangeViewPetRequest) (*dto.ChangeViewPetResponse, *dto.ResponseErr)
-	Adopt(*dto.AdoptDto) (bool, *dto.ResponseErr)
+	Adopt(string, *dto.AdoptByRequest) (*dto.AdoptByResponse, *dto.ResponseErr)
 }

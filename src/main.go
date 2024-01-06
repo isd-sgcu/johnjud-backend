@@ -133,6 +133,7 @@ func main() {
 	r.GetPet("/:id", petHandler.FindOne)
 	r.PostPet("/create", petHandler.Create)
 	r.PutPet("/:id", petHandler.Update)
+	r.PutPet("/:id/adopt", petHandler.Adopt)
 	r.PutPet("/:id/visible", petHandler.ChangeView)
 	r.DeletePet("/:id", petHandler.Delete)
 

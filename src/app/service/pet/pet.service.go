@@ -18,11 +18,6 @@ type Service struct {
 	petClient petproto.PetServiceClient
 }
 
-// Adopt implements pet.Service.
-func (*Service) Adopt(*dto.AdoptDto) (bool, *dto.ResponseErr) {
-	panic("unimplemented")
-}
-
 func NewService(petClient petproto.PetServiceClient) *Service {
 	return &Service{
 		petClient: petClient,
@@ -273,6 +268,50 @@ func (s *Service) ChangeView(id string, in *dto.ChangeViewPetRequest) (result *d
 		}
 	}
 	return &dto.ChangeViewPetResponse{
+		Success: res.Success,
+	}, nil
+}
+
+func (s *Service) Adopt(petId string, in *dto.AdoptByRequest) (result *dto.AdoptByResponse, err *dto.ResponseErr) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	res, errRes := s.petClient.AdoptPet(ctx, &petproto.AdoptPetRequest{
+		UserId: in.UserID,
+		PetId:  in.PetID,
+	})
+	if errRes != nil {
+		st, _ := status.FromError(errRes)
+		log.Error().
+			Err(errRes).
+			Str("service", "pet").
+			Str("module", "adopt").
+			Msg(st.Message())
+		switch st.Code() {
+		case codes.NotFound:
+			return nil,
+				&dto.ResponseErr{
+					StatusCode: http.StatusNotFound,
+					Message:    constant.PetNotFoundMessage,
+					Data:       nil,
+				}
+		case codes.Unavailable:
+			return nil,
+				&dto.ResponseErr{
+					StatusCode: http.StatusServiceUnavailable,
+					Message:    constant.UnavailableServiceMessage,
+					Data:       nil,
+				}
+		default:
+			return nil,
+				&dto.ResponseErr{
+					StatusCode: http.StatusServiceUnavailable,
+					Message:    constant.InternalErrorMessage,
+					Data:       nil,
+				}
+		}
+	}
+	return &dto.AdoptByResponse{
 		Success: res.Success,
 	}, nil
 }

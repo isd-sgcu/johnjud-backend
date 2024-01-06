@@ -298,3 +298,66 @@ func (h *Handler) Delete(c router.IContext) {
 	})
 	return
 }
+
+// Adopt is a function that handles the adoption of a pet in the database
+// @Summary Adopt a pet
+// @Description Return true if the pet is successfully adopted
+// @Param id path string true "Pet ID"
+// @Param user_id body string true "User ID"
+// @Param pet_id body string true "Pet ID"
+// @Tags pet
+// @Accept json
+// @Produce json
+// @Success 201 {object} bool
+// @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
+// @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
+// @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
+// @Router /v1/pets/{id}/adopt [put]
+func (h *Handler) Adopt(c router.IContext) {
+	petId, err := c.Param("id")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, &dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    "Invalid ID",
+			Data:       nil,
+		})
+		return
+	}
+
+	request := &dto.AdoptByRequest{}
+	err = c.Bind(request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.BindingRequestErrorMessage + err.Error(),
+			Data:       nil,
+		})
+		return
+	}
+
+	if err := h.validate.Validate(request); err != nil {
+		var errorMessage []string
+		for _, reqErr := range err {
+			errorMessage = append(errorMessage, reqErr.Message)
+		}
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.InvalidRequestBodyMessage + strings.Join(errorMessage, ", "),
+			Data:       nil,
+		})
+		return
+	}
+
+	res, errRes := h.service.Adopt(petId, request)
+	if errRes != nil {
+		c.JSON(errRes.StatusCode, errRes)
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.ResponseSuccess{
+		StatusCode: http.StatusOK,
+		Message:    petconst.AdoptPetSuccessMessage,
+		Data:       res,
+	})
+	return
+}
