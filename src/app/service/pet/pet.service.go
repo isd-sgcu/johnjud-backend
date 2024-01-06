@@ -18,6 +18,11 @@ type Service struct {
 	petClient petproto.PetServiceClient
 }
 
+// Adopt implements pet.Service.
+func (*Service) Adopt(*dto.AdoptDto) (bool, *dto.ResponseErr) {
+	panic("unimplemented")
+}
+
 func NewService(petClient petproto.PetServiceClient) *Service {
 	return &Service{
 		petClient: petClient,
@@ -51,7 +56,7 @@ func (s *Service) FindAll() (result []*dto.PetResponse, err *dto.ResponseErr) {
 		}
 	}
 	imagesList := utils.MockImageList(len(res.Pets))
-	findAllResponse := utils.RawToDtoList(res.Pets, imagesList)
+	findAllResponse := utils.ProtoToDtoList(res.Pets, imagesList)
 	return findAllResponse, nil
 }
 
@@ -94,7 +99,7 @@ func (s *Service) FindOne(id string) (result *dto.PetResponse, err *dto.Response
 	return findOneResponse, nil
 }
 
-func (s *Service) Create(in *dto.CreatePetRequest) (ressult *dto.PetResponse, err *dto.ResponseErr) {
+func (s *Service) Create(in *dto.CreatePetRequest) (result *dto.PetResponse, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -112,7 +117,7 @@ func (s *Service) Create(in *dto.CreatePetRequest) (ressult *dto.PetResponse, er
 		case codes.InvalidArgument:
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusBadRequest,
-				Message:    constant.InvalidArgument,
+				Message:    constant.InvalidArgumentMessage,
 				Data:       nil,
 			}
 		case codes.Unavailable:
@@ -158,7 +163,7 @@ func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *dto.PetRe
 		case codes.InvalidArgument:
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusBadRequest,
-				Message:    constant.InvalidArgument,
+				Message:    constant.InvalidArgumentMessage,
 				Data:       nil,
 			}
 		case codes.Unavailable:

@@ -1,4 +1,4 @@
-package health_check
+package healthcheck
 
 import (
 	"net/http"

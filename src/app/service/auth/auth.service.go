@@ -2,21 +2,22 @@ package auth
 
 import (
 	"context"
+	"net/http"
+	"time"
+
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
-	auth_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
+	authProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"net/http"
-	"time"
 )
 
 type Service struct {
-	client auth_proto.AuthServiceClient
+	client authProto.AuthServiceClient
 }
 
-func NewService(client auth_proto.AuthServiceClient) *Service {
+func NewService(client authProto.AuthServiceClient) *Service {
 	return &Service{
 		client: client,
 	}
@@ -26,7 +27,7 @@ func (s *Service) Signup(request *dto.SignupRequest) (*dto.SignupResponse, *dto.
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	resp, err := s.client.SignUp(ctx, &auth_proto.SignUpRequest{
+	resp, err := s.client.SignUp(ctx, &authProto.SignUpRequest{
 		FirstName: request.Firstname,
 		LastName:  request.Lastname,
 		Email:     request.Email,
@@ -85,7 +86,7 @@ func (s *Service) SignIn(request *dto.SignInRequest) (*dto.Credential, *dto.Resp
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	resp, err := s.client.SignIn(ctx, &auth_proto.SignInRequest{
+	resp, err := s.client.SignIn(ctx, &authProto.SignInRequest{
 		Email:    request.Email,
 		Password: request.Password,
 	})
@@ -141,7 +142,7 @@ func (s *Service) SignOut(token string) (*dto.SignOutResponse, *dto.ResponseErr)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	response, err := s.client.SignOut(ctx, &auth_proto.SignOutRequest{
+	response, err := s.client.SignOut(ctx, &authProto.SignOutRequest{
 		Token: token,
 	})
 	if err != nil {
@@ -188,7 +189,7 @@ func (s *Service) Validate(token string) (*dto.TokenPayloadAuth, *dto.ResponseEr
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	response, err := s.client.Validate(ctx, &auth_proto.ValidateRequest{
+	response, err := s.client.Validate(ctx, &authProto.ValidateRequest{
 		Token: token,
 	})
 	if err != nil {
@@ -236,7 +237,7 @@ func (s *Service) RefreshToken(request *dto.RefreshTokenRequest) (*dto.Credentia
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	response, err := s.client.RefreshToken(ctx, &auth_proto.RefreshTokenRequest{
+	response, err := s.client.RefreshToken(ctx, &authProto.RefreshTokenRequest{
 		RefreshToken: request.RefreshToken,
 	})
 	if err != nil {

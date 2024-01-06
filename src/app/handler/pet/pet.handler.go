@@ -6,29 +6,20 @@ import (
 
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
-	imageSrv "github.com/isd-sgcu/johnjud-gateway/src/app/handler/image"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
 	petconst "github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
+	imageSvc "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/image"
+	petSvc "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/pet"
 )
 
 type Handler struct {
-	service      Service
-	imageService imageSrv.Service
+	service      petSvc.Service
+	imageService imageSvc.Service
 	validate     validator.IDtoValidator
 }
 
-type Service interface {
-	FindAll() ([]*dto.PetResponse, *dto.ResponseErr)
-	FindOne(string) (*dto.PetResponse, *dto.ResponseErr)
-	Create(*dto.CreatePetRequest) (*dto.PetResponse, *dto.ResponseErr)
-	Update(string, *dto.UpdatePetRequest) (*dto.PetResponse, *dto.ResponseErr)
-	ChangeView(string, *dto.ChangeViewPetRequest) (*dto.ChangeViewPetResponse, *dto.ResponseErr)
-	Delete(string) (*dto.DeleteResponse, *dto.ResponseErr)
-	Adopt(string, *dto.AdoptByRequest) (*dto.AdoptByResponse, *dto.ResponseErr)
-}
-
-func NewHandler(service Service, imageService imageSrv.Service, validate validator.IDtoValidator) *Handler {
+func NewHandler(service petSvc.Service, imageService imageSvc.Service, validate validator.IDtoValidator) *Handler {
 	return &Handler{service, imageService, validate}
 }
 
@@ -74,7 +65,7 @@ func (h *Handler) FindOne(c router.IContext) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ResponseErr{
 			StatusCode: http.StatusInternalServerError,
-			Message:    "Invalid ID",
+			Message:    constant.InvalidIDMessage,
 			Data:       nil,
 		})
 		return
