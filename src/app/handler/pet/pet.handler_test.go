@@ -14,10 +14,12 @@ import (
 	petMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/service/pet"
 	validatorMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/validator"
 
+	errConst "github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	utils "github.com/isd-sgcu/johnjud-gateway/src/app/utils/pet"
-	petconst "github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
+	petConst "github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
 	petProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
-	imageProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
+	imgProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
+
 	"github.com/stretchr/testify/suite"
 )
 
@@ -33,8 +35,8 @@ type PetHandlerTest struct {
 	NotFoundErr          *dto.ResponseErr
 	ServiceDownErr       *dto.ResponseErr
 	InternalErr          *dto.ResponseErr
-	Images               []*imageProto.Image
-	ImagesList           [][]*imageProto.Image
+	Images               []*imgProto.Image
+	ImagesList           [][]*imgProto.Image
 }
 
 func TestPetHandler(t *testing.T) {
@@ -56,7 +58,7 @@ func (t *PetHandlerTest) SetupTest() {
 			Gender:       petProto.Gender(rand.Intn(1) + 1),
 			Habit:        faker.Paragraph(),
 			Caption:      faker.Paragraph(),
-			Images:       []*imageProto.Image{},
+			Images:       []*imgProto.Image{},
 			Status:       petProto.PetStatus(rand.Intn(1) + 1),
 			IsSterile:    true,
 			IsVaccinated: true,
@@ -108,27 +110,27 @@ func (t *PetHandlerTest) SetupTest() {
 
 	t.NotFoundErr = &dto.ResponseErr{
 		StatusCode: http.StatusNotFound,
-		Message:    "Pet not found",
+		Message:    errConst.PetNotFoundMessage,
 		Data:       nil,
 	}
 
 	t.BindErr = &dto.ResponseErr{
 		StatusCode: http.StatusBadRequest,
-		Message:    "Invalid ID",
+		Message:    errConst.InvalidIDMessage,
 	}
 
 	t.InternalErr = &dto.ResponseErr{
 		StatusCode: http.StatusInternalServerError,
-		Message:    "Internal Server Error",
+		Message:    errConst.InternalErrorMessage,
 		Data:       nil,
 	}
 }
 
 func (t *PetHandlerTest) TestFindAllSuccess() {
-	findAllResponse := utils.RawToDtoList(t.Pets, t.ImagesList)
+	findAllResponse := utils.ProtoToDtoList(t.Pets, t.ImagesList)
 	expectedResponse := dto.ResponseSuccess{
 		StatusCode: http.StatusOK,
-		Message:    petconst.FindAllPetSuccessMessage,
+		Message:    petConst.FindAllPetSuccessMessage,
 		Data:       findAllResponse,
 	}
 
@@ -150,7 +152,7 @@ func (t *PetHandlerTest) TestFindOneSuccess() {
 	findOneResponse := utils.ProtoToDto(t.Pet, t.Images)
 	expectedResponse := dto.ResponseSuccess{
 		StatusCode: http.StatusOK,
-		Message:    petconst.FindOnePetSuccessMessage,
+		Message:    petConst.FindOnePetSuccessMessage,
 		Data:       findOneResponse,
 	}
 
@@ -209,7 +211,7 @@ func (t *PetHandlerTest) TestCreateSuccess() {
 	createResponse := utils.ProtoToDto(t.Pet, t.Images)
 	expectedResponse := dto.ResponseSuccess{
 		StatusCode: http.StatusCreated,
-		Message:    petconst.CreatePetSuccessMessage,
+		Message:    petConst.CreatePetSuccessMessage,
 		Data:       createResponse,
 	}
 
@@ -252,7 +254,7 @@ func (t *PetHandlerTest) TestUpdateSuccess() {
 	updateResponse := utils.ProtoToDto(t.Pet, t.Images)
 	expectedResponse := dto.ResponseSuccess{
 		StatusCode: http.StatusOK,
-		Message:    petconst.UpdatePetSuccessMessage,
+		Message:    petConst.UpdatePetSuccessMessage,
 		Data:       updateResponse,
 	}
 
@@ -319,7 +321,7 @@ func (t *PetHandlerTest) TestDeleteSuccess() {
 	}
 	expectedResponse := dto.ResponseSuccess{
 		StatusCode: http.StatusOK,
-		Message:    petconst.DeletePetSuccessMessage,
+		Message:    petConst.DeletePetSuccessMessage,
 		Data:       deleteResponse,
 	}
 
@@ -383,7 +385,7 @@ func (t *PetHandlerTest) TestChangeViewSuccess() {
 	}
 	expectedResponse := dto.ResponseSuccess{
 		StatusCode: http.StatusOK,
-		Message:    petconst.ChangeViewPetSuccessMessage,
+		Message:    petConst.ChangeViewPetSuccessMessage,
 		Data:       changeViewResponse,
 	}
 

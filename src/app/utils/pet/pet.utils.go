@@ -122,7 +122,7 @@ func UpdateDtoToProto(id string, in *dto.UpdatePetRequest) *petproto.UpdatePetRe
 	return req
 }
 
-func RawToDtoList(in []*petproto.Pet, imagesList [][]*imgproto.Image) []*dto.PetResponse {
+func ProtoToDtoList(in []*petproto.Pet, imagesList [][]*imgproto.Image) []*dto.PetResponse {
 	var resp []*dto.PetResponse
 	for i, p := range in {
 		pet := &dto.PetResponse{
