@@ -112,7 +112,7 @@ func (s *Service) Create(in *dto.CreatePetRequest) (result *dto.PetResponse, err
 		case codes.InvalidArgument:
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusBadRequest,
-				Message:    constant.InvalidArgument,
+				Message:    constant.InvalidArgumentMessage,
 				Data:       nil,
 			}
 		case codes.Unavailable:
@@ -158,7 +158,7 @@ func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *dto.PetRe
 		case codes.InvalidArgument:
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusBadRequest,
-				Message:    constant.InvalidArgument,
+				Message:    constant.InvalidArgumentMessage,
 				Data:       nil,
 			}
 		case codes.Unavailable:
