@@ -18,11 +18,6 @@ type Service struct {
 	petClient petproto.PetServiceClient
 }
 
-// Adopt implements pet.Service.
-func (*Service) Adopt(*dto.AdoptDto) (bool, *dto.ResponseErr) {
-	panic("unimplemented")
-}
-
 func NewService(petClient petproto.PetServiceClient) *Service {
 	return &Service{
 		petClient: petClient,

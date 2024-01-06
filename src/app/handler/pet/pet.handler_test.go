@@ -459,16 +459,16 @@ func (t *PetHandlerTest) TestAdoptSuccess() {
 	}
 	expectedResponse := dto.ResponseSuccess{
 		StatusCode: http.StatusOK,
-		Message:    petconst.AdoptPetSuccessMessage,
+		Message:    petConst.AdoptPetSuccessMessage,
 		Data:       adoptByResponse,
 	}
 
 	controller := gomock.NewController(t.T())
 
-	petSvc := mock_pet.NewMockService(controller)
-	imageSvc := mock_image.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	petSvc := petMock.NewMockService(controller)
+	imageSvc := imageMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
 	context.EXPECT().Bind(t.AdoptByRequest).Return(nil)
@@ -487,10 +487,10 @@ func (t *PetHandlerTest) TestAdoptNotFound() {
 
 	controller := gomock.NewController(t.T())
 
-	petSvc := mock_pet.NewMockService(controller)
-	imageSvc := mock_image.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	petSvc := petMock.NewMockService(controller)
+	imageSvc := imageMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
 	context.EXPECT().Bind(t.AdoptByRequest).Return(nil)
@@ -509,10 +509,10 @@ func (t *PetHandlerTest) TestAdoptGrpcErr() {
 
 	controller := gomock.NewController(t.T())
 
-	petSvc := mock_pet.NewMockService(controller)
-	imageSvc := mock_image.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	petSvc := petMock.NewMockService(controller)
+	imageSvc := imageMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
 	context.EXPECT().Bind(t.AdoptByRequest).Return(nil)
