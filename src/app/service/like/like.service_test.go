@@ -86,7 +86,7 @@ func (t *LikeServiceTest) SetupTest() {
 
 	t.InvalidArgumentErr = &dto.ResponseErr{
 		StatusCode: http.StatusBadRequest,
-		Message:    constant.InvalidArgument,
+		Message:    constant.InvalidArgumentMessage,
 		Data:       nil,
 	}
 }
@@ -191,7 +191,7 @@ func (t *LikeServiceTest) TestCreateInvalidArgumentError() {
 
 	expected := t.InvalidArgumentErr
 
-	clientErr := status.Error(codes.InvalidArgument, constant.InvalidArgument)
+	clientErr := status.Error(codes.InvalidArgument, constant.InvalidArgumentMessage)
 
 	client := &likeMock.LikeClientMock{}
 	client.On("Create", protoReq).Return(nil, clientErr)
@@ -208,7 +208,7 @@ func (t *LikeServiceTest) TestCreateInternalError() {
 
 	expected := t.InvalidArgumentErr
 
-	clientErr := status.Error(codes.InvalidArgument, constant.InvalidArgument)
+	clientErr := status.Error(codes.InvalidArgument, constant.InvalidArgumentMessage)
 
 	client := &likeMock.LikeClientMock{}
 	client.On("Create", protoReq).Return(nil, clientErr)
