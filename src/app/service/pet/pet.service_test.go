@@ -180,7 +180,7 @@ func (t *PetServiceTest) SetupTest() {
 
 	t.InvalidArgumentErr = &dto.ResponseErr{
 		StatusCode: http.StatusBadRequest,
-		Message:    constant.InvalidArgument,
+		Message:    constant.InvalidArgumentMessage,
 		Data:       nil,
 	}
 }
@@ -301,7 +301,7 @@ func (t *PetServiceTest) TestCreateInvalidArgumentError() {
 
 	expected := t.InvalidArgumentErr
 
-	clientErr := status.Error(codes.InvalidArgument, constant.InvalidArgument)
+	clientErr := status.Error(codes.InvalidArgument, constant.InvalidArgumentMessage)
 
 	client := &petmock.PetClientMock{}
 	client.On("Create", protoReq).Return(nil, clientErr)
