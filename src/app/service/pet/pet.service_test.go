@@ -539,40 +539,34 @@ func (t *PetServiceTest) TestAdoptSuccess() {
 
 func (t *PetServiceTest) TestAdoptNotFoundError() {
 	protoReq := t.AdoptReq
-	protoResp := &petproto.AdoptPetResponse{
-		Success: false,
-	}
 
 	clientErr := status.Error(codes.NotFound, constant.PetNotFoundMessage)
 
 	expected := t.NotFoundErr
 
 	client := &petmock.PetClientMock{}
-	client.On("AdoptPet", protoReq).Return(protoResp, clientErr)
+	client.On("AdoptPet", protoReq).Return(nil, clientErr)
 
 	svc := NewService(client)
 	actual, err := svc.Adopt(t.Pet.Id, t.AdoptDto)
 
-	assert.Equal(t.T(), &dto.AdoptByResponse{Success: false}, actual)
+	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
 }
 
 func (t *PetServiceTest) TestAdoptUnavailableServiceError() {
 	protoReq := t.AdoptReq
-	protoResp := &petproto.AdoptPetResponse{
-		Success: false,
-	}
 
 	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
 
 	expected := t.UnavailableServiceErr
 
 	client := &petmock.PetClientMock{}
-	client.On("AdoptPet", protoReq).Return(protoResp, clientErr)
+	client.On("AdoptPet", protoReq).Return(nil, clientErr)
 
 	svc := NewService(client)
 	actual, err := svc.Adopt(t.Pet.Id, t.AdoptDto)
 
-	assert.Equal(t.T(), &dto.AdoptByResponse{Success: false}, actual)
+	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
 }

@@ -280,7 +280,6 @@ func (s *Service) Adopt(petId string, in *dto.AdoptByRequest) (result *dto.Adopt
 		UserId: in.UserID,
 		PetId:  in.PetID,
 	})
-
 	if errRes != nil {
 		st, _ := status.FromError(errRes)
 		log.Error().
@@ -290,25 +289,22 @@ func (s *Service) Adopt(petId string, in *dto.AdoptByRequest) (result *dto.Adopt
 			Msg(st.Message())
 		switch st.Code() {
 		case codes.NotFound:
-			return &dto.AdoptByResponse{
-					Success: false,
-				}, &dto.ResponseErr{
+			return nil,
+				&dto.ResponseErr{
 					StatusCode: http.StatusNotFound,
 					Message:    constant.PetNotFoundMessage,
 					Data:       nil,
 				}
 		case codes.Unavailable:
-			return &dto.AdoptByResponse{
-					Success: false,
-				}, &dto.ResponseErr{
+			return nil,
+				&dto.ResponseErr{
 					StatusCode: http.StatusServiceUnavailable,
 					Message:    constant.UnavailableServiceMessage,
 					Data:       nil,
 				}
 		default:
-			return &dto.AdoptByResponse{
-					Success: false,
-				}, &dto.ResponseErr{
+			return nil,
+				&dto.ResponseErr{
 					StatusCode: http.StatusServiceUnavailable,
 					Message:    constant.InternalErrorMessage,
 					Data:       nil,

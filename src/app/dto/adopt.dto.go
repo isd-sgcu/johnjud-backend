@@ -11,5 +11,5 @@ type AdoptByRequest struct {
 }
 
 type AdoptByResponse struct {
-	Success bool `json:"success" validate:"required"`
+	Success bool `json:"success"`
 }
