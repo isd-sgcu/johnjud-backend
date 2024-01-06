@@ -6,7 +6,7 @@ import (
 
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
-	imageSrv "github.com/isd-sgcu/johnjud-gateway/src/app/handler/image"
+	imageSvc "github.com/isd-sgcu/johnjud-gateway/src/app/handler/image"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
 	petconst "github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
@@ -14,7 +14,7 @@ import (
 
 type Handler struct {
 	service      Service
-	imageService imageSrv.Service
+	imageService imageSvc.Service
 	validate     validator.IDtoValidator
 }
 
@@ -27,7 +27,7 @@ type Service interface {
 	Delete(string) (*dto.DeleteResponse, *dto.ResponseErr)
 }
 
-func NewHandler(service Service, imageService imageSrv.Service, validate validator.IDtoValidator) *Handler {
+func NewHandler(service Service, imageService imageSvc.Service, validate validator.IDtoValidator) *Handler {
 	return &Handler{service, imageService, validate}
 }
 

@@ -11,22 +11,22 @@ import (
 	"time"
 
 	authHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/auth"
-	health_check "github.com/isd-sgcu/johnjud-gateway/src/app/handler/health-check"
+	healthcheck "github.com/isd-sgcu/johnjud-gateway/src/app/handler/healthcheck"
 	petHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/pet"
 	userHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/user"
 	guard "github.com/isd-sgcu/johnjud-gateway/src/app/middleware/auth"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
-	authSrv "github.com/isd-sgcu/johnjud-gateway/src/app/service/auth"
-	imageSrv "github.com/isd-sgcu/johnjud-gateway/src/app/service/image"
-	petSrv "github.com/isd-sgcu/johnjud-gateway/src/app/service/pet"
-	userSrv "github.com/isd-sgcu/johnjud-gateway/src/app/service/user"
+	authSvc "github.com/isd-sgcu/johnjud-gateway/src/app/service/auth"
+	imageSvc "github.com/isd-sgcu/johnjud-gateway/src/app/service/image"
+	petSvc "github.com/isd-sgcu/johnjud-gateway/src/app/service/pet"
+	userSvc "github.com/isd-sgcu/johnjud-gateway/src/app/service/user"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
 	"github.com/isd-sgcu/johnjud-gateway/src/config"
 	"github.com/isd-sgcu/johnjud-gateway/src/constant/auth"
-	auth_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
-	user_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/user/v1"
-	pet_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
-	image_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
+	authProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
+	userProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/user/v1"
+	petProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
+	imageProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -90,23 +90,23 @@ func main() {
 			Msg("Cannot connect to service")
 	}
 
-	hc := health_check.NewHandler()
+	hc := healthcheck.NewHandler()
 
-	userClient := user_proto.NewUserServiceClient(authConn)
-	userService := userSrv.NewService(userClient)
+	userClient := userProto.NewUserServiceClient(authConn)
+	userService := userSvc.NewService(userClient)
 	userHandler := userHdr.NewHandler(userService, v)
 
-	authClient := auth_proto.NewAuthServiceClient(authConn)
-	authService := authSrv.NewService(authClient)
+	authClient := authProto.NewAuthServiceClient(authConn)
+	authService := authSvc.NewService(authClient)
 	authHandler := authHdr.NewHandler(authService, userService, v)
 
 	authGuard := guard.NewAuthGuard(authService, auth.ExcludePath, conf.App, auth.VersionList)
 
-	imageClient := image_proto.NewImageServiceClient(fileConn)
-	imageService := imageSrv.NewService(imageClient)
+	imageClient := imageProto.NewImageServiceClient(fileConn)
+	imageService := imageSvc.NewService(imageClient)
 
-	petClient := pet_proto.NewPetServiceClient(backendConn)
-	petService := petSrv.NewService(petClient)
+	petClient := petProto.NewPetServiceClient(backendConn)
+	petService := petSvc.NewService(petClient)
 	petHandler := petHdr.NewHandler(petService, imageService, v)
 
 	r := router.NewFiberRouter(&authGuard, conf.App)
@@ -117,7 +117,7 @@ func main() {
 	r.PostAuth("/signup", authHandler.Signup)
 	r.PostAuth("/signin", authHandler.SignIn)
 	r.PostAuth("/signout", authHandler.SignOut)
-	r.PostAuth("/me", authHandler.Validate)
+	//r.PostAuth("/me", authHandler.Validate)
 	r.PostAuth("/refreshToken", authHandler.RefreshToken)
 
 	r.GetHealthCheck("/", hc.HealthCheck)

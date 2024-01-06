@@ -21,14 +21,6 @@ func NewHandler(service auth.Service, userService user.Service, validate validat
 	return &Handler{service, userService, validate}
 }
 
-func (h *Handler) Validate(c router.IContext) {
-
-}
-
-func (h *Handler) RefreshToken(c router.IContext) {
-
-}
-
 // Signup is a function that create user in database
 // @Summary Signup user
 // @Description Return the data of user if successfully
@@ -130,6 +122,7 @@ func (h *Handler) SignIn(c router.IContext) {
 // @Accept json
 // @Produce json
 // @Success 200 {object} dto.SignOutResponse
+// @Failure 401 {object} dto.ResponseUnauthorizedErr "Invalid token"
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/auth/signout [post]
@@ -137,6 +130,53 @@ func (h *Handler) SignOut(c router.IContext) {
 	token := c.Token()
 
 	response, respErr := h.service.SignOut(token)
+	if respErr != nil {
+		c.JSON(respErr.StatusCode, respErr)
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// RefreshToken is a function to redeem new access token and refresh token
+// @Summary Refresh token
+// @Description Return the credential
+// @Param request body dto.RefreshTokenRequest true "refreshToken request dto"
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} dto.Credential
+// @Failure 400 {object} dto.ResponseBadRequestErr "Invalid token"
+// @Failure 401 {object} dto.ResponseUnauthorizedErr "Invalid token"
+// @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
+// @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
+// @Router /v1/auth/refreshToken [post]
+func (h *Handler) RefreshToken(c router.IContext) {
+	request := &dto.RefreshTokenRequest{}
+	err := c.Bind(request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.BindingRequestErrorMessage + err.Error(),
+			Data:       nil,
+		})
+		return
+	}
+
+	if err := h.validate.Validate(request); err != nil {
+		var errorMessage []string
+		for _, reqErr := range err {
+			errorMessage = append(errorMessage, reqErr.Message)
+		}
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.InvalidRequestBodyMessage + strings.Join(errorMessage, ", "),
+			Data:       nil,
+		})
+		return
+	}
+
+	response, respErr := h.service.RefreshToken(request)
 	if respErr != nil {
 		c.JSON(respErr.StatusCode, respErr)
 		return

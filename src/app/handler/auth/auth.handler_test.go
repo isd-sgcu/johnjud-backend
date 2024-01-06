@@ -2,25 +2,27 @@ package auth
 
 import (
 	"errors"
+	"net/http"
+	"testing"
+
 	"github.com/go-faker/faker/v4"
 	"github.com/golang/mock/gomock"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
-	mock_router "github.com/isd-sgcu/johnjud-gateway/src/mocks/router"
-	mock_auth "github.com/isd-sgcu/johnjud-gateway/src/mocks/service/auth"
-	mock_user "github.com/isd-sgcu/johnjud-gateway/src/mocks/service/user"
-	mock_validator "github.com/isd-sgcu/johnjud-gateway/src/mocks/validator"
+	routerMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/router"
+	authMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/service/auth"
+	userMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/service/user"
+	validatorMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/validator"
 	"github.com/stretchr/testify/suite"
-	"net/http"
-	"testing"
 )
 
 type AuthHandlerTest struct {
 	suite.Suite
-	signupRequest *dto.SignupRequest
-	signInRequest *dto.SignInRequest
-	bindErr       error
-	validateErr   []*dto.BadReqErrResponse
+	signupRequest       *dto.SignupRequest
+	signInRequest       *dto.SignInRequest
+	refreshTokenRequest *dto.RefreshTokenRequest
+	bindErr             error
+	validateErr         []*dto.BadReqErrResponse
 }
 
 func TestAuthHandler(t *testing.T) {
@@ -30,6 +32,7 @@ func TestAuthHandler(t *testing.T) {
 func (t *AuthHandlerTest) SetupTest() {
 	signupRequest := &dto.SignupRequest{}
 	signInRequest := &dto.SignInRequest{}
+	refreshTokenRequest := &dto.RefreshTokenRequest{}
 	bindErr := errors.New("Binding request failed")
 	validateErr := []*dto.BadReqErrResponse{
 		{
@@ -46,6 +49,7 @@ func (t *AuthHandlerTest) SetupTest() {
 
 	t.signupRequest = signupRequest
 	t.signInRequest = signInRequest
+	t.refreshTokenRequest = refreshTokenRequest
 	t.bindErr = bindErr
 	t.validateErr = validateErr
 }
@@ -59,10 +63,10 @@ func (t *AuthHandlerTest) TestSignupSuccess() {
 	}
 	controller := gomock.NewController(t.T())
 
-	authSvc := mock_auth.NewMockService(controller)
-	userSvc := mock_user.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Bind(t.signupRequest).Return(nil)
 	validator.EXPECT().Validate(t.signupRequest).Return(nil)
@@ -83,10 +87,10 @@ func (t *AuthHandlerTest) TestSignupBindFailed() {
 
 	controller := gomock.NewController(t.T())
 
-	authSvc := mock_auth.NewMockService(controller)
-	userSvc := mock_user.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Bind(t.signupRequest).Return(t.bindErr)
 	context.EXPECT().JSON(http.StatusBadRequest, errResponse)
@@ -105,10 +109,10 @@ func (t *AuthHandlerTest) TestSignupValidateFailed() {
 
 	controller := gomock.NewController(t.T())
 
-	authSvc := mock_auth.NewMockService(controller)
-	userSvc := mock_user.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Bind(t.signupRequest).Return(nil)
 	validator.EXPECT().Validate(t.signupRequest).Return(t.validateErr)
@@ -128,10 +132,10 @@ func (t *AuthHandlerTest) TestSignupServiceError() {
 
 	controller := gomock.NewController(t.T())
 
-	authSvc := mock_auth.NewMockService(controller)
-	userSvc := mock_user.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Bind(t.signupRequest).Return(nil)
 	validator.EXPECT().Validate(t.signupRequest).Return(nil)
@@ -152,10 +156,10 @@ func (t *AuthHandlerTest) TestSignInSuccess() {
 
 	controller := gomock.NewController(t.T())
 
-	authSvc := mock_auth.NewMockService(controller)
-	userSvc := mock_user.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Bind(t.signInRequest).Return(nil)
 	validator.EXPECT().Validate(t.signInRequest).Return(nil)
@@ -176,10 +180,10 @@ func (t *AuthHandlerTest) TestSignInBindFailed() {
 
 	controller := gomock.NewController(t.T())
 
-	authSvc := mock_auth.NewMockService(controller)
-	userSvc := mock_user.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Bind(t.signInRequest).Return(t.bindErr)
 	context.EXPECT().JSON(http.StatusBadRequest, errResponse)
@@ -198,10 +202,10 @@ func (t *AuthHandlerTest) TestSignInValidateFailed() {
 
 	controller := gomock.NewController(t.T())
 
-	authSvc := mock_auth.NewMockService(controller)
-	userSvc := mock_user.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Bind(t.signInRequest).Return(nil)
 	validator.EXPECT().Validate(t.signInRequest).Return(t.validateErr)
@@ -221,10 +225,10 @@ func (t *AuthHandlerTest) TestSignInServiceError() {
 
 	controller := gomock.NewController(t.T())
 
-	authSvc := mock_auth.NewMockService(controller)
-	userSvc := mock_user.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Bind(t.signInRequest).Return(nil)
 	validator.EXPECT().Validate(t.signInRequest).Return(nil)
@@ -244,10 +248,10 @@ func (t *AuthHandlerTest) TestSignOutSuccess() {
 
 	controller := gomock.NewController(t.T())
 
-	authSvc := mock_auth.NewMockService(controller)
-	userSvc := mock_user.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Token().Return(token)
 	authSvc.EXPECT().SignOut(token).Return(signOutResponse, nil)
@@ -268,10 +272,10 @@ func (t *AuthHandlerTest) TestSignOutServiceError() {
 
 	controller := gomock.NewController(t.T())
 
-	authSvc := mock_auth.NewMockService(controller)
-	userSvc := mock_user.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	handler := NewHandler(authSvc, userSvc, validator)
 
@@ -280,4 +284,97 @@ func (t *AuthHandlerTest) TestSignOutServiceError() {
 	context.EXPECT().JSON(http.StatusInternalServerError, errResponse)
 
 	handler.SignOut(context)
+}
+
+func (t *AuthHandlerTest) TestRefreshTokenSuccess() {
+	refreshTokenResponse := &dto.Credential{
+		AccessToken:  faker.Word(),
+		RefreshToken: faker.UUIDDigit(),
+		ExpiresIn:    3600,
+	}
+
+	controller := gomock.NewController(t.T())
+
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
+
+	handler := NewHandler(authSvc, userSvc, validator)
+
+	context.EXPECT().Bind(t.refreshTokenRequest).Return(nil)
+	validator.EXPECT().Validate(t.refreshTokenRequest).Return(nil)
+	authSvc.EXPECT().RefreshToken(t.refreshTokenRequest).Return(refreshTokenResponse, nil)
+	context.EXPECT().JSON(http.StatusOK, refreshTokenResponse)
+
+	handler.RefreshToken(context)
+}
+
+func (t *AuthHandlerTest) TestRefreshTokenBindFailed() {
+	errResponse := dto.ResponseErr{
+		StatusCode: http.StatusBadRequest,
+		Message:    constant.BindingRequestErrorMessage + t.bindErr.Error(),
+		Data:       nil,
+	}
+
+	controller := gomock.NewController(t.T())
+
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
+
+	handler := NewHandler(authSvc, userSvc, validator)
+
+	context.EXPECT().Bind(t.refreshTokenRequest).Return(t.bindErr)
+	context.EXPECT().JSON(http.StatusBadRequest, errResponse)
+
+	handler.RefreshToken(context)
+}
+
+func (t *AuthHandlerTest) TestRefreshTokenValidateFailed() {
+	errResponse := dto.ResponseErr{
+		StatusCode: http.StatusBadRequest,
+		Message:    constant.InvalidRequestBodyMessage + "BadRequestError1, BadRequestError2",
+		Data:       nil,
+	}
+
+	controller := gomock.NewController(t.T())
+
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
+
+	handler := NewHandler(authSvc, userSvc, validator)
+
+	context.EXPECT().Bind(t.refreshTokenRequest).Return(nil)
+	validator.EXPECT().Validate(t.refreshTokenRequest).Return(t.validateErr)
+	context.EXPECT().JSON(http.StatusBadRequest, errResponse)
+
+	handler.RefreshToken(context)
+}
+
+func (t *AuthHandlerTest) TestRefreshTokenServiceError() {
+	refreshTokenErr := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	controller := gomock.NewController(t.T())
+
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
+
+	handler := NewHandler(authSvc, userSvc, validator)
+
+	context.EXPECT().Bind(t.refreshTokenRequest).Return(nil)
+	validator.EXPECT().Validate(t.refreshTokenRequest).Return(nil)
+	authSvc.EXPECT().RefreshToken(t.refreshTokenRequest).Return(nil, refreshTokenErr)
+	context.EXPECT().JSON(http.StatusInternalServerError, refreshTokenErr)
+
+	handler.RefreshToken(context)
 }
