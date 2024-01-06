@@ -12,7 +12,7 @@ type PetClientMock struct {
 	mock.Mock
 }
 
-func (c *PetClientMock) AdoptPet(ctx context.Context, in *petProto.AdoptPetRequest, opts ...grpc.CallOption) (res *petProto.AdoptPetResponse, err error) {
+func (c *PetClientMock) AdoptPet(_ context.Context, in *petProto.AdoptPetRequest, _ ...grpc.CallOption) (res *petProto.AdoptPetResponse, err error) {
 	args := c.Called(in)
 
 	if args.Get(0) != nil {
@@ -21,7 +21,7 @@ func (c *PetClientMock) AdoptPet(ctx context.Context, in *petProto.AdoptPetReque
 	return res, args.Error(1)
 }
 
-func (c *PetClientMock) FindAll(ctx context.Context, in *petProto.FindAllPetRequest, opts ...grpc.CallOption) (res *petProto.FindAllPetResponse, err error) {
+func (c *PetClientMock) FindAll(_ context.Context, in *petProto.FindAllPetRequest, _ ...grpc.CallOption) (res *petProto.FindAllPetResponse, err error) {
 	args := c.Called(in)
 
 	if args.Get(0) != nil {
@@ -30,7 +30,7 @@ func (c *PetClientMock) FindAll(ctx context.Context, in *petProto.FindAllPetRequ
 	return res, args.Error(1)
 }
 
-func (c *PetClientMock) FindOne(ctx context.Context, in *petProto.FindOnePetRequest, opts ...grpc.CallOption) (res *petProto.FindOnePetResponse, err error) {
+func (c *PetClientMock) FindOne(_ context.Context, in *petProto.FindOnePetRequest, _ ...grpc.CallOption) (res *petProto.FindOnePetResponse, err error) {
 	args := c.Called(in)
 
 	if args.Get(0) != nil {
@@ -39,7 +39,7 @@ func (c *PetClientMock) FindOne(ctx context.Context, in *petProto.FindOnePetRequ
 	return res, args.Error(1)
 }
 
-func (c *PetClientMock) Create(ctx context.Context, in *petProto.CreatePetRequest, opts ...grpc.CallOption) (res *petProto.CreatePetResponse, err error) {
+func (c *PetClientMock) Create(_ context.Context, in *petProto.CreatePetRequest, _ ...grpc.CallOption) (res *petProto.CreatePetResponse, err error) {
 	args := c.Called(in)
 
 	if args.Get(0) != nil {
@@ -49,7 +49,7 @@ func (c *PetClientMock) Create(ctx context.Context, in *petProto.CreatePetReques
 	return res, args.Error(1)
 }
 
-func (c *PetClientMock) Update(ctx context.Context, in *petProto.UpdatePetRequest, opts ...grpc.CallOption) (res *petProto.UpdatePetResponse, err error) {
+func (c *PetClientMock) Update(_ context.Context, in *petProto.UpdatePetRequest, _ ...grpc.CallOption) (res *petProto.UpdatePetResponse, err error) {
 	args := c.Called(in)
 
 	if args.Get(0) != nil {
@@ -59,7 +59,7 @@ func (c *PetClientMock) Update(ctx context.Context, in *petProto.UpdatePetReques
 	return res, args.Error(1)
 }
 
-func (c *PetClientMock) ChangeView(ctx context.Context, in *petProto.ChangeViewPetRequest, opts ...grpc.CallOption) (res *petProto.ChangeViewPetResponse, err error) {
+func (c *PetClientMock) ChangeView(_ context.Context, in *petProto.ChangeViewPetRequest, _ ...grpc.CallOption) (res *petProto.ChangeViewPetResponse, err error) {
 	args := c.Called(in)
 
 	if args.Get(0) != nil {
@@ -69,7 +69,7 @@ func (c *PetClientMock) ChangeView(ctx context.Context, in *petProto.ChangeViewP
 	return res, args.Error(1)
 }
 
-func (c *PetClientMock) Delete(ctx context.Context, in *petProto.DeletePetRequest, opts ...grpc.CallOption) (res *petProto.DeletePetResponse, err error) {
+func (c *PetClientMock) Delete(_ context.Context, in *petProto.DeletePetRequest, _ ...grpc.CallOption) (res *petProto.DeletePetResponse, err error) {
 	args := c.Called(in)
 
 	if args.Get(0) != nil {
