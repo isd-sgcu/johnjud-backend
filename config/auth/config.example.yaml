@@ -1,0 +1,23 @@
+app:
+  port: 3002
+  debug: true
+  secret: <secret>
+
+database:
+  host: localhost
+  port: 5432
+  name: johnjud_db
+  username: root
+  password: root
+
+jwt:
+  secret: <secret>
+  expires_in: 3600
+  refresh_token_ttl: 604800
+  issuer: <issuer>
+
+redis:
+  host: localhost
+  port: 6379
+  password: ""
+  dbnum: 0

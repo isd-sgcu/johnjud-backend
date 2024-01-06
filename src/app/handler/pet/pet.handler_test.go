@@ -9,22 +9,22 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
-	mock_router "github.com/isd-sgcu/johnjud-gateway/src/mocks/router"
-	mock_image "github.com/isd-sgcu/johnjud-gateway/src/mocks/service/image"
-	mock_pet "github.com/isd-sgcu/johnjud-gateway/src/mocks/service/pet"
-	mock_validator "github.com/isd-sgcu/johnjud-gateway/src/mocks/validator"
+	routerMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/router"
+	imageMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/service/image"
+	petMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/service/pet"
+	validatorMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/validator"
 
 	utils "github.com/isd-sgcu/johnjud-gateway/src/app/utils/pet"
 	petconst "github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
-	pet_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
-	image_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
+	petProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
+	imageProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 	"github.com/stretchr/testify/suite"
 )
 
 type PetHandlerTest struct {
 	suite.Suite
-	Pet                  *pet_proto.Pet
-	Pets                 []*pet_proto.Pet
+	Pet                  *petProto.Pet
+	Pets                 []*petProto.Pet
 	PetDto               *dto.PetResponse
 	CreatePetRequest     *dto.CreatePetRequest
 	ChangeViewPetRequest *dto.ChangeViewPetRequest
@@ -33,8 +33,8 @@ type PetHandlerTest struct {
 	NotFoundErr          *dto.ResponseErr
 	ServiceDownErr       *dto.ResponseErr
 	InternalErr          *dto.ResponseErr
-	Images               []*image_proto.Image
-	ImagesList           [][]*image_proto.Image
+	Images               []*imageProto.Image
+	ImagesList           [][]*imageProto.Image
 }
 
 func TestPetHandler(t *testing.T) {
@@ -45,19 +45,19 @@ func (t *PetHandlerTest) SetupTest() {
 	imagesList := utils.MockImageList(3)
 	t.ImagesList = imagesList
 	t.Images = imagesList[0]
-	var pets []*pet_proto.Pet
+	var pets []*petProto.Pet
 	for i := 0; i <= 3; i++ {
-		pet := &pet_proto.Pet{
+		pet := &petProto.Pet{
 			Id:           faker.UUIDDigit(),
 			Type:         faker.Word(),
 			Species:      faker.Word(),
 			Name:         faker.Name(),
 			Birthdate:    faker.Word(),
-			Gender:       pet_proto.Gender(rand.Intn(1) + 1),
+			Gender:       petProto.Gender(rand.Intn(1) + 1),
 			Habit:        faker.Paragraph(),
 			Caption:      faker.Paragraph(),
-			Images:       []*image_proto.Image{},
-			Status:       pet_proto.PetStatus(rand.Intn(1) + 1),
+			Images:       []*imageProto.Image{},
+			Status:       petProto.PetStatus(rand.Intn(1) + 1),
 			IsSterile:    true,
 			IsVaccinated: true,
 			IsVisible:    true,
@@ -134,10 +134,10 @@ func (t *PetHandlerTest) TestFindAllSuccess() {
 
 	controller := gomock.NewController(t.T())
 
-	petSvc := mock_pet.NewMockService(controller)
-	imageSvc := mock_image.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	petSvc := petMock.NewMockService(controller)
+	imageSvc := imageMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	petSvc.EXPECT().FindAll().Return(findAllResponse, nil)
 	context.EXPECT().JSON(http.StatusOK, expectedResponse)
@@ -156,10 +156,10 @@ func (t *PetHandlerTest) TestFindOneSuccess() {
 
 	controller := gomock.NewController(t.T())
 
-	petSvc := mock_pet.NewMockService(controller)
-	imageSvc := mock_image.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	petSvc := petMock.NewMockService(controller)
+	imageSvc := imageMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
 	petSvc.EXPECT().FindOne(t.Pet.Id).Return(findOneResponse, nil)
@@ -174,10 +174,10 @@ func (t *PetHandlerTest) TestFindOneNotFoundErr() {
 
 	controller := gomock.NewController(t.T())
 
-	petSvc := mock_pet.NewMockService(controller)
-	imageSvc := mock_image.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	petSvc := petMock.NewMockService(controller)
+	imageSvc := imageMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
 	petSvc.EXPECT().FindOne(t.Pet.Id).Return(nil, findOneResponse)
@@ -192,10 +192,10 @@ func (t *PetHandlerTest) TestFindOneGrpcErr() {
 
 	controller := gomock.NewController(t.T())
 
-	petSvc := mock_pet.NewMockService(controller)
-	imageSvc := mock_image.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	petSvc := petMock.NewMockService(controller)
+	imageSvc := imageMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
 	petSvc.EXPECT().FindOne(t.Pet.Id).Return(nil, findOneResponse)
@@ -215,10 +215,10 @@ func (t *PetHandlerTest) TestCreateSuccess() {
 
 	controller := gomock.NewController(t.T())
 
-	petSvc := mock_pet.NewMockService(controller)
-	imageSvc := mock_image.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	petSvc := petMock.NewMockService(controller)
+	imageSvc := imageMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Bind(t.CreatePetRequest).Return(nil)
 	validator.EXPECT().Validate(t.CreatePetRequest).Return(nil)
@@ -234,10 +234,10 @@ func (t *PetHandlerTest) TestCreateGrpcErr() {
 
 	controller := gomock.NewController(t.T())
 
-	petSvc := mock_pet.NewMockService(controller)
-	imageSvc := mock_image.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	petSvc := petMock.NewMockService(controller)
+	imageSvc := imageMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Bind(t.CreatePetRequest).Return(nil)
 	validator.EXPECT().Validate(t.CreatePetRequest).Return(nil)
@@ -258,10 +258,10 @@ func (t *PetHandlerTest) TestUpdateSuccess() {
 
 	controller := gomock.NewController(t.T())
 
-	petSvc := mock_pet.NewMockService(controller)
-	imageSvc := mock_image.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	petSvc := petMock.NewMockService(controller)
+	imageSvc := imageMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
 	context.EXPECT().Bind(t.UpdatePetRequest).Return(nil)
@@ -278,10 +278,10 @@ func (t *PetHandlerTest) TestUpdateNotFound() {
 
 	controller := gomock.NewController(t.T())
 
-	petSvc := mock_pet.NewMockService(controller)
-	imageSvc := mock_image.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	petSvc := petMock.NewMockService(controller)
+	imageSvc := imageMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
 	context.EXPECT().Bind(t.UpdatePetRequest).Return(nil)
@@ -298,10 +298,10 @@ func (t *PetHandlerTest) TestUpdateGrpcErr() {
 
 	controller := gomock.NewController(t.T())
 
-	petSvc := mock_pet.NewMockService(controller)
-	imageSvc := mock_image.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	petSvc := petMock.NewMockService(controller)
+	imageSvc := imageMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
 	context.EXPECT().Bind(t.UpdatePetRequest).Return(nil)
@@ -325,10 +325,10 @@ func (t *PetHandlerTest) TestDeleteSuccess() {
 
 	controller := gomock.NewController(t.T())
 
-	petSvc := mock_pet.NewMockService(controller)
-	imageSvc := mock_image.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	petSvc := petMock.NewMockService(controller)
+	imageSvc := imageMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
 	petSvc.EXPECT().Delete(t.Pet.Id).Return(deleteResponse, nil)
@@ -344,10 +344,10 @@ func (t *PetHandlerTest) TestDeleteNotFound() {
 
 	controller := gomock.NewController(t.T())
 
-	petSvc := mock_pet.NewMockService(controller)
-	imageSvc := mock_image.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	petSvc := petMock.NewMockService(controller)
+	imageSvc := imageMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
 	petSvc.EXPECT().Delete(t.Pet.Id).Return(deleteResponse, t.NotFoundErr)
@@ -364,10 +364,10 @@ func (t *PetHandlerTest) TestDeleteGrpcErr() {
 
 	controller := gomock.NewController(t.T())
 
-	petSvc := mock_pet.NewMockService(controller)
-	imageSvc := mock_image.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	petSvc := petMock.NewMockService(controller)
+	imageSvc := imageMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
 	petSvc.EXPECT().Delete(t.Pet.Id).Return(deleteResponse, t.ServiceDownErr)
@@ -389,10 +389,10 @@ func (t *PetHandlerTest) TestChangeViewSuccess() {
 
 	controller := gomock.NewController(t.T())
 
-	petSvc := mock_pet.NewMockService(controller)
-	imageSvc := mock_image.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	petSvc := petMock.NewMockService(controller)
+	imageSvc := imageMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
 	context.EXPECT().Bind(t.ChangeViewPetRequest).Return(nil)
@@ -411,10 +411,10 @@ func (t *PetHandlerTest) TestChangeViewNotFound() {
 
 	controller := gomock.NewController(t.T())
 
-	petSvc := mock_pet.NewMockService(controller)
-	imageSvc := mock_image.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	petSvc := petMock.NewMockService(controller)
+	imageSvc := imageMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
 	context.EXPECT().Bind(t.ChangeViewPetRequest).Return(nil)
@@ -433,10 +433,10 @@ func (t *PetHandlerTest) TestChangeViewGrpcErr() {
 
 	controller := gomock.NewController(t.T())
 
-	petSvc := mock_pet.NewMockService(controller)
-	imageSvc := mock_image.NewMockService(controller)
-	validator := mock_validator.NewMockIDtoValidator(controller)
-	context := mock_router.NewMockIContext(controller)
+	petSvc := petMock.NewMockService(controller)
+	imageSvc := imageMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
 	context.EXPECT().Bind(t.ChangeViewPetRequest).Return(nil)
