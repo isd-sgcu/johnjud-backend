@@ -73,7 +73,7 @@ func (h *Handler) FindOne(c router.IContext) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ResponseErr{
 			StatusCode: http.StatusInternalServerError,
-			Message:    "Invalid ID",
+			Message:    constant.InvalidID,
 			Data:       nil,
 		})
 		return
