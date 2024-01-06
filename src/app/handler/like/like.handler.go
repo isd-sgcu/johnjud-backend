@@ -9,21 +9,20 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
 	likeConst "github.com/isd-sgcu/johnjud-gateway/src/constant/like"
-	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/like/v1"
 )
 
 type Handler struct {
 	service  Service
-	validate *validator.DtoValidator
+	validate validator.IDtoValidator
 }
 
 type Service interface {
-	FindByUserId(string) ([]*proto.Like, *dto.ResponseErr)
-	Create(*dto.CreateLikeRequest) (*proto.Like, *dto.ResponseErr)
-	Delete(string) (bool, *dto.ResponseErr)
+	FindByUserId(string) ([]*dto.LikeResponse, *dto.ResponseErr)
+	Create(*dto.CreateLikeRequest) (*dto.LikeResponse, *dto.ResponseErr)
+	Delete(string) (*dto.DeleteLikeResponse, *dto.ResponseErr)
 }
 
-func NewHandler(service Service, validate *validator.DtoValidator) *Handler {
+func NewHandler(service Service, validate validator.IDtoValidator) *Handler {
 	return &Handler{service, validate}
 }
 
@@ -32,7 +31,7 @@ func (h *Handler) FindByUserId(c router.IContext) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ResponseErr{
 			StatusCode: http.StatusInternalServerError,
-			Message:    constant.InvalidID,
+			Message:    constant.InvalidIDMessage,
 			Data:       nil,
 		})
 		return
