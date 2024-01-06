@@ -9,20 +9,15 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
 	likeConst "github.com/isd-sgcu/johnjud-gateway/src/constant/like"
+	likeSvc "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/like"
 )
 
 type Handler struct {
-	service  Service
+	service  likeSvc.Service
 	validate validator.IDtoValidator
 }
 
-type Service interface {
-	FindByUserId(string) ([]*dto.LikeResponse, *dto.ResponseErr)
-	Create(*dto.CreateLikeRequest) (*dto.LikeResponse, *dto.ResponseErr)
-	Delete(string) (*dto.DeleteLikeResponse, *dto.ResponseErr)
-}
-
-func NewHandler(service Service, validate validator.IDtoValidator) *Handler {
+func NewHandler(service likeSvc.Service, validate validator.IDtoValidator) *Handler {
 	return &Handler{service, validate}
 }
 
