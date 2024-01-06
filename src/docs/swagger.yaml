@@ -1,0 +1,342 @@
+definitions:
+  dto.BadReqErrResponse:
+    properties:
+      failed_field:
+        type: string
+      message:
+        type: string
+      value: {}
+    type: object
+  dto.Credential:
+    properties:
+      access_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3BiZX...
+        type: string
+      expires_in:
+        example: 3600
+        type: integer
+      refresh_token:
+        example: e7e84d54-7518-4...
+        type: string
+    type: object
+  dto.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  dto.PetDto:
+    type: object
+  dto.ResponseBadRequestErr:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.BadReqErrResponse'
+        type: array
+      message:
+        example: Invalid request body
+        type: string
+      status_code:
+        example: 400
+        type: integer
+    type: object
+  dto.ResponseConflictErr:
+    properties:
+      data: {}
+      message:
+        example: Conflict
+        type: string
+      status_code:
+        example: 409
+        type: integer
+    type: object
+  dto.ResponseForbiddenErr:
+    properties:
+      data: {}
+      message:
+        example: Insufficiency permission
+        type: string
+      status_code:
+        example: 403
+        type: integer
+    type: object
+  dto.ResponseInternalErr:
+    properties:
+      data: {}
+      message:
+        example: Internal service error
+        type: string
+      status_code:
+        example: 500
+        type: integer
+    type: object
+  dto.ResponseServiceDownErr:
+    properties:
+      data: {}
+      message:
+        example: Service is down
+        type: string
+      status_code:
+        example: 503
+        type: integer
+    type: object
+  dto.ResponseUnauthorizedErr:
+    properties:
+      data: {}
+      message:
+        example: Invalid token
+        type: string
+      status_code:
+        example: 401
+        type: integer
+    type: object
+  dto.SignInRequest:
+    properties:
+      email:
+        type: string
+      password:
+        maxLength: 30
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.SignOutResponse:
+    properties:
+      is_success:
+        type: boolean
+    type: object
+  dto.SignupRequest:
+    properties:
+      email:
+        type: string
+      firstname:
+        type: string
+      lastname:
+        type: string
+      password:
+        maxLength: 30
+        minLength: 6
+        type: string
+    required:
+    - email
+    - firstname
+    - lastname
+    - password
+    type: object
+  dto.SignupResponse:
+    properties:
+      email:
+        type: string
+      firstname:
+        type: string
+      id:
+        type: string
+      lastname:
+        type: string
+    type: object
+info:
+  contact:
+    email: sd.team.sgcu@gmail.com
+    name: ISD Team
+  description: '# Johnjud API'
+  title: JohnJud API
+  version: "1.0"
+paths:
+  /v1/auth/refreshToken:
+    post:
+      consumes:
+      - application/json
+      description: Return the credential
+      parameters:
+      - description: refreshToken request dto
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Credential'
+        "400":
+          description: Invalid token
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "401":
+          description: Invalid token
+          schema:
+            $ref: '#/definitions/dto.ResponseUnauthorizedErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Refresh token
+      tags:
+      - auth
+  /v1/auth/signin:
+    post:
+      consumes:
+      - application/json
+      description: Return the credential of user including access token and refresh
+        token
+      parameters:
+      - description: signIn request dto
+        in: body
+        name: signIn
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SignInRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.Credential'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "403":
+          description: Incorrect email or password
+          schema:
+            $ref: '#/definitions/dto.ResponseForbiddenErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Sign in user
+      tags:
+      - auth
+  /v1/auth/signout:
+    post:
+      consumes:
+      - application/json
+      description: Return the bool value of success
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SignOutResponse'
+        "401":
+          description: Invalid token
+          schema:
+            $ref: '#/definitions/dto.ResponseUnauthorizedErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Sign out user
+      tags:
+      - auth
+  /v1/auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Return the data of user if successfully
+      parameters:
+      - description: signup request dto
+        in: body
+        name: signup
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SignupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.SignupResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "409":
+          description: Duplicate email
+          schema:
+            $ref: '#/definitions/dto.ResponseConflictErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Signup user
+      tags:
+      - auth
+  /v1/pet/:
+    get:
+      consumes:
+      - application/json
+      description: Return the data of pets if successfully
+      parameters:
+      - description: pet dto
+        in: body
+        name: signup
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PetDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.PetDto'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "409":
+          description: Duplicate email
+          schema:
+            $ref: '#/definitions/dto.ResponseConflictErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: find all pets
+      tags:
+      - auth
+schemes:
+- https
+- http
+securityDefinitions:
+  AuthToken:
+    description: Description for what is this security definition being used
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
+tags:
+- description: |-
+    # Auth Tag API Documentation
+    **Auth** functions goes here
+  name: auth

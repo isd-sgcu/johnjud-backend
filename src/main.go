@@ -11,21 +11,43 @@ import (
 	"time"
 
 	authHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/auth"
-	health_check "github.com/isd-sgcu/johnjud-gateway/src/app/handler/health-check"
+	healthcheck "github.com/isd-sgcu/johnjud-gateway/src/app/handler/healthcheck"
+	petHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/pet"
 	userHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/user"
 	guard "github.com/isd-sgcu/johnjud-gateway/src/app/middleware/auth"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
-	authSrv "github.com/isd-sgcu/johnjud-gateway/src/app/service/auth"
-	userSrv "github.com/isd-sgcu/johnjud-gateway/src/app/service/user"
+	authSvc "github.com/isd-sgcu/johnjud-gateway/src/app/service/auth"
+	imageSvc "github.com/isd-sgcu/johnjud-gateway/src/app/service/image"
+	petSvc "github.com/isd-sgcu/johnjud-gateway/src/app/service/pet"
+	userSvc "github.com/isd-sgcu/johnjud-gateway/src/app/service/user"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
 	"github.com/isd-sgcu/johnjud-gateway/src/config"
 	"github.com/isd-sgcu/johnjud-gateway/src/constant/auth"
-	auth_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
-	user_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/user/v1"
+	authProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
+	userProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/user/v1"
+	petProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
+	imageProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
+
+// @title JohnJud API
+// @version 1.0
+// @description.markdown
+
+// @contact.name ISD Team
+// @contact.email sd.team.sgcu@gmail.com
+
+// @schemes https http
+
+// @securityDefinitions.apikey  AuthToken
+// @in                          header
+// @name                        Authorization
+// @description					Description for what is this security definition being used
+
+// @tag.name auth
+// @tag.description.markdown
 
 func main() {
 	conf, err := config.LoadConfig()
@@ -36,7 +58,7 @@ func main() {
 			Msg("Failed to start service")
 	}
 
-	v, err := validator.NewValidator()
+	v, err := validator.NewIValidator()
 	if err != nil {
 		log.Fatal().
 			Err(err).
@@ -44,13 +66,13 @@ func main() {
 			Msg("Failed to start service")
 	}
 
-	// backendConn, err := grpc.Dial(conf.Service.Backend, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	// if err != nil {
-	// 	log.Fatal().
-	// 		Err(err).
-	// 		Str("service", "johnjud-backend").
-	// 		Msg("Cannot connect to service")
-	// }
+	backendConn, err := grpc.Dial(conf.Service.Backend, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal().
+			Err(err).
+			Str("service", "johnjud-backend").
+			Msg("Cannot connect to service")
+	}
 
 	authConn, err := grpc.Dial(conf.Service.Auth, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -60,25 +82,32 @@ func main() {
 			Msg("Cannot connect to service")
 	}
 
-	// fileConn, err := grpc.Dial(conf.Service.File, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	// if err != nil {
-	// 	log.Fatal().
-	// 		Err(err).
-	// 		Str("service", "johnjud-file").
-	// 		Msg("Cannot connect to service")
-	// }
+	fileConn, err := grpc.Dial(conf.Service.File, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal().
+			Err(err).
+			Str("service", "johnjud-file").
+			Msg("Cannot connect to service")
+	}
 
-	hc := health_check.NewHandler()
+	hc := healthcheck.NewHandler()
 
-	userClient := user_proto.NewUserServiceClient(authConn)
-	userService := userSrv.NewService(userClient)
+	userClient := userProto.NewUserServiceClient(authConn)
+	userService := userSvc.NewService(userClient)
 	userHandler := userHdr.NewHandler(userService, v)
 
-	authClient := auth_proto.NewAuthServiceClient(authConn)
-	authService := authSrv.NewService(authClient)
+	authClient := authProto.NewAuthServiceClient(authConn)
+	authService := authSvc.NewService(authClient)
 	authHandler := authHdr.NewHandler(authService, userService, v)
 
-	authGuard := guard.NewAuthGuard(authService, auth.ExcludePath, conf.App)
+	authGuard := guard.NewAuthGuard(authService, auth.ExcludePath, conf.App, auth.VersionList)
+
+	imageClient := imageProto.NewImageServiceClient(fileConn)
+	imageService := imageSvc.NewService(imageClient)
+
+	petClient := petProto.NewPetServiceClient(backendConn)
+	petService := petSvc.NewService(petClient)
+	petHandler := petHdr.NewHandler(petService, imageService, v)
 
 	r := router.NewFiberRouter(&authGuard, conf.App)
 
@@ -86,15 +115,24 @@ func main() {
 	r.PutUser("/", userHandler.Update)
 
 	r.PostAuth("/signup", authHandler.Signup)
-	r.PostAuth("/signin", authHandler.Signin)
-	r.PostAuth("/signout", authHandler.Signout)
-	r.PostAuth("/me", authHandler.Validate)
+	r.PostAuth("/signin", authHandler.SignIn)
+	r.PostAuth("/signout", authHandler.SignOut)
+	//r.PostAuth("/me", authHandler.Validate)
 	r.PostAuth("/refreshToken", authHandler.RefreshToken)
 
 	r.GetHealthCheck("/", hc.HealthCheck)
 
+	r.GetPet("/", petHandler.FindAll)
+	r.GetPet("/:id", petHandler.FindOne)
+	r.PostPet("/create", petHandler.Create)
+	r.PutPet("/:id", petHandler.Update)
+	r.PutPet("/:id/visible", petHandler.ChangeView)
+	r.DeletePet("/:id", petHandler.Delete)
+
+	v1 := router.NewAPIv1(r, conf.App)
+
 	go func() {
-		if err := r.Listen(fmt.Sprintf(":%v", conf.App.Port)); err != nil && err != http.ErrServerClosed {
+		if err := v1.Listen(fmt.Sprintf(":%v", conf.App.Port)); err != nil && err != http.ErrServerClosed {
 			log.Fatal().
 				Err(err).
 				Str("service", "mgl-gateway").

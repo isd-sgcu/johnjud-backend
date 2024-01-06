@@ -12,6 +12,10 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+type IDtoValidator interface {
+	Validate(interface{}) []*dto.BadReqErrResponse
+}
+
 type DtoValidator struct {
 	v     *validator.Validate
 	trans ut.Translator
@@ -60,4 +64,8 @@ func NewValidator() (*DtoValidator, error) {
 		v:     v,
 		trans: trans,
 	}, nil
+}
+
+func NewIValidator() (IDtoValidator, error) {
+	return NewValidator()
 }

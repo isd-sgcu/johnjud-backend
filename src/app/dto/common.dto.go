@@ -44,6 +44,12 @@ type ResponseNotfoundErr struct {
 	Data       interface{} `json:"data"`
 }
 
+type ResponseConflictErr struct {
+	StatusCode int         `json:"status_code" example:"409"`
+	Message    string      `json:"message" example:"Conflict"`
+	Data       interface{} `json:"data"`
+}
+
 type ResponseInternalErr struct {
 	StatusCode int         `json:"status_code" example:"500"`
 	Message    string      `json:"message" example:"Internal service error"`
@@ -59,5 +65,11 @@ type ResponseServiceDownErr struct {
 type ResponseGatewayTimeoutErr struct {
 	StatusCode int         `json:"status_code" example:"504"`
 	Message    string      `json:"message" example:"Connection timeout"`
+	Data       interface{} `json:"data"`
+}
+
+type ResponseSuccess struct {
+	StatusCode int         `json:"status_code" example:"200"`
+	Message    string      `json:"message" example:"success"`
 	Data       interface{} `json:"data"`
 }

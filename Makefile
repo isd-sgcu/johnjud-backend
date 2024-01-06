@@ -14,3 +14,14 @@ test:
 
 server:
 	go run ./src/.
+
+mock-gen:
+	mockgen -source ./src/pkg/service/auth/auth.service.go -destination ./src/mocks/service/auth/auth.mock.go
+	mockgen -source ./src/pkg/service/user/user.service.go -destination ./src/mocks/service/user/user.mock.go
+	mockgen -source ./src/pkg/service/pet/pet.service.go -destination ./src/mocks/service/pet/pet.mock.go
+	mockgen -source ./src/pkg/service/image/image.service.go -destination ./src/mocks/service/image/image.mock.go
+	mockgen -source ./src/app/validator/validator.go -destination ./src/mocks/validator/validator.mock.go
+	mockgen -source ./src/app/router/context.go -destination ./src/mocks/router/context.mock.go
+
+create-doc:
+	swag init -d ./src -o ./src/docs -md ./src/docs/markdown

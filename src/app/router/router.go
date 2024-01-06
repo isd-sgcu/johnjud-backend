@@ -15,43 +15,50 @@ type FiberRouter struct {
 	pet   fiber.Router
 	image fiber.Router
 	like  fiber.Router
-	adopt fiber.Router
 }
 
 type IGuard interface {
-	Use(*FiberCtx)
+	Use(IContext) error
+}
+
+func NewAPIv1(r *FiberRouter, conf config.App) *fiber.App {
+	if conf.Debug {
+		r.Use(logger.New(logger.Config{Next: func(c *fiber.Ctx) bool {
+			return c.Path() == "/v1/"
+		}}))
+		r.Get("/docs/*", swagger.HandlerDefault)
+	}
+
+	app := fiber.New(fiber.Config{
+		StrictRouting:     true,
+		AppName:           "JohnJud API",
+		EnablePrintRoutes: conf.Debug,
+	})
+
+	app.Mount("/v1", r.App)
+
+	return app
 }
 
 func NewFiberRouter(authGuard IGuard, conf config.App) *FiberRouter {
-	r := fiber.New(fiber.Config{
-		StrictRouting: true,
-		AppName:       "JohnJud API",
-	})
+	r := fiber.New(fiber.Config{})
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: "*",
 	}))
 
-	if conf.Debug {
-		r.Use(logger.New(logger.Config{Next: func(c *fiber.Ctx) bool {
-			return c.Path() == "/"
-		}}))
-		r.Get("/docs/*", swagger.HandlerDefault)
-	}
-
 	auth := GroupWithAuthMiddleware(r, "/auth", authGuard.Use)
 	user := GroupWithAuthMiddleware(r, "/user", authGuard.Use)
-	pet := GroupWithAuthMiddleware(r, "/pet", authGuard.Use)
+	pet := GroupWithAuthMiddleware(r, "/pets", authGuard.Use)
+
 	image := GroupWithAuthMiddleware(r, "/image", authGuard.Use)
 	like := GroupWithAuthMiddleware(r, "/like", authGuard.Use)
-	adopt := GroupWithAuthMiddleware(r, "/adopt", authGuard.Use)
 
-	return &FiberRouter{r, user, auth, pet, image, adopt, like}
+	return &FiberRouter{r, auth, user, pet, image, like}
 }
 
-func GroupWithAuthMiddleware(r *fiber.App, path string, middleware func(ctx *FiberCtx)) fiber.Router {
+func GroupWithAuthMiddleware(r *fiber.App, path string, middleware func(ctx IContext) error) fiber.Router {
 	return r.Group(path, func(c *fiber.Ctx) error {
-		middleware(NewFiberCtx(c))
-		return nil
+		return middleware(NewFiberCtx(c))
 	})
 }

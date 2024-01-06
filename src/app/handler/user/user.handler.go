@@ -1,25 +1,19 @@
 package user
 
 import (
-	"net/http"
-
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
-	user_proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/user/v1"
+	"github.com/isd-sgcu/johnjud-gateway/src/pkg/service/user"
+	"net/http"
 )
 
 type Handler struct {
-	service  Service
-	validate *validator.DtoValidator
+	service  user.Service
+	validate validator.IDtoValidator
 }
 
-type Service interface {
-	FindOne(string) (*user_proto.User, *dto.ResponseErr)
-	Update(string, *dto.UpdateUserDto) (*user_proto.User, *dto.ResponseErr)
-}
-
-func NewHandler(service Service, validate *validator.DtoValidator) *Handler {
+func NewHandler(service user.Service, validate validator.IDtoValidator) *Handler {
 	return &Handler{service, validate}
 }
 
