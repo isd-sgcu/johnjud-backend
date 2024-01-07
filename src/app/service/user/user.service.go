@@ -76,6 +76,8 @@ func (s *Service) Update(id string, in *dto.UpdateUserRequest) (*dto.UpdateUserR
 		Id:        id,
 		Firstname: in.Firstname,
 		Lastname:  in.Lastname,
+		Password:  in.Password,
+		Email:     in.Email,
 	})
 	if err != nil {
 		st, _ := status.FromError(err)
