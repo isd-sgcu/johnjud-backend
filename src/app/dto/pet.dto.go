@@ -36,10 +36,10 @@ type CreatePetRequest struct {
 	Species      string     `json:"species" validate:"required"`
 	Name         string     `json:"name" validate:"required"`
 	Birthdate    string     `json:"birthdate" validate:"required"`
-	Gender       pet.Gender `json:"gender" validate:"required" example:"male"`
+	Gender       pet.Gender `json:"gender" validate:"required" example:"1"`
 	Habit        string     `json:"habit" validate:"required"`
 	Caption      string     `json:"caption"`
-	Status       pet.Status `json:"status" validate:"required" example:"findhome"`
+	Status       pet.Status `json:"status" validate:"required" example:"1"`
 	IsSterile    *bool      `json:"is_sterile" validate:"required"`
 	IsVaccinated *bool      `json:"is_vaccinated" validate:"required"`
 	IsVisible    *bool      `json:"is_visible" validate:"required"`
@@ -57,6 +57,15 @@ type ChangeViewPetRequest struct {
 
 type ChangeViewPetResponse struct {
 	Success bool `json:"success" validate:"required"`
+}
+
+type AdoptByRequest struct {
+	UserID string `json:"user_id" validate:"required"`
+	PetID  string `json:"pet_id" validate:"required"`
+}
+
+type AdoptByResponse struct {
+	Success bool `json:"success"`
 }
 
 type UpdatePetRequest struct {
