@@ -23,7 +23,7 @@ func NewService(client proto.UserServiceClient) *Service {
 	}
 }
 
-func (s *Service) FindOne(id string) (*dto.FindOneUserResponse, *dto.ResponseErr) {
+func (s *Service) FindOne(id string) (*dto.User, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -60,7 +60,7 @@ func (s *Service) FindOne(id string) (*dto.FindOneUserResponse, *dto.ResponseErr
 		}
 	}
 
-	return &dto.FindOneUserResponse{
+	return &dto.User{
 		Id:        response.User.Id,
 		Firstname: response.User.Firstname,
 		Lastname:  response.User.Lastname,
@@ -68,7 +68,7 @@ func (s *Service) FindOne(id string) (*dto.FindOneUserResponse, *dto.ResponseErr
 	}, nil
 }
 
-func (s *Service) Update(id string, in *dto.UpdateUserRequest) (*dto.UpdateUserResponse, *dto.ResponseErr) {
+func (s *Service) Update(id string, in *dto.UpdateUserRequest) (*dto.User, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -109,7 +109,7 @@ func (s *Service) Update(id string, in *dto.UpdateUserRequest) (*dto.UpdateUserR
 		}
 	}
 
-	return &dto.UpdateUserResponse{
+	return &dto.User{
 		Id:        response.User.Id,
 		Firstname: response.User.Firstname,
 		Lastname:  response.User.Lastname,

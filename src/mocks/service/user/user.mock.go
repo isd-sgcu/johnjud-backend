@@ -50,10 +50,10 @@ func (mr *MockServiceMockRecorder) Delete(arg0 interface{}) *gomock.Call {
 }
 
 // FindOne mocks base method.
-func (m *MockService) FindOne(arg0 string) (*dto.FindOneUserResponse, *dto.ResponseErr) {
+func (m *MockService) FindOne(arg0 string) (*dto.User, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindOne", arg0)
-	ret0, _ := ret[0].(*dto.FindOneUserResponse)
+	ret0, _ := ret[0].(*dto.User)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
@@ -65,10 +65,10 @@ func (mr *MockServiceMockRecorder) FindOne(arg0 interface{}) *gomock.Call {
 }
 
 // Update mocks base method.
-func (m *MockService) Update(arg0 string, arg1 *dto.UpdateUserRequest) (*dto.UpdateUserResponse, *dto.ResponseErr) {
+func (m *MockService) Update(arg0 string, arg1 *dto.UpdateUserRequest) (*dto.User, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", arg0, arg1)
-	ret0, _ := ret[0].(*dto.UpdateUserResponse)
+	ret0, _ := ret[0].(*dto.User)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }

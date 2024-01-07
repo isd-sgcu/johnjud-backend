@@ -101,7 +101,7 @@ func (t *UserServiceTest) TestFindOneSuccess() {
 		},
 	}
 
-	expected := &dto.FindOneUserResponse{
+	expected := &dto.User{
 		Id:        t.User.Id,
 		Email:     t.User.Email,
 		Firstname: t.User.Firstname,
@@ -171,7 +171,7 @@ func (t *UserServiceTest) TestUpdateSuccess() {
 		},
 	}
 
-	expected := &dto.UpdateUserResponse{
+	expected := &dto.User{
 		Id:        t.User.Id,
 		Email:     t.User.Email,
 		Firstname: t.User.Firstname,
