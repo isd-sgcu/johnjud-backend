@@ -18,6 +18,18 @@ func NewHandler(service user.Service, validate validator.IDtoValidator) *Handler
 	return &Handler{service, validate}
 }
 
+// FindOne is a function that returns a user by id from database
+// @Summary finds one user
+// @Description Returns the data of user if successful
+// @Param id path string true "user id"
+// @Tags user
+// @Accept json
+// @Produce json
+// @Success 200 {object} dto.User
+// @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
+// @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
+// @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
+// @Router /v1/users/{id} [get]
 func (h *Handler) FindOne(c *router.FiberCtx) {
 	id, err := c.ID()
 	if err != nil {
