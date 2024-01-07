@@ -89,7 +89,7 @@ func (s *Service) Update(id string, in *dto.UpdateUserRequest) (*dto.UpdateUserR
 		switch st.Code() {
 		case codes.AlreadyExists:
 			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusNotFound,
+				StatusCode: http.StatusConflict,
 				Message:    constant.DuplicateEmailMessage,
 				Data:       nil,
 			}
@@ -131,11 +131,19 @@ func (s *Service) Delete(id string) (*dto.DeleteUserResponse, *dto.ResponseErr) 
 			Str("service", "user").
 			Str("module", "delete").
 			Msg(st.Message())
-
-		return nil, &dto.ResponseErr{
-			StatusCode: http.StatusInternalServerError,
-			Message:    constant.InternalErrorMessage,
-			Data:       nil,
+		switch st.Code() {
+		case codes.Unavailable:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusServiceUnavailable,
+				Message:    constant.UnavailableServiceMessage,
+				Data:       nil,
+			}
+		default:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusInternalServerError,
+				Message:    constant.InternalErrorMessage,
+				Data:       nil,
+			}
 		}
 	}
 
