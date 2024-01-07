@@ -44,7 +44,7 @@ func (m *MockService) Adopt(arg0 string, arg1 *dto.AdoptByRequest) (*dto.AdoptBy
 }
 
 // Adopt indicates an expected call of Adopt.
-func (mr *MockServiceMockRecorder) Adopt(arg0, arg1 any) *gomock.Call {
+func (mr *MockServiceMockRecorder) Adopt(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Adopt", reflect.TypeOf((*MockService)(nil).Adopt), arg0, arg1)
 }
