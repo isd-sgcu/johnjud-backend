@@ -27,13 +27,13 @@ func NewHandler(service petSvc.Service, imageService imageSvc.Service, likeServi
 	return &Handler{service, imageService, likeService, validate}
 }
 
-// FindAll is a function that return all pets in database
-// @Summary find all pets
-// @Description Return the data of pets if successfully
-// @Tags auth
+// FindAll is a function that returns all pets in database
+// @Summary finds all pets
+// @Description Returns the data of pets if successful
+// @Tags pet
 // @Accept json
 // @Produce json
-// @Success 200 {object} dto.PetDto
+// @Success 200 {object} []dto.PetResponse
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/pets/ [get]
@@ -62,14 +62,14 @@ func (h *Handler) FindAll(c router.IContext) {
 	return
 }
 
-// FindOne is a function that return all pet in database
-// @Summary find one pet
-// @Description Return the data of pets if successfully
+// FindOne is a function that returns a pet by id in database
+// @Summary finds one pet
+// @Description Returns the data of a pet if successful
 // @Param id path string true "pet id"
-// @Tags auth
+// @Tags pet
 // @Accept json
 // @Produce json
-// @Success 200 {object} dto.PetDto
+// @Success 200 {object} dto.PetResponse
 // @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
@@ -107,14 +107,14 @@ func (h *Handler) FindOne(c router.IContext) {
 	return
 }
 
-// Create is a function that create pet in database
-// @Summary create pet
-// @Description Return the data of pet if successfully
+// Create is a function that creates pet in database
+// @Summary creates pet
+// @Description Returns the data of pet if successful
 // @Param create body dto.CreatePetRequest true "pet dto"
-// @Tags auth
+// @Tags pet
 // @Accept json
 // @Produce json
-// @Success 201 {object} dto.PetDto
+// @Success 201 {object} dto.PetResponse
 // @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
@@ -158,15 +158,15 @@ func (h *Handler) Create(c router.IContext) {
 	return
 }
 
-// Update is a function that update pet in database
-// @Summary update pet
-// @Description Return the data of pet if successfully
+// Update is a function that updates pet in database
+// @Summary updates pet
+// @Description Returns the data of pet if successfully
 // @Param update body dto.UpdatePetRequest true "update pet dto"
-// @Param id path stirng true "pet id"
-// @Tags auth
+// @Param id path string true "pet id"
+// @Tags pet
 // @Accept json
 // @Produce json
-// @Success 201 {object} dto.PetDto
+// @Success 201 {object} dto.PetResponse
 // @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
@@ -221,19 +221,19 @@ func (h *Handler) Update(c router.IContext) {
 	return
 }
 
-// Change is a function that change visibility of pet in database
-// @Summary change view pet
-// @Description Return the status true of pet if successfully else false
-// @Param change view body dto.ChangeViewPetRequest true "change view pet dto"
-// @Param id string true "pet id"
-// @Tags auth
+// ChangeView is a function that changes visibility of pet in database
+// @Summary changes pet's public visiblility
+// @Description Returns successful status if pet's IsVisible is successfully changed
+// @Param changeViewDto body dto.ChangeViewPetRequest true "changeView pet dto"
+// @Param id path string true "pet id"
+// @Tags pet
 // @Accept json
 // @Produce json
-// @Success 201 {object} bool
+// @Success 201 {object} dto.ChangeViewPetResponse
 // @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
-// @Router /v1/pets/ [put]
+// @Router /v1/pets/{id}/visible [put]
 func (h *Handler) ChangeView(c router.IContext) {
 	id, err := c.Param("id")
 	if err != nil {
@@ -284,14 +284,14 @@ func (h *Handler) ChangeView(c router.IContext) {
 	return
 }
 
-// Delete is a function that delete pet in database
-// @Summary delete pet
-// @Description Return the status true of pet if successfully else false
-// @Param id string true "pet id"
-// @Tags auth
+// Delete is a function that deletes pet in database
+// @Summary deletes pet
+// @Description Returns successful status if pet is successfully deleted
+// @Param id path string true "pet id"
+// @Tags pet
 // @Accept json
 // @Produce json
-// @Success 201 {object} bool
+// @Success 201 {object} dto.DeleteResponse
 // @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
@@ -322,15 +322,14 @@ func (h *Handler) Delete(c router.IContext) {
 }
 
 // Adopt is a function that handles the adoption of a pet in the database
-// @Summary Adopt a pet
+// @Summary Change a pet's adoptBy status
 // @Description Return true if the pet is successfully adopted
+// @Param adoptDto body dto.AdoptByRequest true "adopt pet dto"
 // @Param id path string true "Pet ID"
-// @Param user_id body string true "User ID"
-// @Param pet_id body string true "Pet ID"
 // @Tags pet
 // @Accept json
 // @Produce json
-// @Success 201 {object} bool
+// @Success 201 {object} dto.AdoptByResponse
 // @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
