@@ -6,28 +6,20 @@ import (
 
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
-	imageSrv "github.com/isd-sgcu/johnjud-gateway/src/app/handler/image"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
 	petconst "github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
+	imageSvc "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/image"
+	petSvc "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/pet"
 )
 
 type Handler struct {
-	service      Service
-	imageService imageSrv.Service
+	service      petSvc.Service
+	imageService imageSvc.Service
 	validate     validator.IDtoValidator
 }
 
-type Service interface {
-	FindAll() ([]*dto.PetResponse, *dto.ResponseErr)
-	FindOne(string) (*dto.PetResponse, *dto.ResponseErr)
-	Create(*dto.CreatePetRequest) (*dto.PetResponse, *dto.ResponseErr)
-	Update(string, *dto.UpdatePetRequest) (*dto.PetResponse, *dto.ResponseErr)
-	ChangeView(string, *dto.ChangeViewPetRequest) (*dto.ChangeViewPetResponse, *dto.ResponseErr)
-	Delete(string) (*dto.DeleteResponse, *dto.ResponseErr)
-}
-
-func NewHandler(service Service, imageService imageSrv.Service, validate validator.IDtoValidator) *Handler {
+func NewHandler(service petSvc.Service, imageService imageSvc.Service, validate validator.IDtoValidator) *Handler {
 	return &Handler{service, imageService, validate}
 }
 
@@ -73,7 +65,7 @@ func (h *Handler) FindOne(c router.IContext) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ResponseErr{
 			StatusCode: http.StatusInternalServerError,
-			Message:    "Invalid ID",
+			Message:    constant.InvalidIDMessage,
 			Data:       nil,
 		})
 		return
@@ -302,6 +294,69 @@ func (h *Handler) Delete(c router.IContext) {
 	c.JSON(http.StatusOK, dto.ResponseSuccess{
 		StatusCode: http.StatusOK,
 		Message:    petconst.DeletePetSuccessMessage,
+		Data:       res,
+	})
+	return
+}
+
+// Adopt is a function that handles the adoption of a pet in the database
+// @Summary Adopt a pet
+// @Description Return true if the pet is successfully adopted
+// @Param id path string true "Pet ID"
+// @Param user_id body string true "User ID"
+// @Param pet_id body string true "Pet ID"
+// @Tags pet
+// @Accept json
+// @Produce json
+// @Success 201 {object} bool
+// @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
+// @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
+// @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
+// @Router /v1/pets/{id}/adopt [put]
+func (h *Handler) Adopt(c router.IContext) {
+	petId, err := c.Param("id")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, &dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    "Invalid ID",
+			Data:       nil,
+		})
+		return
+	}
+
+	request := &dto.AdoptByRequest{}
+	err = c.Bind(request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.BindingRequestErrorMessage + err.Error(),
+			Data:       nil,
+		})
+		return
+	}
+
+	if err := h.validate.Validate(request); err != nil {
+		var errorMessage []string
+		for _, reqErr := range err {
+			errorMessage = append(errorMessage, reqErr.Message)
+		}
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.InvalidRequestBodyMessage + strings.Join(errorMessage, ", "),
+			Data:       nil,
+		})
+		return
+	}
+
+	res, errRes := h.service.Adopt(petId, request)
+	if errRes != nil {
+		c.JSON(errRes.StatusCode, errRes)
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.ResponseSuccess{
+		StatusCode: http.StatusOK,
+		Message:    petconst.AdoptPetSuccessMessage,
 		Data:       res,
 	})
 	return

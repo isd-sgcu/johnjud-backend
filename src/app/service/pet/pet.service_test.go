@@ -37,6 +37,7 @@ type PetServiceTest struct {
 	InvalidArgumentErr    *dto.ResponseErr
 	InternalErr           *dto.ResponseErr
 	ChangeViewedPetDto    *dto.ChangeViewPetRequest
+	AdoptDto              *dto.AdoptByRequest
 
 	Images     []*imgproto.Image
 	ImagesList [][]*imgproto.Image
@@ -160,6 +161,11 @@ func (t *PetServiceTest) SetupTest() {
 		UserId: t.Pet.AdoptBy,
 	}
 
+	t.AdoptDto = &dto.AdoptByRequest{
+		UserID: t.Pet.AdoptBy,
+		PetID:  t.Pet.Id,
+	}
+
 	t.UnavailableServiceErr = &dto.ResponseErr{
 		StatusCode: http.StatusServiceUnavailable,
 		Message:    constant.UnavailableServiceMessage,
@@ -180,7 +186,7 @@ func (t *PetServiceTest) SetupTest() {
 
 	t.InvalidArgumentErr = &dto.ResponseErr{
 		StatusCode: http.StatusBadRequest,
-		Message:    constant.InvalidArgument,
+		Message:    constant.InvalidArgumentMessage,
 		Data:       nil,
 	}
 }
@@ -191,7 +197,7 @@ func (t *PetServiceTest) TestFindAllSuccess() {
 		Pets: t.Pets,
 	}
 
-	expected := utils.RawToDtoList(t.Pets, t.ImagesList)
+	expected := utils.ProtoToDtoList(t.Pets, t.ImagesList)
 
 	client := petmock.PetClientMock{}
 	client.On("FindAll", protoReq).Return(protoResp, nil)
@@ -301,7 +307,7 @@ func (t *PetServiceTest) TestCreateInvalidArgumentError() {
 
 	expected := t.InvalidArgumentErr
 
-	clientErr := status.Error(codes.InvalidArgument, constant.InvalidArgument)
+	clientErr := status.Error(codes.InvalidArgument, constant.InvalidArgumentMessage)
 
 	client := &petmock.PetClientMock{}
 	client.On("Create", protoReq).Return(nil, clientErr)
@@ -512,5 +518,55 @@ func (t *PetServiceTest) TestChangeViewUnavailableServiceError() {
 	actual, err := svc.ChangeView(t.Pet.Id, t.ChangeViewedPetDto)
 
 	assert.Equal(t.T(), &dto.ChangeViewPetResponse{Success: false}, actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *PetServiceTest) TestAdoptSuccess() {
+	protoReq := t.AdoptReq
+	protoResp := &petproto.AdoptPetResponse{
+		Success: true,
+	}
+
+	client := &petmock.PetClientMock{}
+	client.On("AdoptPet", protoReq).Return(protoResp, nil)
+
+	svc := NewService(client)
+	actual, err := svc.Adopt(t.Pet.Id, t.AdoptDto)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), actual, &dto.AdoptByResponse{Success: true})
+}
+
+func (t *PetServiceTest) TestAdoptNotFoundError() {
+	protoReq := t.AdoptReq
+
+	clientErr := status.Error(codes.NotFound, constant.PetNotFoundMessage)
+
+	expected := t.NotFoundErr
+
+	client := &petmock.PetClientMock{}
+	client.On("AdoptPet", protoReq).Return(nil, clientErr)
+
+	svc := NewService(client)
+	actual, err := svc.Adopt(t.Pet.Id, t.AdoptDto)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *PetServiceTest) TestAdoptUnavailableServiceError() {
+	protoReq := t.AdoptReq
+
+	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
+
+	expected := t.UnavailableServiceErr
+
+	client := &petmock.PetClientMock{}
+	client.On("AdoptPet", protoReq).Return(nil, clientErr)
+
+	svc := NewService(client)
+	actual, err := svc.Adopt(t.Pet.Id, t.AdoptDto)
+
+	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
 }

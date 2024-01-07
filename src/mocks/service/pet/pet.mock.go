@@ -35,18 +35,18 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 }
 
 // Adopt mocks base method.
-func (m *MockService) Adopt(arg0 *dto.AdoptDto) (bool, *dto.ResponseErr) {
+func (m *MockService) Adopt(arg0 string, arg1 *dto.AdoptByRequest) (*dto.AdoptByResponse, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Adopt", arg0)
-	ret0, _ := ret[0].(bool)
+	ret := m.ctrl.Call(m, "Adopt", arg0, arg1)
+	ret0, _ := ret[0].(*dto.AdoptByResponse)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // Adopt indicates an expected call of Adopt.
-func (mr *MockServiceMockRecorder) Adopt(arg0 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) Adopt(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Adopt", reflect.TypeOf((*MockService)(nil).Adopt), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Adopt", reflect.TypeOf((*MockService)(nil).Adopt), arg0, arg1)
 }
 
 // ChangeView mocks base method.
