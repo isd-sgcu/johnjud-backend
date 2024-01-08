@@ -9,6 +9,7 @@ import (
 
 type IContext interface {
 	UserID() string
+	Role() string
 	Bind(interface{}) error
 	JSON(int, interface{})
 	ID() (string, error)
