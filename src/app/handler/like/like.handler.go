@@ -21,6 +21,18 @@ func NewHandler(service likeSvc.Service, validate validator.IDtoValidator) *Hand
 	return &Handler{service, validate}
 }
 
+// FindByUserId is a function that return all petID and userID that user liked.
+// @Summary find likes by user id
+// @Description Return dto.ResponseSuccess
+// @Param id path string true "user id"
+// @Tags like
+// @Accept json
+// @Produce json
+// @Success 200 {object} dto.ResponseSuccess
+// @Failure 404 {object} dto.ResponseNotfoundErr "user not found"
+// @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
+// @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
+// @Router /v1/likes/ [get]
 func (h *Handler) FindByUserId(c router.IContext) {
 	id, err := c.Param("id")
 	if err != nil {
@@ -46,6 +58,18 @@ func (h *Handler) FindByUserId(c router.IContext) {
 	return
 }
 
+// Create is a function for creating a `like` for a pet that a user is interested
+// @Summary create like
+// @Description Return dto.ResponseSuccess
+// @Param create body dto.CreateLikeRequest true "create like request"
+// @Tags like
+// @Accept json
+// @Produce json
+// @Success 200 {object} dto.ResponseSuccess
+// @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
+// @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
+// @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
+// @Router /v1/likes/ [post]
 func (h *Handler) Create(c router.IContext) {
 	request := &dto.CreateLikeRequest{}
 	err := c.Bind(request)
@@ -85,6 +109,18 @@ func (h *Handler) Create(c router.IContext) {
 	return
 }
 
+// Create is a function for delete like in database
+// @Summary delete like
+// @Description Return dto.ResponseSuccess if like is successfully deleted
+// @Param id path string true "user id"
+// @Tags like
+// @Accept json
+// @Produce json
+// @Success 200 {object} dto.ResponseSuccess
+// @Failure 404 {object} dto.ResponseNotfoundErr "like not found"
+// @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
+// @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
+// @Router /v1/likes/ [delete]
 func (h *Handler) Delete(c router.IContext) {
 	id, err := c.Param("id")
 	if err != nil {
