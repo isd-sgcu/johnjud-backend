@@ -8,6 +8,8 @@ var ExcludePath = map[string]struct{}{
 	"GET /adopt/":       {},
 }
 
+var AdminPath = map[string]struct{}{}
+
 var VersionList = map[string]struct{}{
 	"v1": {},
 }
