@@ -7,20 +7,27 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
+	petUtils "github.com/isd-sgcu/johnjud-gateway/src/app/utils/pet"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
 	petconst "github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
 	imageSvc "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/image"
+	likeSvc "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/like"
 	petSvc "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/pet"
 )
 
 type Handler struct {
 	service      petSvc.Service
+	likeService  likeSvc.Service
 	imageService imageSvc.Service
 	validate     validator.IDtoValidator
 }
 
-func NewHandler(service petSvc.Service, imageService imageSvc.Service, validate validator.IDtoValidator) *Handler {
-	return &Handler{service, imageService, validate}
+func NewHandler(service petSvc.Service, imageService imageSvc.Service, likeService likeSvc.Service, validate validator.IDtoValidator) *Handler {
+	return &Handler{
+		service:      service,
+		imageService: imageService,
+		likeService:  likeService,
+	}
 }
 
 // FindAll is a function that return all pets in database
@@ -34,17 +41,25 @@ func NewHandler(service petSvc.Service, imageService imageSvc.Service, validate 
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/pets/ [get]
 func (h *Handler) FindAll(c router.IContext) {
-	token :=  
+	userId := c.UserID()
 	response, respErr := h.service.FindAll()
 	if respErr != nil {
 		c.JSON(respErr.StatusCode, respErr)
 		return
 	}
 
+	likeResponse, likeRespErr := h.likeService.FindByUserId(userId)
+	if likeRespErr != nil {
+		c.JSON(respErr.StatusCode, likeRespErr)
+		return
+	}
+
+	petResponse := petUtils.MapIsLikeToPets(likeResponse, response)
+
 	c.JSON(http.StatusOK, dto.ResponseSuccess{
 		StatusCode: http.StatusOK,
 		Message:    petconst.FindAllPetSuccessMessage,
-		Data:       response,
+		Data:       petResponse,
 	})
 	return
 }
@@ -62,7 +77,7 @@ func (h *Handler) FindAll(c router.IContext) {
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/pets/{id} [get]
 func (h *Handler) FindOne(c router.IContext) {
-	token := c.Token()
+	userId := c.UserID()
 	id, err := c.Param("id")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ResponseErr{
@@ -78,6 +93,14 @@ func (h *Handler) FindOne(c router.IContext) {
 		c.JSON(respErr.StatusCode, respErr)
 		return
 	}
+
+	likeResponse, likeRespErr := h.likeService.FindByUserId(userId)
+	if likeRespErr != nil {
+		c.JSON(respErr.StatusCode, likeRespErr)
+		return
+	}
+
+	response.IsLike = petUtils.IsLike(id, likeResponse)
 
 	c.JSON(http.StatusOK, dto.ResponseSuccess{
 		StatusCode: http.StatusOK,
