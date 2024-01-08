@@ -28,6 +28,7 @@ type PetResponse struct {
 	Contact      string          `json:"contact"`
 	AdoptBy      string          `json:"adopt_by"`
 	Images       []ImageResponse `json:"images"`
+	IsLike       *bool           `json:"is_like"`
 }
 
 type CreatePetRequest struct {
