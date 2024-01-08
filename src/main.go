@@ -103,7 +103,7 @@ func main() {
 	authService := authSvc.NewService(authClient)
 	authHandler := authHdr.NewHandler(authService, userService, v)
 
-	authGuard := guard.NewAuthGuard(authService, auth.ExcludePath, conf.App, auth.VersionList)
+	authGuard := guard.NewAuthGuard(authService, auth.ExcludePath, auth.AdminPath, conf.App, auth.VersionList)
 
 	imageClient := imageProto.NewImageServiceClient(fileConn)
 	imageService := imageSvc.NewService(imageClient)
@@ -120,6 +120,7 @@ func main() {
 
 	r.GetUser("/:id", userHandler.FindOne)
 	r.PutUser("/", userHandler.Update)
+	r.DeleteUser("/:id", userHandler.Delete)
 
 	r.PostAuth("/signup", authHandler.Signup)
 	r.PostAuth("/signin", authHandler.SignIn)
