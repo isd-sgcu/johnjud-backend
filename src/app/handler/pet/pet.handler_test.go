@@ -11,6 +11,7 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
 	routerMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/router"
 	imageMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/service/image"
+	likeMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/service/like"
 	petMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/service/pet"
 	validatorMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/validator"
 
@@ -141,13 +142,14 @@ func (t *PetHandlerTest) TestFindAllSuccess() {
 
 	petSvc := petMock.NewMockService(controller)
 	imageSvc := imageMock.NewMockService(controller)
+	likeSvc := likeMock.NewMockService(controller)
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
 	petSvc.EXPECT().FindAll().Return(findAllResponse, nil)
 	context.EXPECT().JSON(http.StatusOK, expectedResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := NewHandler(petSvc, imageSvc, likeSvc, validator)
 	handler.FindAll(context)
 }
 
@@ -163,6 +165,7 @@ func (t *PetHandlerTest) TestFindOneSuccess() {
 
 	petSvc := petMock.NewMockService(controller)
 	imageSvc := imageMock.NewMockService(controller)
+	likeSvc := likeMock.NewMockService(controller)
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
@@ -170,7 +173,7 @@ func (t *PetHandlerTest) TestFindOneSuccess() {
 	petSvc.EXPECT().FindOne(t.Pet.Id).Return(findOneResponse, nil)
 	context.EXPECT().JSON(http.StatusOK, expectedResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := NewHandler(petSvc, imageSvc, likeSvc, validator)
 	handler.FindOne(context)
 }
 
@@ -181,6 +184,7 @@ func (t *PetHandlerTest) TestFindOneNotFoundErr() {
 
 	petSvc := petMock.NewMockService(controller)
 	imageSvc := imageMock.NewMockService(controller)
+	likeSvc := likeMock.NewMockService(controller)
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
@@ -188,7 +192,7 @@ func (t *PetHandlerTest) TestFindOneNotFoundErr() {
 	petSvc.EXPECT().FindOne(t.Pet.Id).Return(nil, findOneResponse)
 	context.EXPECT().JSON(http.StatusNotFound, findOneResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := NewHandler(petSvc, imageSvc, likeSvc, validator)
 	handler.FindOne(context)
 }
 
@@ -199,6 +203,7 @@ func (t *PetHandlerTest) TestFindOneGrpcErr() {
 
 	petSvc := petMock.NewMockService(controller)
 	imageSvc := imageMock.NewMockService(controller)
+	likeSvc := likeMock.NewMockService(controller)
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
@@ -206,7 +211,7 @@ func (t *PetHandlerTest) TestFindOneGrpcErr() {
 	petSvc.EXPECT().FindOne(t.Pet.Id).Return(nil, findOneResponse)
 	context.EXPECT().JSON(http.StatusServiceUnavailable, findOneResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := NewHandler(petSvc, imageSvc, likeSvc, validator)
 	handler.FindOne(context)
 }
 
@@ -222,6 +227,7 @@ func (t *PetHandlerTest) TestCreateSuccess() {
 
 	petSvc := petMock.NewMockService(controller)
 	imageSvc := imageMock.NewMockService(controller)
+	likeSvc := likeMock.NewMockService(controller)
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
@@ -230,7 +236,7 @@ func (t *PetHandlerTest) TestCreateSuccess() {
 	petSvc.EXPECT().Create(t.CreatePetRequest).Return(createResponse, nil)
 	context.EXPECT().JSON(http.StatusCreated, expectedResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := NewHandler(petSvc, imageSvc, likeSvc, validator)
 	handler.Create(context)
 }
 
@@ -241,6 +247,7 @@ func (t *PetHandlerTest) TestCreateGrpcErr() {
 
 	petSvc := petMock.NewMockService(controller)
 	imageSvc := imageMock.NewMockService(controller)
+	likeSvc := likeMock.NewMockService(controller)
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
@@ -249,7 +256,7 @@ func (t *PetHandlerTest) TestCreateGrpcErr() {
 	petSvc.EXPECT().Create(t.CreatePetRequest).Return(nil, createErrorResponse)
 	context.EXPECT().JSON(http.StatusServiceUnavailable, createErrorResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := NewHandler(petSvc, imageSvc, likeSvc, validator)
 	handler.Create(context)
 }
 
@@ -265,6 +272,7 @@ func (t *PetHandlerTest) TestUpdateSuccess() {
 
 	petSvc := petMock.NewMockService(controller)
 	imageSvc := imageMock.NewMockService(controller)
+	likeSvc := likeMock.NewMockService(controller)
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
@@ -274,7 +282,7 @@ func (t *PetHandlerTest) TestUpdateSuccess() {
 	petSvc.EXPECT().Update(t.Pet.Id, t.UpdatePetRequest).Return(updateResponse, nil)
 	context.EXPECT().JSON(http.StatusOK, expectedResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := NewHandler(petSvc, imageSvc, likeSvc, validator)
 	handler.Update(context)
 }
 
@@ -285,6 +293,7 @@ func (t *PetHandlerTest) TestUpdateNotFound() {
 
 	petSvc := petMock.NewMockService(controller)
 	imageSvc := imageMock.NewMockService(controller)
+	likeSvc := likeMock.NewMockService(controller)
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
@@ -294,7 +303,7 @@ func (t *PetHandlerTest) TestUpdateNotFound() {
 	petSvc.EXPECT().Update(t.Pet.Id, t.UpdatePetRequest).Return(nil, updateResponse)
 	context.EXPECT().JSON(http.StatusNotFound, updateResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := NewHandler(petSvc, imageSvc, likeSvc, validator)
 	handler.Update(context)
 }
 
@@ -305,6 +314,7 @@ func (t *PetHandlerTest) TestUpdateGrpcErr() {
 
 	petSvc := petMock.NewMockService(controller)
 	imageSvc := imageMock.NewMockService(controller)
+	likeSvc := likeMock.NewMockService(controller)
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
@@ -314,7 +324,7 @@ func (t *PetHandlerTest) TestUpdateGrpcErr() {
 	petSvc.EXPECT().Update(t.Pet.Id, t.UpdatePetRequest).Return(nil, updateResponse)
 	context.EXPECT().JSON(http.StatusServiceUnavailable, updateResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := NewHandler(petSvc, imageSvc, likeSvc, validator)
 	handler.Update(context)
 }
 
@@ -332,6 +342,7 @@ func (t *PetHandlerTest) TestDeleteSuccess() {
 
 	petSvc := petMock.NewMockService(controller)
 	imageSvc := imageMock.NewMockService(controller)
+	likeSvc := likeMock.NewMockService(controller)
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
@@ -339,7 +350,7 @@ func (t *PetHandlerTest) TestDeleteSuccess() {
 	petSvc.EXPECT().Delete(t.Pet.Id).Return(deleteResponse, nil)
 	context.EXPECT().JSON(http.StatusOK, expectedResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := NewHandler(petSvc, imageSvc, likeSvc, validator)
 	handler.Delete(context)
 }
 func (t *PetHandlerTest) TestDeleteNotFound() {
@@ -351,6 +362,7 @@ func (t *PetHandlerTest) TestDeleteNotFound() {
 
 	petSvc := petMock.NewMockService(controller)
 	imageSvc := imageMock.NewMockService(controller)
+	likeSvc := likeMock.NewMockService(controller)
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
@@ -358,7 +370,7 @@ func (t *PetHandlerTest) TestDeleteNotFound() {
 	petSvc.EXPECT().Delete(t.Pet.Id).Return(deleteResponse, t.NotFoundErr)
 	context.EXPECT().JSON(http.StatusNotFound, t.NotFoundErr)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := NewHandler(petSvc, imageSvc, likeSvc, validator)
 	handler.Delete(context)
 }
 
@@ -371,6 +383,7 @@ func (t *PetHandlerTest) TestDeleteGrpcErr() {
 
 	petSvc := petMock.NewMockService(controller)
 	imageSvc := imageMock.NewMockService(controller)
+	likeSvc := likeMock.NewMockService(controller)
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
@@ -378,7 +391,7 @@ func (t *PetHandlerTest) TestDeleteGrpcErr() {
 	petSvc.EXPECT().Delete(t.Pet.Id).Return(deleteResponse, t.ServiceDownErr)
 	context.EXPECT().JSON(http.StatusServiceUnavailable, t.ServiceDownErr)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := NewHandler(petSvc, imageSvc, likeSvc, validator)
 	handler.Delete(context)
 }
 
@@ -396,6 +409,7 @@ func (t *PetHandlerTest) TestChangeViewSuccess() {
 
 	petSvc := petMock.NewMockService(controller)
 	imageSvc := imageMock.NewMockService(controller)
+	likeSvc := likeMock.NewMockService(controller)
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
@@ -405,7 +419,7 @@ func (t *PetHandlerTest) TestChangeViewSuccess() {
 	petSvc.EXPECT().ChangeView(t.Pet.Id, t.ChangeViewPetRequest).Return(changeViewResponse, nil)
 	context.EXPECT().JSON(http.StatusOK, expectedResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := NewHandler(petSvc, imageSvc, likeSvc, validator)
 	handler.ChangeView(context)
 }
 
@@ -418,6 +432,7 @@ func (t *PetHandlerTest) TestChangeViewNotFound() {
 
 	petSvc := petMock.NewMockService(controller)
 	imageSvc := imageMock.NewMockService(controller)
+	likeSvc := likeMock.NewMockService(controller)
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
@@ -427,7 +442,7 @@ func (t *PetHandlerTest) TestChangeViewNotFound() {
 	petSvc.EXPECT().ChangeView(t.Pet.Id, t.ChangeViewPetRequest).Return(changeViewResponse, t.NotFoundErr)
 	context.EXPECT().JSON(http.StatusNotFound, t.NotFoundErr)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := NewHandler(petSvc, imageSvc, likeSvc, validator)
 	handler.ChangeView(context)
 }
 
@@ -440,6 +455,7 @@ func (t *PetHandlerTest) TestChangeViewGrpcErr() {
 
 	petSvc := petMock.NewMockService(controller)
 	imageSvc := imageMock.NewMockService(controller)
+	likeSvc := likeMock.NewMockService(controller)
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
@@ -449,7 +465,7 @@ func (t *PetHandlerTest) TestChangeViewGrpcErr() {
 	petSvc.EXPECT().ChangeView(t.Pet.Id, t.ChangeViewPetRequest).Return(changeViewResponse, t.ServiceDownErr)
 	context.EXPECT().JSON(http.StatusServiceUnavailable, t.ServiceDownErr)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := NewHandler(petSvc, imageSvc, likeSvc, validator)
 	handler.ChangeView(context)
 }
 
@@ -467,6 +483,7 @@ func (t *PetHandlerTest) TestAdoptSuccess() {
 
 	petSvc := petMock.NewMockService(controller)
 	imageSvc := imageMock.NewMockService(controller)
+	likeSvc := likeMock.NewMockService(controller)
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
@@ -476,7 +493,7 @@ func (t *PetHandlerTest) TestAdoptSuccess() {
 	petSvc.EXPECT().Adopt(t.Pet.Id, t.AdoptByRequest).Return(adoptByResponse, nil)
 	context.EXPECT().JSON(http.StatusOK, expectedResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := NewHandler(petSvc, imageSvc, likeSvc, validator)
 	handler.Adopt(context)
 }
 
@@ -489,6 +506,7 @@ func (t *PetHandlerTest) TestAdoptNotFound() {
 
 	petSvc := petMock.NewMockService(controller)
 	imageSvc := imageMock.NewMockService(controller)
+	likeSvc := likeMock.NewMockService(controller)
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
@@ -498,7 +516,7 @@ func (t *PetHandlerTest) TestAdoptNotFound() {
 	petSvc.EXPECT().Adopt(t.Pet.Id, t.AdoptByRequest).Return(adoptByResponse, t.NotFoundErr)
 	context.EXPECT().JSON(http.StatusNotFound, t.NotFoundErr)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := NewHandler(petSvc, imageSvc, likeSvc, validator)
 	handler.Adopt(context)
 }
 
@@ -511,6 +529,7 @@ func (t *PetHandlerTest) TestAdoptGrpcErr() {
 
 	petSvc := petMock.NewMockService(controller)
 	imageSvc := imageMock.NewMockService(controller)
+	likeSvc := likeMock.NewMockService(controller)
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
@@ -520,6 +539,6 @@ func (t *PetHandlerTest) TestAdoptGrpcErr() {
 	petSvc.EXPECT().Adopt(t.Pet.Id, t.AdoptByRequest).Return(adoptByResponse, t.ServiceDownErr)
 	context.EXPECT().JSON(http.StatusServiceUnavailable, t.ServiceDownErr)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := NewHandler(petSvc, imageSvc, likeSvc, validator)
 	handler.Adopt(context)
 }
