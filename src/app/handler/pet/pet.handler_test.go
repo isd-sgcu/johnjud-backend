@@ -113,15 +113,15 @@ func (t *PetHandlerTest) SetupTest() {
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
 		Status:       pet.Status(t.Pet.Status),
-		IsSterile:    &t.Pet.IsSterile,
-		IsVaccinated: &t.Pet.IsVaccinated,
-		IsVisible:    &t.Pet.IsVisible,
-		IsClubPet:    &t.Pet.IsClubPet,
+		IsSterile:    t.Pet.IsSterile,
+		IsVaccinated: t.Pet.IsVaccinated,
+		IsVisible:    t.Pet.IsVisible,
+		IsClubPet:    t.Pet.IsClubPet,
 		Background:   t.Pet.Background,
 		Address:      t.Pet.Address,
 		Contact:      t.Pet.Contact,
 		AdoptBy:      t.Pet.AdoptBy,
-		IsLike:       petUtils.BoolAddr(true),
+		IsLike:       false,
 	}
 
 	t.CreatePetRequest = &dto.CreatePetRequest{}
@@ -172,6 +172,7 @@ func (t *PetHandlerTest) TestFindAllSuccess() {
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
+	context.EXPECT().IsAuth().Return(true)
 	context.EXPECT().UserID().Return(t.User.Id)
 	petSvc.EXPECT().FindAll().Return(findAllResponse, nil)
 	likeSvc.EXPECT().FindByUserId(t.User.Id).Return(likeUtils.ProtoToDtoList(t.Likes), nil)
@@ -197,6 +198,7 @@ func (t *PetHandlerTest) TestFindOneSuccess() {
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
+	context.EXPECT().IsAuth().Return(true)
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
 	context.EXPECT().UserID().Return(t.User.Id)
 	petSvc.EXPECT().FindOne(t.Pet.Id).Return(findOneResponse, nil)
@@ -218,8 +220,8 @@ func (t *PetHandlerTest) TestFindOneNotFoundErr() {
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
+	context.EXPECT().IsAuth().Return(true)
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
-	context.EXPECT().UserID().Return(t.User.Id)
 	petSvc.EXPECT().FindOne(t.Pet.Id).Return(nil, findOneResponse)
 	context.EXPECT().JSON(http.StatusNotFound, findOneResponse)
 
@@ -238,8 +240,8 @@ func (t *PetHandlerTest) TestFindOneGrpcErr() {
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
+	context.EXPECT().IsAuth().Return(true)
 	context.EXPECT().Param("id").Return(t.Pet.Id, nil)
-	context.EXPECT().UserID().Return(t.User.Id)
 	petSvc.EXPECT().FindOne(t.Pet.Id).Return(nil, findOneResponse)
 	context.EXPECT().JSON(http.StatusServiceUnavailable, findOneResponse)
 
