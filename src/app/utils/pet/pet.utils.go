@@ -2,6 +2,7 @@ package pet
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
@@ -38,10 +39,10 @@ func ProtoToDto(in *petproto.Pet, images []*imgproto.Image) *dto.PetResponse {
 		Habit:        in.Habit,
 		Caption:      in.Caption,
 		Status:       pet.Status(in.Status),
-		IsSterile:    &in.IsSterile,
-		IsVaccinated: &in.IsVaccinated,
-		IsVisible:    &in.IsVisible,
-		IsClubPet:    &in.IsClubPet,
+		IsSterile:    in.IsSterile,
+		IsVaccinated: in.IsVaccinated,
+		IsVisible:    in.IsVisible,
+		IsClubPet:    in.IsClubPet,
 		Background:   in.Background,
 		Address:      in.Address,
 		Contact:      in.Contact,
@@ -63,10 +64,10 @@ func CreateDtoToProto(in *dto.CreatePetRequest) *petproto.CreatePetRequest {
 			Caption:      in.Caption,
 			Images:       []*imgproto.Image{},
 			Status:       petproto.PetStatus(in.Status),
-			IsSterile:    *in.IsSterile,
-			IsVaccinated: *in.IsVaccinated,
-			IsVisible:    *in.IsVisible,
-			IsClubPet:    *in.IsClubPet,
+			IsSterile:    in.IsSterile,
+			IsVaccinated: in.IsVaccinated,
+			IsVisible:    in.IsVisible,
+			IsClubPet:    in.IsClubPet,
 			Background:   in.Background,
 			Address:      in.Address,
 			Contact:      in.Contact,
@@ -95,30 +96,6 @@ func UpdateDtoToProto(id string, in *dto.UpdatePetRequest) *petproto.UpdatePetRe
 		},
 	}
 
-	if in.IsClubPet == nil {
-		req.Pet.IsClubPet = false
-	} else {
-		req.Pet.IsClubPet = *in.IsClubPet
-	}
-
-	if in.IsSterile == nil {
-		req.Pet.IsSterile = false
-	} else {
-		req.Pet.IsSterile = *in.IsSterile
-	}
-
-	if in.IsVaccinated == nil {
-		req.Pet.IsVaccinated = false
-	} else {
-		req.Pet.IsVaccinated = *in.IsVaccinated
-	}
-
-	if in.IsVisible == nil {
-		req.Pet.IsVisible = false
-	} else {
-		req.Pet.IsVisible = *in.IsVisible
-	}
-
 	return req
 }
 
@@ -135,10 +112,10 @@ func ProtoToDtoList(in []*petproto.Pet, imagesList [][]*imgproto.Image) []*dto.P
 			Habit:        p.Habit,
 			Caption:      p.Caption,
 			Status:       pet.Status(p.Status),
-			IsSterile:    &p.IsSterile,
-			IsVaccinated: &p.IsVaccinated,
-			IsVisible:    &p.IsVisible,
-			IsClubPet:    &p.IsClubPet,
+			IsSterile:    p.IsSterile,
+			IsVaccinated: p.IsVaccinated,
+			IsVisible:    p.IsVisible,
+			IsClubPet:    p.IsClubPet,
 			Background:   p.Background,
 			Address:      p.Address,
 			Contact:      p.Contact,
@@ -160,13 +137,13 @@ func extractImages(images []*imgproto.Image) []dto.ImageResponse {
 	}
 	return result
 }
-func IsLike(petId string, likes []*dto.LikeResponse) *bool {
+func IsLike(petId string, likes []*dto.LikeResponse) bool {
 	for _, like := range likes {
 		if like.PetID == petId {
-			return BoolAddr(true)
+			return true
 		}
 	}
-	return BoolAddr(false)
+	return false
 }
 
 func MapIsLikeToPets(likes []*dto.LikeResponse, pets []*dto.PetResponse) []*dto.PetResponse {
@@ -176,6 +153,9 @@ func MapIsLikeToPets(likes []*dto.LikeResponse, pets []*dto.PetResponse) []*dto.
 	return pets
 }
 
-func BoolAddr(b bool) *bool {
-	return &b
+func CanSkipAuth(path string) bool {
+	s := strings.Split(path, "/")
+	m := strings.Trim(s[0], " ")
+	p := s[1]
+	return m == "GET" && p == "pets"
 }
