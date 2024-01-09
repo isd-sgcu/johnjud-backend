@@ -1,13 +1,15 @@
 package auth
 
 import (
+	"net/http"
+
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/utils"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/utils/auth"
+	petUtils "github.com/isd-sgcu/johnjud-gateway/src/app/utils/pet"
 	"github.com/isd-sgcu/johnjud-gateway/src/config"
 	authPkg "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/auth"
-	"net/http"
 )
 
 type Guard struct {
@@ -37,6 +39,9 @@ func (m *Guard) Use(ctx router.IContext) error {
 
 	token := ctx.Token()
 	if token == "" {
+		if petUtils.CanSkipAuth(path) {
+			return ctx.Next()
+		}
 		ctx.JSON(http.StatusUnauthorized, &dto.ResponseErr{
 			StatusCode: http.StatusUnauthorized,
 			Message:    "Invalid token",
