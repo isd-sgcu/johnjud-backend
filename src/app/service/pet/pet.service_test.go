@@ -37,9 +37,7 @@ type PetServiceTest struct {
 	UpdatePetReqMock     *proto.UpdatePetRequest
 	ChangeViewPetReqMock *proto.ChangeViewPetRequest
 	Images               []*img_proto.Image
-	ImageUrls            []string
 	ImagesList           [][]*img_proto.Image
-	ImageUrlsList        [][]string
 	ChangeAdoptBy        *pet.Pet
 	AdoptByReq           *proto.AdoptPetRequest
 }
@@ -50,6 +48,9 @@ func TestPetService(t *testing.T) {
 
 func (t *PetServiceTest) SetupTest() {
 	var pets []*pet.Pet
+	genders := []petConst.Gender{petConst.MALE, petConst.FEMALE}
+	statuses := []petConst.Status{petConst.ADOPTED, petConst.FINDHOME}
+
 	for i := 0; i <= 3; i++ {
 		pet := &pet.Pet{
 			Base: model.Base{
@@ -62,15 +63,17 @@ func (t *PetServiceTest) SetupTest() {
 			Species:      faker.Word(),
 			Name:         faker.Name(),
 			Birthdate:    faker.Word(),
-			Gender:       petConst.Gender(rand.Intn(1) + 1),
+			Gender:       genders[rand.Intn(2)],
+			Color:        faker.Word(),
+			Pattern:      faker.Word(),
 			Habit:        faker.Paragraph(),
 			Caption:      faker.Paragraph(),
-			Status:       petConst.Status(rand.Intn(1) + 1),
+			Status:       statuses[rand.Intn(2)],
 			IsSterile:    true,
 			IsVaccinated: true,
 			IsVisible:    true,
 			IsClubPet:    true,
-			Background:   faker.Paragraph(),
+			Origin:       faker.Paragraph(),
 			Address:      faker.Paragraph(),
 			Contact:      faker.Paragraph(),
 			AdoptBy:      "",
@@ -87,21 +90,12 @@ func (t *PetServiceTest) SetupTest() {
 			imageUrls = append(imageUrls, url)
 		}
 		t.ImagesList = append(t.ImagesList, images)
-		t.ImageUrlsList = append(t.ImageUrlsList, imageUrls)
 		pets = append(pets, pet)
 	}
 
 	t.Pets = pets
 	t.Pet = pets[0]
-
-	for _, images := range t.ImagesList {
-		for _, image := range images {
-			t.ImageUrls = append(t.ImageUrls, image.ImageUrl)
-		}
-	}
-
 	t.Images = t.ImagesList[0]
-	t.ImageUrls = t.ImageUrlsList[0]
 
 	t.PetDto = &proto.Pet{
 		Id:           t.Pet.ID.String(),
@@ -109,18 +103,20 @@ func (t *PetServiceTest) SetupTest() {
 		Species:      t.Pet.Species,
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
-		Gender:       proto.Gender(t.Pet.Gender),
+		Gender:       string(t.Pet.Gender),
+		Color:        t.Pet.Color,
+		Pattern:      t.Pet.Pattern,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
-		Status:       proto.PetStatus(t.Pet.Status),
+		Status:       string(t.Pet.Status),
 		IsSterile:    t.Pet.IsSterile,
 		IsVaccinated: t.Pet.IsVaccinated,
 		IsVisible:    t.Pet.IsVisible,
 		IsClubPet:    t.Pet.IsClubPet,
-		Background:   t.Pet.Background,
+		Origin:       t.Pet.Origin,
 		Address:      t.Pet.Address,
 		Contact:      t.Pet.Contact,
-		ImageUrls:    t.ImageUrls,
+		Images:       t.Images,
 	}
 
 	t.UpdatePet = &pet.Pet{
@@ -135,6 +131,8 @@ func (t *PetServiceTest) SetupTest() {
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
 		Gender:       t.Pet.Gender,
+		Color:        t.Pet.Color,
+		Pattern:      t.Pet.Pattern,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
 		Status:       t.Pet.Status,
@@ -142,7 +140,7 @@ func (t *PetServiceTest) SetupTest() {
 		IsVaccinated: t.Pet.IsVaccinated,
 		IsVisible:    t.Pet.IsVisible,
 		IsClubPet:    t.Pet.IsClubPet,
-		Background:   t.Pet.Background,
+		Origin:       t.Pet.Origin,
 		Address:      t.Pet.Address,
 		Contact:      t.Pet.Contact,
 	}
@@ -159,6 +157,8 @@ func (t *PetServiceTest) SetupTest() {
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
 		Gender:       t.Pet.Gender,
+		Color:        t.Pet.Color,
+		Pattern:      t.Pet.Pattern,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
 		Status:       t.Pet.Status,
@@ -166,7 +166,7 @@ func (t *PetServiceTest) SetupTest() {
 		IsVaccinated: t.Pet.IsVaccinated,
 		IsVisible:    false,
 		IsClubPet:    t.Pet.IsClubPet,
-		Background:   t.Pet.Background,
+		Origin:       t.Pet.Origin,
 		Address:      t.Pet.Address,
 		Contact:      t.Pet.Contact,
 	}
@@ -177,16 +177,18 @@ func (t *PetServiceTest) SetupTest() {
 			Species:      t.Pet.Species,
 			Name:         t.Pet.Name,
 			Birthdate:    t.Pet.Birthdate,
-			Gender:       proto.Gender(t.Pet.Gender),
+			Gender:       string(t.Pet.Gender),
+			Color:        t.Pet.Color,
+			Pattern:      t.Pet.Pattern,
 			Habit:        t.Pet.Habit,
 			Caption:      t.Pet.Caption,
-			Status:       proto.PetStatus(t.Pet.Status),
-			ImageUrls:    t.ImageUrls,
+			Status:       string(t.Pet.Status),
+			Images:       t.Images,
 			IsSterile:    t.Pet.IsSterile,
 			IsVaccinated: t.Pet.IsVaccinated,
 			IsVisible:    t.Pet.IsVaccinated,
 			IsClubPet:    t.Pet.IsClubPet,
-			Background:   t.Pet.Background,
+			Origin:       t.Pet.Origin,
 			Address:      t.Pet.Address,
 			Contact:      t.Pet.Contact,
 		},
@@ -199,16 +201,18 @@ func (t *PetServiceTest) SetupTest() {
 			Species:      t.Pet.Species,
 			Name:         t.Pet.Name,
 			Birthdate:    t.Pet.Birthdate,
-			Gender:       proto.Gender(t.Pet.Gender),
+			Gender:       string(t.Pet.Gender),
+			Color:        t.Pet.Color,
+			Pattern:      t.Pet.Pattern,
 			Habit:        t.Pet.Habit,
 			Caption:      t.Pet.Caption,
-			Status:       proto.PetStatus(t.Pet.Status),
-			ImageUrls:    t.ImageUrls,
+			Status:       string(t.Pet.Status),
+			Images:       t.Images,
 			IsSterile:    t.Pet.IsSterile,
 			IsVaccinated: t.Pet.IsVaccinated,
 			IsVisible:    t.Pet.IsVisible,
 			IsClubPet:    t.Pet.IsClubPet,
-			Background:   t.Pet.Background,
+			Origin:       t.Pet.Origin,
 			Address:      t.Pet.Address,
 			Contact:      t.Pet.Contact,
 		},
@@ -231,6 +235,8 @@ func (t *PetServiceTest) SetupTest() {
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
 		Gender:       t.Pet.Gender,
+		Color:        t.Pet.Color,
+		Pattern:      t.Pet.Pattern,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
 		Status:       t.Pet.Status,
@@ -238,7 +244,7 @@ func (t *PetServiceTest) SetupTest() {
 		IsVaccinated: t.Pet.IsVaccinated,
 		IsVisible:    t.Pet.IsVisible,
 		IsClubPet:    t.Pet.IsClubPet,
-		Background:   t.Pet.Background,
+		Origin:       t.Pet.Origin,
 		Address:      t.Pet.Address,
 		Contact:      t.Pet.Contact,
 		AdoptBy:      faker.UUIDDigit(),
@@ -322,7 +328,7 @@ func (t *PetServiceTest) TestFindOneSuccess() {
 
 func (t *PetServiceTest) TestFindAllSuccess() {
 
-	want := &proto.FindAllPetResponse{Pets: t.createPetsDto(t.Pets, t.ImageUrlsList)}
+	want := &proto.FindAllPetResponse{Pets: t.createPetsDto(t.Pets, t.ImagesList)}
 
 	var petsIn []*pet.Pet
 
@@ -360,6 +366,8 @@ func (t *PetServiceTest) TestFindOneNotFound() {
 
 func createPets() []*pet.Pet {
 	var result []*pet.Pet
+	genders := []petConst.Gender{petConst.MALE, petConst.FEMALE}
+	statuses := []petConst.Status{petConst.ADOPTED, petConst.FINDHOME}
 
 	for i := 0; i < rand.Intn(4)+1; i++ {
 		r := &pet.Pet{
@@ -373,15 +381,17 @@ func createPets() []*pet.Pet {
 			Species:      faker.Word(),
 			Name:         faker.Name(),
 			Birthdate:    faker.Word(),
-			Gender:       petConst.Gender(rand.Intn(1) + 1),
+			Gender:       genders[rand.Intn(2)],
+			Color:        faker.Word(),
+			Pattern:      faker.Word(),
 			Habit:        faker.Paragraph(),
 			Caption:      faker.Paragraph(),
-			Status:       petConst.Status(rand.Intn(1) + 1),
+			Status:       statuses[rand.Intn(2)],
 			IsSterile:    true,
 			IsVaccinated: true,
 			IsVisible:    true,
 			IsClubPet:    true,
-			Background:   faker.Paragraph(),
+			Origin:       faker.Paragraph(),
 			Address:      faker.Paragraph(),
 			Contact:      faker.Paragraph(),
 		}
@@ -391,7 +401,7 @@ func createPets() []*pet.Pet {
 	return result
 }
 
-func (t *PetServiceTest) createPetsDto(in []*pet.Pet, imageUrlsList [][]string) []*proto.Pet {
+func (t *PetServiceTest) createPetsDto(in []*pet.Pet, imagesList [][]*img_proto.Image) []*proto.Pet {
 	var result []*proto.Pet
 
 	for i, p := range in {
@@ -401,16 +411,18 @@ func (t *PetServiceTest) createPetsDto(in []*pet.Pet, imageUrlsList [][]string) 
 			Species:      p.Species,
 			Name:         p.Name,
 			Birthdate:    p.Birthdate,
-			Gender:       proto.Gender(p.Gender),
+			Gender:       string(p.Gender),
+			Color:        p.Color,
+			Pattern:      p.Pattern,
 			Habit:        p.Habit,
 			Caption:      p.Caption,
-			Status:       proto.PetStatus(p.Status),
-			ImageUrls:    imageUrlsList[i],
+			Status:       string(p.Status),
+			Images:       imagesList[i],
 			IsSterile:    p.IsSterile,
 			IsVaccinated: p.IsVaccinated,
 			IsVisible:    p.IsVisible,
 			IsClubPet:    p.IsClubPet,
-			Background:   p.Background,
+			Origin:       p.Origin,
 			Address:      p.Address,
 			Contact:      p.Contact,
 		}
@@ -423,7 +435,7 @@ func (t *PetServiceTest) createPetsDto(in []*pet.Pet, imageUrlsList [][]string) 
 
 func (t *PetServiceTest) TestCreateSuccess() {
 	want := &proto.CreatePetResponse{Pet: t.PetDto}
-	want.Pet.ImageUrls = []string{} // when pet is first created, it has no images
+	want.Pet.Images = []*img_proto.Image{} // when pet is first created, it has no images
 
 	repo := &mock.RepositoryMock{}
 
@@ -433,6 +445,8 @@ func (t *PetServiceTest) TestCreateSuccess() {
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
 		Gender:       t.Pet.Gender,
+		Color:        t.Pet.Color,
+		Pattern:      t.Pet.Pattern,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
 		Status:       t.Pet.Status,
@@ -440,7 +454,7 @@ func (t *PetServiceTest) TestCreateSuccess() {
 		IsVaccinated: t.Pet.IsVaccinated,
 		IsVisible:    t.Pet.IsVisible,
 		IsClubPet:    t.Pet.IsClubPet,
-		Background:   t.Pet.Background,
+		Origin:       t.Pet.Origin,
 		Address:      t.Pet.Address,
 		Contact:      t.Pet.Contact,
 	}
@@ -465,6 +479,8 @@ func (t *PetServiceTest) TestCreateInternalErr() {
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
 		Gender:       t.Pet.Gender,
+		Color:        t.Pet.Color,
+		Pattern:      t.Pet.Pattern,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
 		Status:       t.Pet.Status,
@@ -472,7 +488,7 @@ func (t *PetServiceTest) TestCreateInternalErr() {
 		IsVaccinated: t.Pet.IsVaccinated,
 		IsVisible:    t.Pet.IsVisible,
 		IsClubPet:    t.Pet.IsClubPet,
-		Background:   t.Pet.Background,
+		Origin:       t.Pet.Origin,
 		Address:      t.Pet.Address,
 		Contact:      t.Pet.Contact,
 	}

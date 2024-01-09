@@ -32,6 +32,16 @@ func (c *ClientMock) FindByPetId(_ context.Context, in *proto.FindImageByPetIdRe
 	return res, args.Error(1)
 }
 
+func (c *ClientMock) AssignPet(_ context.Context, in *proto.AssignPetRequest, _ ...grpc.CallOption) (res *proto.AssignPetResponse, err error) {
+	args := c.Called(in)
+
+	if args.Get(0) != nil {
+		res = args.Get(0).(*proto.AssignPetResponse)
+	}
+
+	return res, args.Error(1)
+}
+
 func (c *ClientMock) Delete(_ context.Context, in *proto.DeleteImageRequest, _ ...grpc.CallOption) (res *proto.DeleteImageResponse, err error) {
 	args := c.Called(in)
 

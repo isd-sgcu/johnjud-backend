@@ -18,7 +18,7 @@ func (r *Repository) FindAll(result *[]*pet.Pet) error {
 }
 
 func (r *Repository) FindOne(id string, result *pet.Pet) error {
-	return r.db.Model(&pet.Pet{}).Find(result, "id = ?", id).Error
+	return r.db.Model(&pet.Pet{}).First(result, "id = ?", id).Error
 }
 
 func (r *Repository) Create(in *pet.Pet) error {
