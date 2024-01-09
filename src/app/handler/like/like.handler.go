@@ -8,7 +8,6 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
-	likeConst "github.com/isd-sgcu/johnjud-gateway/src/constant/like"
 	likeSvc "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/like"
 )
 
@@ -38,11 +37,7 @@ func (h *Handler) FindByUserId(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    likeConst.FindLikeSuccessMessage,
-		Data:       response,
-	})
+	c.JSON(http.StatusOK, response)
 	return
 }
 
@@ -77,11 +72,7 @@ func (h *Handler) Create(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, dto.ResponseSuccess{
-		StatusCode: http.StatusCreated,
-		Message:    likeConst.CreateLikeSuccessMessage,
-		Data:       response,
-	})
+	c.JSON(http.StatusCreated, response)
 	return
 }
 
@@ -102,10 +93,6 @@ func (h *Handler) Delete(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    likeConst.DelteLikeSuccessMessage,
-		Data:       res,
-	})
+	c.JSON(http.StatusOK, res)
 	return
 }
