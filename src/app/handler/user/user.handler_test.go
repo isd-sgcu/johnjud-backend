@@ -15,7 +15,6 @@ import (
 	validatorMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/validator"
 
 	errConst "github.com/isd-sgcu/johnjud-gateway/src/app/constant"
-	userConst "github.com/isd-sgcu/johnjud-gateway/src/constant/user"
 	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/user/v1"
 
 	"github.com/stretchr/testify/suite"
@@ -94,11 +93,7 @@ func (t *UserHandlerTest) SetupTest() {
 
 func (t *UserHandlerTest) TestFindOneSuccess() {
 	svcResp := t.UserDto
-	expectedResp := &dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    userConst.FindOneUserSuccessMessage,
-		Data:       t.UserDto,
-	}
+	expectedResp := t.UserDto
 
 	controller := gomock.NewController(t.T())
 
@@ -175,11 +170,7 @@ func (t *UserHandlerTest) TestFindOneGrpcErr() {
 
 func (t *UserHandlerTest) TestUpdateSuccess() {
 	svcResp := t.UserDto
-	expectedResp := &dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    userConst.UpdateUserSuccessMessage,
-		Data:       t.UserDto,
-	}
+	expectedResp := t.UserDto
 
 	controller := gomock.NewController(t.T())
 
@@ -313,11 +304,7 @@ func (t *UserHandlerTest) TestDeleteSuccess() {
 	deleteResp := &dto.DeleteUserResponse{
 		Success: true,
 	}
-	expectedResp := &dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    userConst.DeleteUserSuccessMessage,
-		Data:       deleteResp,
-	}
+	expectedResp := deleteResp
 
 	controller := gomock.NewController(t.T())
 

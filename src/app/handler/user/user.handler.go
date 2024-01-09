@@ -8,7 +8,6 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
-	userconst "github.com/isd-sgcu/johnjud-gateway/src/constant/user"
 	"github.com/isd-sgcu/johnjud-gateway/src/pkg/service/user"
 )
 
@@ -50,11 +49,7 @@ func (h *Handler) FindOne(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, &dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    userconst.FindOneUserSuccessMessage,
-		Data:       user,
-	})
+	c.JSON(http.StatusOK, user)
 	return
 }
 
@@ -104,11 +99,7 @@ func (h *Handler) Update(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, &dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    userconst.UpdateUserSuccessMessage,
-		Data:       user,
-	})
+	c.JSON(http.StatusOK, user)
 	return
 }
 
@@ -142,10 +133,6 @@ func (h *Handler) Delete(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, &dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    userconst.DeleteUserSuccessMessage,
-		Data:       res,
-	})
+	c.JSON(http.StatusOK, res)
 	return
 }
