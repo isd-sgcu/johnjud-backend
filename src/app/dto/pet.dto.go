@@ -36,6 +36,8 @@ type CreatePetRequest struct {
 	Name         string     `json:"name" validate:"required"`
 	Birthdate    string     `json:"birthdate" validate:"required"`
 	Gender       pet.Gender `json:"gender" validate:"required" example:"1"`
+	Color        string     `json:"color" validate:"required"`
+	Pattern      string     `json:"pattern" validate:"required"`
 	Habit        string     `json:"habit" validate:"required"`
 	Caption      string     `json:"caption"`
 	Status       pet.Status `json:"status" validate:"required" example:"1"`
@@ -43,7 +45,7 @@ type CreatePetRequest struct {
 	IsVaccinated *bool      `json:"is_vaccinated" validate:"required"`
 	IsVisible    *bool      `json:"is_visible" validate:"required"`
 	IsClubPet    *bool      `json:"is_club_pet" validate:"required"`
-	Background   string     `json:"background"`
+	Origin       string     `json:"origin"`
 	Address      string     `json:"address"`
 	Contact      string     `json:"contact"`
 	AdoptBy      string     `json:"adopt_by"`
