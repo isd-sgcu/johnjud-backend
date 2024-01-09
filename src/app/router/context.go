@@ -17,6 +17,7 @@ type IContext interface {
 	Method() string
 	Path() string
 	StoreValue(string, string)
+	IsAuth() bool
 	Next() error
 }
 
@@ -29,7 +30,12 @@ func NewFiberCtx(c *fiber.Ctx) *FiberCtx {
 }
 
 func (c *FiberCtx) UserID() string {
-	return c.Ctx.Locals("UserId").(string)
+	userId := c.Ctx.Locals("UserId")
+	if userId != nil {
+		return userId.(string)
+	}
+	return ""
+	// return c.Ctx.Locals("UserId").(string)
 }
 
 func (c *FiberCtx) Bind(v interface{}) error {
@@ -84,6 +90,16 @@ func (c *FiberCtx) Path() string {
 
 func (c *FiberCtx) StoreValue(k string, v string) {
 	c.Locals(k, v)
+}
+
+func (c *FiberCtx) IsAuth() bool {
+	raw := c.Ctx.Get(fiber.HeaderAuthorization, "")
+	parts := strings.Split(raw, " ")
+
+	if len(parts) > 1 {
+		return true
+	}
+	return false
 }
 
 //func (c *FiberCtx) Next() {
