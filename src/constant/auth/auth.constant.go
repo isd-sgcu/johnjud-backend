@@ -4,13 +4,14 @@ var ExcludePath = map[string]struct{}{
 	"POST /auth/signup": {},
 	"POST /auth/signin": {},
 	"POST /auth/verify": {},
-	"GET /pets/":        {},
-	"GET /adopt/":       {},
+	"GET /user/:id":     {},
+	"GET /pets":         {},
+	"GET /adopt":        {},
 }
 
 var AdminPath = map[string]struct{}{
 	"DELETE /users/:id":     {},
-	"POST /pets/":           {},
+	"POST /pets":            {},
 	"PUT /pets/:id":         {},
 	"PUT /pets/:id/visible": {},
 	"DELETE /pets/:id":      {},
