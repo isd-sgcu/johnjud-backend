@@ -36,7 +36,7 @@ func NewHandler(service user.Service, validate validator.IDtoValidator) *Handler
 func (h *Handler) FindOne(c router.IContext) {
 	id, err := c.ID()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+		c.JSON(http.StatusBadRequest, &dto.ResponseErr{
 			StatusCode: http.StatusBadRequest,
 			Message:    err.Error(),
 			Data:       nil,
@@ -50,7 +50,7 @@ func (h *Handler) FindOne(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, dto.ResponseSuccess{
+	c.JSON(http.StatusOK, &dto.ResponseSuccess{
 		StatusCode: http.StatusOK,
 		Message:    userconst.FindOneUserSuccessMessage,
 		Data:       user,
@@ -77,7 +77,7 @@ func (h *Handler) Update(c router.IContext) {
 
 	err := c.Bind(request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+		c.JSON(http.StatusBadRequest, &dto.ResponseErr{
 			StatusCode: http.StatusBadRequest,
 			Message:    constant.BindingRequestErrorMessage + err.Error(),
 			Data:       nil,
@@ -90,7 +90,7 @@ func (h *Handler) Update(c router.IContext) {
 		for _, reqErr := range err {
 			errorMessage = append(errorMessage, reqErr.Message)
 		}
-		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+		c.JSON(http.StatusBadRequest, &dto.ResponseErr{
 			StatusCode: http.StatusBadRequest,
 			Message:    constant.InvalidRequestBodyMessage + strings.Join(errorMessage, ", "),
 			Data:       nil,
@@ -104,7 +104,7 @@ func (h *Handler) Update(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ResponseSuccess{
+	c.JSON(http.StatusOK, &dto.ResponseSuccess{
 		StatusCode: http.StatusOK,
 		Message:    userconst.UpdateUserSuccessMessage,
 		Data:       user,
@@ -128,7 +128,7 @@ func (h *Handler) Update(c router.IContext) {
 func (h *Handler) Delete(c router.IContext) {
 	id, err := c.ID()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+		c.JSON(http.StatusBadRequest, &dto.ResponseErr{
 			StatusCode: http.StatusBadRequest,
 			Message:    err.Error(),
 			Data:       nil,
@@ -142,7 +142,7 @@ func (h *Handler) Delete(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ResponseSuccess{
+	c.JSON(http.StatusOK, &dto.ResponseSuccess{
 		StatusCode: http.StatusOK,
 		Message:    userconst.DeleteUserSuccessMessage,
 		Data:       res,
