@@ -38,13 +38,23 @@ func NewHandler(service petSvc.Service, imageService imageSvc.Service, likeServi
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/pets/ [get]
 func (h *Handler) FindAll(c router.IContext) {
-	userID := c.UserID()
+	isAuth := c.IsAuth()
 	response, respErr := h.service.FindAll()
 	if respErr != nil {
 		c.JSON(respErr.StatusCode, respErr)
 		return
 	}
 
+	if !isAuth {
+		c.JSON(http.StatusOK, dto.ResponseSuccess{
+			StatusCode: http.StatusOK,
+			Message:    petconst.FindAllPetSuccessMessage,
+			Data:       response,
+		})
+		return
+	}
+
+	userID := c.UserID()
 	likeResponse, likeErr := h.likeService.FindByUserId(userID)
 	if likeErr != nil {
 		c.JSON(likeErr.StatusCode, likeErr)
@@ -58,7 +68,6 @@ func (h *Handler) FindAll(c router.IContext) {
 		Message:    petconst.FindAllPetSuccessMessage,
 		Data:       petWithLikeResponse,
 	})
-
 	return
 }
 
@@ -76,7 +85,7 @@ func (h *Handler) FindAll(c router.IContext) {
 // @Router /v1/pets/{id} [get]
 func (h *Handler) FindOne(c router.IContext) {
 	id, err := c.Param("id")
-	userId := c.UserID()
+	isAuth := c.IsAuth()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ResponseErr{
 			StatusCode: http.StatusInternalServerError,
@@ -92,6 +101,16 @@ func (h *Handler) FindOne(c router.IContext) {
 		return
 	}
 
+	if !isAuth {
+		c.JSON(http.StatusOK, dto.ResponseSuccess{
+			StatusCode: http.StatusOK,
+			Message:    petconst.FindOnePetSuccessMessage,
+			Data:       response,
+		})
+		return
+	}
+
+	userId := c.UserID()
 	likeResponse, likeErr := h.likeService.FindByUserId(userId)
 	if likeErr != nil {
 		c.JSON(likeErr.StatusCode, likeErr)
