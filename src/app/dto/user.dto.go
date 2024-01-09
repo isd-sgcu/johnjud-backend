@@ -15,5 +15,5 @@ type UpdateUserRequest struct {
 }
 
 type DeleteUserResponse struct {
-	Success bool `json:"success" validate:"required"`
+	Success bool `json:"success"`
 }
