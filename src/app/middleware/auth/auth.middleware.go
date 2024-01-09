@@ -33,8 +33,10 @@ func NewAuthGuard(s authPkg.Service, e map[string]struct{}, a map[string]struct{
 func (m *Guard) Use(ctx router.IContext) error {
 	method := ctx.Method()
 	path := ctx.Path()
+
 	path = utils.TrimInList(path, "/", m.versionList)
-	path = auth.FormatPath(method, path)
+	ids := auth.FindIDFromPath(path)
+	path = auth.FormatPath(method, path, ids)
 	if utils.IsExisted(m.excludes, path) {
 		return ctx.Next()
 	}
