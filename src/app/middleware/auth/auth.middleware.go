@@ -62,7 +62,7 @@ func (m *Guard) Use(ctx router.IContext) error {
 	if utils.IsExisted(m.adminpath, path) && payload.Role != string(user.ADMIN) {
 		ctx.JSON(http.StatusUnauthorized, dto.ResponseErr{
 			StatusCode: http.StatusUnauthorized,
-			Message:    "Unauthorized",
+			Message:    "Limited access",
 			Data:       nil,
 		})
 		return nil

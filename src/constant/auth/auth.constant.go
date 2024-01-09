@@ -10,7 +10,7 @@ var ExcludePath = map[string]struct{}{
 }
 
 var AdminPath = map[string]struct{}{
-	"DELETE /users/:id":     {},
+	"DELETE /user/:id":      {},
 	"POST /pets":            {},
 	"PUT /pets/:id":         {},
 	"PUT /pets/:id/visible": {},
