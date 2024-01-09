@@ -34,7 +34,7 @@ func (m *MockIContext) EXPECT() *MockIContextMockRecorder {
 }
 
 // Bind mocks base method.
-func (m *MockIContext) Bind(arg0 interface{}) error {
+func (m *MockIContext) Bind(arg0 any) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Bind", arg0)
 	ret0, _ := ret[0].(error)
@@ -42,7 +42,7 @@ func (m *MockIContext) Bind(arg0 interface{}) error {
 }
 
 // Bind indicates an expected call of Bind.
-func (mr *MockIContextMockRecorder) Bind(arg0 interface{}) *gomock.Call {
+func (mr *MockIContextMockRecorder) Bind(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Bind", reflect.TypeOf((*MockIContext)(nil).Bind), arg0)
 }
@@ -62,14 +62,28 @@ func (mr *MockIContextMockRecorder) ID() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ID", reflect.TypeOf((*MockIContext)(nil).ID))
 }
 
+// IsAuth mocks base method.
+func (m *MockIContext) IsAuth() bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsAuth")
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// IsAuth indicates an expected call of IsAuth.
+func (mr *MockIContextMockRecorder) IsAuth() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsAuth", reflect.TypeOf((*MockIContext)(nil).IsAuth))
+}
+
 // JSON mocks base method.
-func (m *MockIContext) JSON(arg0 int, arg1 interface{}) {
+func (m *MockIContext) JSON(arg0 int, arg1 any) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "JSON", arg0, arg1)
 }
 
 // JSON indicates an expected call of JSON.
-func (mr *MockIContextMockRecorder) JSON(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockIContextMockRecorder) JSON(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "JSON", reflect.TypeOf((*MockIContext)(nil).JSON), arg0, arg1)
 }
@@ -112,7 +126,7 @@ func (m *MockIContext) Param(arg0 string) (string, error) {
 }
 
 // Param indicates an expected call of Param.
-func (mr *MockIContextMockRecorder) Param(arg0 interface{}) *gomock.Call {
+func (mr *MockIContextMockRecorder) Param(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Param", reflect.TypeOf((*MockIContext)(nil).Param), arg0)
 }
@@ -138,7 +152,7 @@ func (m *MockIContext) StoreValue(arg0, arg1 string) {
 }
 
 // StoreValue indicates an expected call of StoreValue.
-func (mr *MockIContextMockRecorder) StoreValue(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockIContextMockRecorder) StoreValue(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreValue", reflect.TypeOf((*MockIContext)(nil).StoreValue), arg0, arg1)
 }
