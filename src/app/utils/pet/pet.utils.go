@@ -160,3 +160,22 @@ func extractImages(images []*imgproto.Image) []dto.ImageResponse {
 	}
 	return result
 }
+func IsLike(petId string, likes []*dto.LikeResponse) *bool {
+	for _, like := range likes {
+		if like.PetID == petId {
+			return BoolAddr(true)
+		}
+	}
+	return BoolAddr(false)
+}
+
+func MapIsLikeToPets(likes []*dto.LikeResponse, pets []*dto.PetResponse) []*dto.PetResponse {
+	for _, pet := range pets {
+		pet.IsLike = IsLike(pet.Id, likes)
+	}
+	return pets
+}
+
+func BoolAddr(b bool) *bool {
+	return &b
+}
