@@ -108,13 +108,14 @@ func main() {
 	imageClient := imageProto.NewImageServiceClient(fileConn)
 	imageService := imageSvc.NewService(imageClient)
 
-	petClient := petProto.NewPetServiceClient(backendConn)
-	petService := petSvc.NewService(petClient)
-	petHandler := petHdr.NewHandler(petService, imageService, v)
-
 	likeClient := likeProto.NewLikeServiceClient(backendConn)
 	likeService := likeSvc.NewService(likeClient)
 	likeHandler := likeHdr.NewHandler(likeService, v)
+
+	petClient := petProto.NewPetServiceClient(backendConn)
+	petService := petSvc.NewService(petClient)
+	petHandler := petHdr.NewHandler(petService, imageService, likeService,  v)
+
 
 	r := router.NewFiberRouter(&authGuard, conf.App)
 
