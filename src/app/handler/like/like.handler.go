@@ -22,7 +22,7 @@ func NewHandler(service likeSvc.Service, validate validator.IDtoValidator) *Hand
 }
 
 func (h *Handler) FindByUserId(c router.IContext) {
-	id, err := c.Param("id")
+	id, err := c.ID()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ResponseErr{
 			StatusCode: http.StatusInternalServerError,
@@ -86,7 +86,7 @@ func (h *Handler) Create(c router.IContext) {
 }
 
 func (h *Handler) Delete(c router.IContext) {
-	id, err := c.Param("id")
+	id, err := c.ID()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ResponseErr{
 			StatusCode: http.StatusBadRequest,

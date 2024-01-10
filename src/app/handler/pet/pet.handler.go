@@ -84,7 +84,7 @@ func (h *Handler) FindAll(c router.IContext) {
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/pets/{id} [get]
 func (h *Handler) FindOne(c router.IContext) {
-	id, err := c.Param("id")
+	id, err := c.ID()
 	isAuth := c.IsAuth()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ResponseErr{
