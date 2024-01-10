@@ -39,6 +39,21 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 	return m.recorder
 }
 
+// AssignPet mocks base method.
+func (m *MockService) AssignPet(arg0 *dto.AssignPetRequest) (*dto.AssignPetResponse, *dto.ResponseErr) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AssignPet", arg0)
+	ret0, _ := ret[0].(*dto.AssignPetResponse)
+	ret1, _ := ret[1].(*dto.ResponseErr)
+	return ret0, ret1
+}
+
+// AssignPet indicates an expected call of AssignPet.
+func (mr *MockServiceMockRecorder) AssignPet(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AssignPet", reflect.TypeOf((*MockService)(nil).AssignPet), arg0)
+}
+
 // Delete mocks base method.
 func (m *MockService) Delete(arg0 string) (*dto.DeleteImageResponse, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
