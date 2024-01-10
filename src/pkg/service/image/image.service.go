@@ -2,11 +2,10 @@ package image
 
 import (
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
-	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 )
 
 type Service interface {
-	FindByPetId(string) ([]*proto.Image, *dto.ResponseErr)
-	Upload(*dto.ImageDto) (*proto.Image, *dto.ResponseErr)
-	Delete(string) (bool, *dto.ResponseErr)
+	FindByPetId(string) ([]*dto.ImageResponse, *dto.ResponseErr)
+	Upload(*dto.UploadImageRequest) (*dto.ImageResponse, *dto.ResponseErr)
+	Delete(string) (*dto.DeleteImageResponse, *dto.ResponseErr)
 }
