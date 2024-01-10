@@ -15,3 +15,12 @@ type UploadImageRequest struct {
 type DeleteImageResponse struct {
 	Success bool `json:"success"`
 }
+
+type AssignPetRequest struct {
+	Ids   []string `json:"ids"`
+	PetId string   `json:"pet_id"`
+}
+
+type AssignPetResponse struct {
+	Success bool `json:"success"`
+}
