@@ -16,10 +16,10 @@ type PetResponse struct {
 	Habit        string          `json:"habit"`
 	Caption      string          `json:"caption"`
 	Status       pet.Status      `json:"status"`
-	IsSterile    *bool           `json:"is_sterile"`
-	IsVaccinated *bool           `json:"is_vaccinated"`
-	IsVisible    *bool           `json:"is_visible"`
-	IsClubPet    *bool           `json:"is_club_pet"`
+	IsSterile    bool            `json:"is_sterile"`
+	IsVaccinated bool            `json:"is_vaccinated"`
+	IsVisible    bool            `json:"is_visible"`
+	IsClubPet    bool            `json:"is_club_pet"`
 	Origin       string          `json:"origin"`
 	Address      string          `json:"address"`
 	Contact      string          `json:"contact"`
@@ -38,10 +38,10 @@ type CreatePetRequest struct {
 	Habit        string     `json:"habit" validate:"required"`
 	Caption      string     `json:"caption"`
 	Status       pet.Status `json:"status" validate:"required" example:"findhome"`
-	IsSterile    *bool      `json:"is_sterile" validate:"required"`
-	IsVaccinated *bool      `json:"is_vaccinated" validate:"required"`
-	IsVisible    *bool      `json:"is_visible" validate:"required"`
-	IsClubPet    *bool      `json:"is_club_pet" validate:"required"`
+	IsSterile    bool       `json:"is_sterile" validate:"required"`
+	IsVaccinated bool       `json:"is_vaccinated" validate:"required"`
+	IsVisible    bool       `json:"is_visible" validate:"required"`
+	IsClubPet    bool       `json:"is_club_pet" validate:"required"`
 	Origin       string     `json:"origin" validate:"required"`
 	Address      string     `json:"address"`
 	Contact      string     `json:"contact"`
@@ -77,10 +77,10 @@ type UpdatePetRequest struct {
 	Habit        string     `json:"habit"`
 	Caption      string     `json:"caption"`
 	Status       pet.Status `json:"status"`
-	IsSterile    *bool      `json:"is_sterile"`
-	IsVaccinated *bool      `json:"is_vaccinated"`
-	IsVisible    *bool      `json:"is_visible"`
-	IsClubPet    *bool      `json:"is_club_pet"`
+	IsSterile    bool       `json:"is_sterile"`
+	IsVaccinated bool       `json:"is_vaccinated"`
+	IsVisible    bool       `json:"is_visible"`
+	IsClubPet    bool       `json:"is_club_pet"`
 	Origin       string     `json:"origin"`
 	Address      string     `json:"address"`
 	Contact      string     `json:"contact"`
