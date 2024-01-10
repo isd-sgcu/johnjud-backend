@@ -51,7 +51,7 @@ func NewFiberRouter(authGuard IGuard, conf config.App) *FiberRouter {
 	user := GroupWithAuthMiddleware(r, "/user", authGuard.Use)
 	pet := GroupWithAuthMiddleware(r, "/pets", authGuard.Use)
 
-	image := GroupWithAuthMiddleware(r, "/image", authGuard.Use)
+	image := GroupWithAuthMiddleware(r, "/images", authGuard.Use)
 	like := GroupWithAuthMiddleware(r, "/likes", authGuard.Use)
 
 	return &FiberRouter{r, auth, user, pet, image, like}
