@@ -1,7 +1,6 @@
-package auth
+package image
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -45,7 +44,6 @@ func (h *Handler) FindByPetId(c *router.FiberCtx) {
 func (h *Handler) Upload(c *router.FiberCtx) {
 	request := &dto.UploadImageRequest{}
 	err := c.Bind(request)
-	fmt.Println("request: ", request)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ResponseErr{
 			StatusCode: http.StatusBadRequest,
