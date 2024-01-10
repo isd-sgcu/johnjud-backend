@@ -12,6 +12,7 @@ import (
 
 	authHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/auth"
 	healthcheck "github.com/isd-sgcu/johnjud-gateway/src/app/handler/healthcheck"
+	imageHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/image"
 	likeHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/like"
 	petHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/pet"
 	userHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/user"
@@ -107,6 +108,7 @@ func main() {
 
 	imageClient := imageProto.NewImageServiceClient(fileConn)
 	imageService := imageSvc.NewService(imageClient)
+	imageHandler := imageHdr.NewHandler(imageService, v)
 
 	likeClient := likeProto.NewLikeServiceClient(backendConn)
 	likeService := likeSvc.NewService(likeClient)
@@ -114,8 +116,7 @@ func main() {
 
 	petClient := petProto.NewPetServiceClient(backendConn)
 	petService := petSvc.NewService(petClient)
-	petHandler := petHdr.NewHandler(petService, imageService, likeService,  v)
-
+	petHandler := petHdr.NewHandler(petService, imageService, likeService, v)
 
 	r := router.NewFiberRouter(&authGuard, conf.App)
 
@@ -141,6 +142,10 @@ func main() {
 	r.GetLike("/:id", likeHandler.FindByUserId)
 	r.PostLike("/", likeHandler.Create)
 	r.DeleteLike("/:id", likeHandler.Delete)
+
+	r.PostImage("/create", imageHandler.Upload)
+	r.GetImages("/:id", imageHandler.FindByPetId)
+	r.DeleteImage("/:id", imageHandler.Delete)
 
 	v1 := router.NewAPIv1(r, conf.App)
 
