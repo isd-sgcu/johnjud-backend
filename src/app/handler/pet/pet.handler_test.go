@@ -48,6 +48,9 @@ func (t *PetHandlerTest) SetupTest() {
 	t.ImagesList = imagesList
 	t.Images = imagesList[0]
 	var pets []*petProto.Pet
+	genders := []petConst.Gender{petConst.MALE, petConst.FEMALE}
+	statuses := []petConst.Status{petConst.ADOPTED, petConst.FINDHOME}
+
 	for i := 0; i <= 3; i++ {
 		pet := &petProto.Pet{
 			Id:           faker.UUIDDigit(),
@@ -55,16 +58,18 @@ func (t *PetHandlerTest) SetupTest() {
 			Species:      faker.Word(),
 			Name:         faker.Name(),
 			Birthdate:    faker.Word(),
-			Gender:       petProto.Gender(rand.Intn(1) + 1),
+			Gender:       string(genders[rand.Intn(2)]),
+			Color:        faker.Word(),
+			Pattern:      faker.Word(),
 			Habit:        faker.Paragraph(),
 			Caption:      faker.Paragraph(),
 			Images:       []*imgProto.Image{},
-			Status:       petProto.PetStatus(rand.Intn(1) + 1),
+			Status:       string(statuses[rand.Intn(2)]),
 			IsSterile:    true,
 			IsVaccinated: true,
 			IsVisible:    true,
 			IsClubPet:    true,
-			Background:   faker.Paragraph(),
+			Origin:       faker.Paragraph(),
 			Address:      faker.Paragraph(),
 			Contact:      faker.Paragraph(),
 			AdoptBy:      "",
@@ -83,6 +88,8 @@ func (t *PetHandlerTest) SetupTest() {
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
 		Gender:       pet.Gender(t.Pet.Gender),
+		Color:        t.Pet.Color,
+		Pattern:      t.Pet.Pattern,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
 		Status:       pet.Status(t.Pet.Status),
@@ -90,7 +97,7 @@ func (t *PetHandlerTest) SetupTest() {
 		IsVaccinated: &t.Pet.IsVaccinated,
 		IsVisible:    &t.Pet.IsVisible,
 		IsClubPet:    &t.Pet.IsClubPet,
-		Background:   t.Pet.Background,
+		Origin:       t.Pet.Origin,
 		Address:      t.Pet.Address,
 		Contact:      t.Pet.Contact,
 		AdoptBy:      t.Pet.AdoptBy,

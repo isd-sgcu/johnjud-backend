@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+
 	authProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
 	"github.com/stretchr/testify/mock"
 	"google.golang.org/grpc"
@@ -42,6 +43,20 @@ func (m *AuthClientMock) SignIn(_ context.Context, in *authProto.SignInRequest, 
 func (m *AuthClientMock) SignOut(_ context.Context, in *authProto.SignOutRequest, _ ...grpc.CallOption) (*authProto.SignOutResponse, error) {
 	args := m.Called(in)
 	resp, _ := args.Get(0).(*authProto.SignOutResponse)
+	err, _ := args.Get(1).(error)
+	return resp, err
+}
+
+func (m *AuthClientMock) ForgotPassword(_ context.Context, in *authProto.ForgotPasswordRequest, _ ...grpc.CallOption) (*authProto.ForgotPasswordResponse, error) {
+	args := m.Called(in)
+	resp, _ := args.Get(0).(*authProto.ForgotPasswordResponse)
+	err, _ := args.Get(1).(error)
+	return resp, err
+}
+
+func (m *AuthClientMock) ResetPassword(_ context.Context, in *authProto.ResetPasswordRequest, _ ...grpc.CallOption) (*authProto.ResetPasswordResponse, error) {
+	args := m.Called(in)
+	resp, _ := args.Get(0).(*authProto.ResetPasswordResponse)
 	err, _ := args.Get(1).(error)
 	return resp, err
 }
