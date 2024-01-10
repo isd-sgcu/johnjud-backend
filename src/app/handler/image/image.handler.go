@@ -96,3 +96,38 @@ func (h *Handler) Delete(c *router.FiberCtx) {
 	c.JSON(http.StatusOK, res.Success)
 	return
 }
+
+func (h *Handler) AssignPet(c *router.FiberCtx) {
+	request := &dto.AssignPetRequest{}
+	err := c.Bind(request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.BindingRequestErrorMessage + err.Error(),
+			Data:       nil,
+		})
+		return
+	}
+
+	if err := h.validate.Validate(request); err != nil {
+		var errorMessage []string
+		for _, reqErr := range err {
+			errorMessage = append(errorMessage, reqErr.Message)
+		}
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.InvalidRequestBodyMessage + strings.Join(errorMessage, ", "),
+			Data:       nil,
+		})
+		return
+	}
+
+	response, respErr := h.service.AssignPet(request)
+	if respErr != nil {
+		c.JSON(respErr.StatusCode, respErr)
+		return
+	}
+
+	c.JSON(http.StatusCreated, response)
+	return
+}
