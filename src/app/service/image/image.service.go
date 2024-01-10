@@ -99,6 +99,7 @@ func (s *Service) Upload(in *dto.UploadImageRequest) (*dto.ImageResponse, *dto.R
 func (s *Service) Delete(id string) (*dto.DeleteImageResponse, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
 	request := &proto.DeleteImageRequest{
 		Id: id,
 	}
