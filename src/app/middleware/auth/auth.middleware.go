@@ -9,20 +9,23 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/app/utils/auth"
 	petUtils "github.com/isd-sgcu/johnjud-gateway/src/app/utils/pet"
 	"github.com/isd-sgcu/johnjud-gateway/src/config"
+	"github.com/isd-sgcu/johnjud-gateway/src/constant/user"
 	authPkg "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/auth"
 )
 
 type Guard struct {
 	service     authPkg.Service
 	excludes    map[string]struct{}
+	adminpath   map[string]struct{}
 	conf        config.App
 	versionList map[string]struct{}
 }
 
-func NewAuthGuard(s authPkg.Service, e map[string]struct{}, conf config.App, versionList map[string]struct{}) Guard {
+func NewAuthGuard(s authPkg.Service, e map[string]struct{}, a map[string]struct{}, conf config.App, versionList map[string]struct{}) Guard {
 	return Guard{
 		service:     s,
 		excludes:    e,
+		adminpath:   a,
 		conf:        conf,
 		versionList: versionList,
 	}
@@ -31,8 +34,10 @@ func NewAuthGuard(s authPkg.Service, e map[string]struct{}, conf config.App, ver
 func (m *Guard) Use(ctx router.IContext) error {
 	method := ctx.Method()
 	path := ctx.Path()
+
 	path = utils.TrimInList(path, "/", m.versionList)
-	path = auth.FormatPath(method, path)
+	ids := auth.FindIDFromPath(path)
+	path = auth.FormatPath(method, path, ids)
 	if utils.IsExisted(m.excludes, path) {
 		return ctx.Next()
 	}
@@ -57,6 +62,15 @@ func (m *Guard) Use(ctx router.IContext) error {
 
 	ctx.StoreValue("UserId", payload.UserId)
 	ctx.StoreValue("Role", payload.Role)
+
+	if utils.IsExisted(m.adminpath, path) && payload.Role != string(user.ADMIN) {
+		ctx.JSON(http.StatusUnauthorized, dto.ResponseErr{
+			StatusCode: http.StatusUnauthorized,
+			Message:    "Limited access",
+			Data:       nil,
+		})
+		return nil
+	}
 
 	return ctx.Next()
 }

@@ -17,6 +17,8 @@ type PetResponse struct {
 	Name         string          `json:"name"`
 	Birthdate    string          `json:"birthdate"`
 	Gender       pet.Gender      `json:"gender"`
+	Color        string          `json:"color"`
+	Pattern      string          `json:"pattern"`
 	Habit        string          `json:"habit"`
 	Caption      string          `json:"caption"`
 	Status       pet.Status      `json:"status"`
@@ -37,15 +39,18 @@ type CreatePetRequest struct {
 	Species      string     `json:"species" validate:"required"`
 	Name         string     `json:"name" validate:"required"`
 	Birthdate    string     `json:"birthdate" validate:"required"`
-	Gender       pet.Gender `json:"gender" validate:"required" example:"1"`
+	Gender       pet.Gender `json:"gender" validate:"required" example:"male"`
+	Color        string     `json:"color" validate:"required"`
+	Pattern      string     `json:"pattern" validate:"required"`
 	Habit        string     `json:"habit" validate:"required"`
 	Caption      string     `json:"caption"`
-	Status       pet.Status `json:"status" validate:"required" example:"1"`
+	Status       pet.Status `json:"status" validate:"required" example:"findhome"`
 	IsSterile    bool       `json:"is_sterile" validate:"required"`
 	IsVaccinated bool       `json:"is_vaccinated" validate:"required"`
 	IsVisible    bool       `json:"is_visible" validate:"required"`
 	IsClubPet    bool       `json:"is_club_pet" validate:"required"`
 	Background   string     `json:"background"`
+
 	Address      string     `json:"address"`
 	Contact      string     `json:"contact"`
 	AdoptBy      string     `json:"adopt_by"`
@@ -57,7 +62,7 @@ type ChangeViewPetRequest struct {
 }
 
 type ChangeViewPetResponse struct {
-	Success bool `json:"success" validate:"required"`
+	Success bool `json:"success"`
 }
 
 type AdoptByRequest struct {
@@ -75,6 +80,8 @@ type UpdatePetRequest struct {
 	Name         string     `json:"name"`
 	Birthdate    string     `json:"birthdate"`
 	Gender       pet.Gender `json:"gender"`
+	Color        string     `json:"color"`
+	Pattern      string     `json:"pattern"`
 	Habit        string     `json:"habit"`
 	Caption      string     `json:"caption"`
 	Status       pet.Status `json:"status"`
@@ -92,5 +99,5 @@ type DeleteRequest struct {
 	Id string `json:"id" validate:"required"`
 }
 type DeleteResponse struct {
-	Success bool `json:"success" validate:"required"`
+	Success bool `json:"success"`
 }

@@ -145,6 +145,20 @@ func (mr *MockIContextMockRecorder) Path() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Path", reflect.TypeOf((*MockIContext)(nil).Path))
 }
 
+// Role mocks base method.
+func (m *MockIContext) Role() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Role")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Role indicates an expected call of Role.
+func (mr *MockIContextMockRecorder) Role() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Role", reflect.TypeOf((*MockIContext)(nil).Role))
+}
+
 // StoreValue mocks base method.
 func (m *MockIContext) StoreValue(arg0, arg1 string) {
 	m.ctrl.T.Helper()

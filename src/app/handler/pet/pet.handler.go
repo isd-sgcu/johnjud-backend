@@ -8,7 +8,6 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
-	petconst "github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
 	imageSvc "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/image"
 	likeSvc "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/like"
 	petSvc "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/pet"
@@ -169,11 +168,7 @@ func (h *Handler) Create(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, dto.ResponseSuccess{
-		StatusCode: http.StatusCreated,
-		Message:    petconst.CreatePetSuccessMessage,
-		Data:       response,
-	})
+	c.JSON(http.StatusCreated, response)
 	return
 }
 
@@ -232,11 +227,7 @@ func (h *Handler) Update(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petconst.UpdatePetSuccessMessage,
-		Data:       pet,
-	})
+	c.JSON(http.StatusOK, pet)
 	return
 }
 
@@ -295,11 +286,7 @@ func (h *Handler) ChangeView(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petconst.ChangeViewPetSuccessMessage,
-		Data:       res,
-	})
+	c.JSON(http.StatusOK, res)
 	return
 }
 
@@ -332,11 +319,7 @@ func (h *Handler) Delete(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petconst.DeletePetSuccessMessage,
-		Data:       res,
-	})
+	c.JSON(http.StatusOK, res)
 	return
 }
 
@@ -394,10 +377,6 @@ func (h *Handler) Adopt(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petconst.AdoptPetSuccessMessage,
-		Data:       res,
-	})
+	c.JSON(http.StatusOK, res)
 	return
 }

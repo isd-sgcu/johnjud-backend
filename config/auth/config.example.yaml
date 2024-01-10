@@ -4,7 +4,7 @@ app:
   secret: <secret>
 
 database:
-  host: localhost
+  host: local-db
   port: 5432
   name: johnjud_db
   username: root
@@ -17,7 +17,7 @@ jwt:
   issuer: <issuer>
 
 redis:
-  host: localhost
+  host: local-cache
   port: 6379
   password: ""
   dbnum: 0

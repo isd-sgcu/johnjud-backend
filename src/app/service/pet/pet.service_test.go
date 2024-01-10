@@ -51,6 +51,8 @@ func (t *PetServiceTest) SetupTest() {
 	imagesList := utils.MockImageList(3)
 	t.ImagesList = imagesList
 	t.Images = imagesList[0]
+	genders := []pet.Gender{pet.MALE, pet.FEMALE}
+	statuses := []pet.Status{pet.ADOPTED, pet.FINDHOME}
 
 	var pets []*petproto.Pet
 	for i := 0; i <= 3; i++ {
@@ -60,16 +62,18 @@ func (t *PetServiceTest) SetupTest() {
 			Species:      faker.Word(),
 			Name:         faker.Name(),
 			Birthdate:    faker.Word(),
-			Gender:       petproto.Gender(rand.Intn(1) + 1),
+			Gender:       string(genders[rand.Intn(2)]),
+			Color:        faker.Word(),
+			Pattern:      faker.Word(),
 			Habit:        faker.Paragraph(),
 			Caption:      faker.Paragraph(),
 			Images:       imagesList[i],
-			Status:       petproto.PetStatus(rand.Intn(1) + 1),
+			Status:       string(statuses[rand.Intn(2)]),
 			IsSterile:    true,
 			IsVaccinated: true,
 			IsVisible:    true,
 			IsClubPet:    true,
-			Background:   faker.Paragraph(),
+			Origin:       faker.Paragraph(),
 			Address:      faker.Paragraph(),
 			Contact:      faker.Paragraph(),
 			AdoptBy:      faker.UUIDDigit(),
@@ -88,6 +92,8 @@ func (t *PetServiceTest) SetupTest() {
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
 		Gender:       t.Pet.Gender,
+		Color:        t.Pet.Color,
+		Pattern:      t.Pet.Pattern,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
 		Images:       t.Pet.Images,
@@ -96,7 +102,7 @@ func (t *PetServiceTest) SetupTest() {
 		IsVaccinated: t.Pet.IsVaccinated,
 		IsVisible:    false,
 		IsClubPet:    t.Pet.IsClubPet,
-		Background:   t.Pet.Background,
+		Origin:       t.Pet.Origin,
 		Address:      t.Pet.Address,
 		Contact:      t.Pet.Contact,
 		AdoptBy:      t.Pet.AdoptBy,
@@ -110,6 +116,8 @@ func (t *PetServiceTest) SetupTest() {
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
 		Gender:       pet.Gender(t.Pet.Gender),
+		Color:        t.Pet.Color,
+		Pattern:      t.Pet.Pattern,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
 		Images:       []string{},
@@ -130,6 +138,8 @@ func (t *PetServiceTest) SetupTest() {
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
 		Gender:       pet.Gender(t.Pet.Gender),
+		Color:        t.Pet.Color,
+		Pattern:      t.Pet.Pattern,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
 		Images:       []string{},
@@ -440,7 +450,7 @@ func (t *PetServiceTest) TestDeleteNotFound() {
 	svc := NewService(client)
 	actual, err := svc.Delete(t.Pet.Id)
 
-	assert.Equal(t.T(), &dto.DeleteResponse{Success: false}, actual)
+	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
 }
 
@@ -461,7 +471,7 @@ func (t *PetServiceTest) TestDeleteServiceUnavailableError() {
 	svc := NewService(client)
 	actual, err := svc.Delete(t.Pet.Id)
 
-	assert.Equal(t.T(), &dto.DeleteResponse{Success: false}, actual)
+	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
 }
 
