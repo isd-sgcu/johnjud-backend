@@ -40,10 +40,10 @@ func ProtoToDto(in *petproto.Pet, images []*imgproto.Image) *dto.PetResponse {
 		Habit:        in.Habit,
 		Caption:      in.Caption,
 		Status:       pet.Status(in.Status),
-		IsSterile:    &in.IsSterile,
-		IsVaccinated: &in.IsVaccinated,
-		IsVisible:    &in.IsVisible,
-		IsClubPet:    &in.IsClubPet,
+		IsSterile:    in.IsSterile,
+		IsVaccinated: in.IsVaccinated,
+		IsVisible:    in.IsVisible,
+		IsClubPet:    in.IsClubPet,
 		Origin:       in.Origin,
 		Address:      in.Address,
 		Contact:      in.Contact,
@@ -67,10 +67,10 @@ func CreateDtoToProto(in *dto.CreatePetRequest) *petproto.CreatePetRequest {
 			Caption:      in.Caption,
 			Images:       []*imgproto.Image{},
 			Status:       string(in.Status),
-			IsSterile:    *in.IsSterile,
-			IsVaccinated: *in.IsVaccinated,
-			IsVisible:    *in.IsVisible,
-			IsClubPet:    *in.IsClubPet,
+			IsSterile:    in.IsSterile,
+			IsVaccinated: in.IsVaccinated,
+			IsVisible:    in.IsVisible,
+			IsClubPet:    in.IsClubPet,
 			Origin:       in.Origin,
 			Address:      in.Address,
 			Contact:      in.Contact,
@@ -101,30 +101,6 @@ func UpdateDtoToProto(id string, in *dto.UpdatePetRequest) *petproto.UpdatePetRe
 		},
 	}
 
-	if in.IsClubPet == nil {
-		req.Pet.IsClubPet = false
-	} else {
-		req.Pet.IsClubPet = *in.IsClubPet
-	}
-
-	if in.IsSterile == nil {
-		req.Pet.IsSterile = false
-	} else {
-		req.Pet.IsSterile = *in.IsSterile
-	}
-
-	if in.IsVaccinated == nil {
-		req.Pet.IsVaccinated = false
-	} else {
-		req.Pet.IsVaccinated = *in.IsVaccinated
-	}
-
-	if in.IsVisible == nil {
-		req.Pet.IsVisible = false
-	} else {
-		req.Pet.IsVisible = *in.IsVisible
-	}
-
 	return req
 }
 
@@ -143,10 +119,10 @@ func ProtoToDtoList(in []*petproto.Pet, imagesList [][]*imgproto.Image) []*dto.P
 			Habit:        p.Habit,
 			Caption:      p.Caption,
 			Status:       pet.Status(p.Status),
-			IsSterile:    &p.IsSterile,
-			IsVaccinated: &p.IsVaccinated,
-			IsVisible:    &p.IsVisible,
-			IsClubPet:    &p.IsClubPet,
+			IsSterile:    p.IsSterile,
+			IsVaccinated: p.IsVaccinated,
+			IsVisible:    p.IsVisible,
+			IsClubPet:    p.IsClubPet,
 			Origin:       p.Origin,
 			Address:      p.Address,
 			Contact:      p.Contact,
