@@ -16,6 +16,10 @@ var AdminPath = map[string]struct{}{
 	"PUT /pets/:id/visible": {},
 	"DELETE /pets/:id":      {},
 	//need to add image upload, delete, assignpet
+	"POST /images/assign/:pet_id": {},
+	"DELETE /images/:id":          {},
+	"POST /images/":               {},
+	"GET /images/:id":             {},
 }
 
 var VersionList = map[string]struct{}{
