@@ -9,6 +9,7 @@ import (
 
 type IContext interface {
 	UserID() string
+	Role() string
 	Bind(interface{}) error
 	JSON(int, interface{})
 	ID() (string, error)
@@ -30,6 +31,10 @@ func NewFiberCtx(c *fiber.Ctx) *FiberCtx {
 
 func (c *FiberCtx) UserID() string {
 	return c.Ctx.Locals("UserId").(string)
+}
+
+func (c *FiberCtx) Role() string {
+	return c.Ctx.Locals("Role").(string)
 }
 
 func (c *FiberCtx) Bind(v interface{}) error {

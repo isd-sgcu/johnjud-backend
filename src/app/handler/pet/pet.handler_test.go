@@ -16,7 +16,6 @@ import (
 
 	errConst "github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	utils "github.com/isd-sgcu/johnjud-gateway/src/app/utils/pet"
-	petConst "github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
 	petProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	imgProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 
@@ -131,11 +130,7 @@ func (t *PetHandlerTest) SetupTest() {
 
 func (t *PetHandlerTest) TestFindAllSuccess() {
 	findAllResponse := utils.ProtoToDtoList(t.Pets, t.ImagesList)
-	expectedResponse := dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petConst.FindAllPetSuccessMessage,
-		Data:       findAllResponse,
-	}
+	expectedResponse := findAllResponse
 
 	controller := gomock.NewController(t.T())
 
@@ -153,11 +148,7 @@ func (t *PetHandlerTest) TestFindAllSuccess() {
 
 func (t *PetHandlerTest) TestFindOneSuccess() {
 	findOneResponse := utils.ProtoToDto(t.Pet, t.Images)
-	expectedResponse := dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petConst.FindOnePetSuccessMessage,
-		Data:       findOneResponse,
-	}
+	expectedResponse := findOneResponse
 
 	controller := gomock.NewController(t.T())
 
@@ -212,11 +203,7 @@ func (t *PetHandlerTest) TestFindOneGrpcErr() {
 
 func (t *PetHandlerTest) TestCreateSuccess() {
 	createResponse := utils.ProtoToDto(t.Pet, t.Images)
-	expectedResponse := dto.ResponseSuccess{
-		StatusCode: http.StatusCreated,
-		Message:    petConst.CreatePetSuccessMessage,
-		Data:       createResponse,
-	}
+	expectedResponse := createResponse
 
 	controller := gomock.NewController(t.T())
 
@@ -255,11 +242,7 @@ func (t *PetHandlerTest) TestCreateGrpcErr() {
 
 func (t *PetHandlerTest) TestUpdateSuccess() {
 	updateResponse := utils.ProtoToDto(t.Pet, t.Images)
-	expectedResponse := dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petConst.UpdatePetSuccessMessage,
-		Data:       updateResponse,
-	}
+	expectedResponse := updateResponse
 
 	controller := gomock.NewController(t.T())
 
@@ -322,11 +305,7 @@ func (t *PetHandlerTest) TestDeleteSuccess() {
 	deleteResponse := &dto.DeleteResponse{
 		Success: true,
 	}
-	expectedResponse := dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petConst.DeletePetSuccessMessage,
-		Data:       deleteResponse,
-	}
+	expectedResponse := deleteResponse
 
 	controller := gomock.NewController(t.T())
 
@@ -386,11 +365,7 @@ func (t *PetHandlerTest) TestChangeViewSuccess() {
 	changeViewResponse := &dto.ChangeViewPetResponse{
 		Success: true,
 	}
-	expectedResponse := dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petConst.ChangeViewPetSuccessMessage,
-		Data:       changeViewResponse,
-	}
+	expectedResponse := changeViewResponse
 
 	controller := gomock.NewController(t.T())
 
@@ -457,11 +432,7 @@ func (t *PetHandlerTest) TestAdoptSuccess() {
 	adoptByResponse := &dto.AdoptByResponse{
 		Success: true,
 	}
-	expectedResponse := dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petConst.AdoptPetSuccessMessage,
-		Data:       adoptByResponse,
-	}
+	expectedResponse := adoptByResponse
 
 	controller := gomock.NewController(t.T())
 

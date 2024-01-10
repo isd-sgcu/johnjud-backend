@@ -9,7 +9,6 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	dto "github.com/isd-sgcu/johnjud-gateway/src/app/dto"
-	v1 "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/user/v1"
 )
 
 // MockService is a mock of Service interface.
@@ -35,11 +34,26 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 	return m.recorder
 }
 
+// Delete mocks base method.
+func (m *MockService) Delete(arg0 string) (*dto.DeleteUserResponse, *dto.ResponseErr) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", arg0)
+	ret0, _ := ret[0].(*dto.DeleteUserResponse)
+	ret1, _ := ret[1].(*dto.ResponseErr)
+	return ret0, ret1
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockServiceMockRecorder) Delete(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockService)(nil).Delete), arg0)
+}
+
 // FindOne mocks base method.
-func (m *MockService) FindOne(arg0 string) (*v1.User, *dto.ResponseErr) {
+func (m *MockService) FindOne(arg0 string) (*dto.User, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindOne", arg0)
-	ret0, _ := ret[0].(*v1.User)
+	ret0, _ := ret[0].(*dto.User)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
@@ -51,10 +65,10 @@ func (mr *MockServiceMockRecorder) FindOne(arg0 interface{}) *gomock.Call {
 }
 
 // Update mocks base method.
-func (m *MockService) Update(arg0 string, arg1 *dto.UpdateUserDto) (*v1.User, *dto.ResponseErr) {
+func (m *MockService) Update(arg0 string, arg1 *dto.UpdateUserRequest) (*dto.User, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", arg0, arg1)
-	ret0, _ := ret[0].(*v1.User)
+	ret0, _ := ret[0].(*dto.User)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }

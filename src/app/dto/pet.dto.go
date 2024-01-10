@@ -55,7 +55,7 @@ type ChangeViewPetRequest struct {
 }
 
 type ChangeViewPetResponse struct {
-	Success bool `json:"success" validate:"required"`
+	Success bool `json:"success"`
 }
 
 type AdoptByRequest struct {
@@ -90,5 +90,5 @@ type DeleteRequest struct {
 	Id string `json:"id" validate:"required"`
 }
 type DeleteResponse struct {
-	Success bool `json:"success" validate:"required"`
+	Success bool `json:"success"`
 }

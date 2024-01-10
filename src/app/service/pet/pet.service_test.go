@@ -440,7 +440,7 @@ func (t *PetServiceTest) TestDeleteNotFound() {
 	svc := NewService(client)
 	actual, err := svc.Delete(t.Pet.Id)
 
-	assert.Equal(t.T(), &dto.DeleteResponse{Success: false}, actual)
+	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
 }
 
@@ -461,7 +461,7 @@ func (t *PetServiceTest) TestDeleteServiceUnavailableError() {
 	svc := NewService(client)
 	actual, err := svc.Delete(t.Pet.Id)
 
-	assert.Equal(t.T(), &dto.DeleteResponse{Success: false}, actual)
+	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
 }
 

@@ -9,7 +9,6 @@ import (
 	errConst "github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	utils "github.com/isd-sgcu/johnjud-gateway/src/app/utils/like"
-	likeConst "github.com/isd-sgcu/johnjud-gateway/src/constant/like"
 	routerMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/router"
 	likeMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/service/like"
 	validatorMock "github.com/isd-sgcu/johnjud-gateway/src/mocks/validator"
@@ -74,11 +73,7 @@ func (t *LikeHandlerTest) SetupTest() {
 
 func (t *LikeHandlerTest) TestFindLikesSuccess() {
 	findLikeResponse := utils.ProtoToDtoList(t.Likes)
-	expectedResponse := dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    likeConst.FindLikeSuccessMessage,
-		Data:       findLikeResponse,
-	}
+	expectedResponse := findLikeResponse
 
 	controller := gomock.NewController(t.T())
 
@@ -147,11 +142,7 @@ func (t *LikeHandlerTest) TestFindLikeInternalError() {
 
 func (t *LikeHandlerTest) TestCreateSuccess() {
 	createLikeResponse := utils.ProtoToDto(t.Like)
-	expectedResponse := dto.ResponseSuccess{
-		StatusCode: http.StatusCreated,
-		Message:    likeConst.CreateLikeSuccessMessage,
-		Data:       createLikeResponse,
-	}
+	expectedResponse := createLikeResponse
 
 	controller := gomock.NewController(t.T())
 
@@ -208,11 +199,7 @@ func (t *LikeHandlerTest) TestDeleteSuccess() {
 	deleteResponse := &dto.DeleteLikeResponse{
 		Success: true,
 	}
-	expectedResponse := dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    likeConst.DelteLikeSuccessMessage,
-		Data:       deleteResponse,
-	}
+	expectedResponse := deleteResponse
 
 	controller := gomock.NewController(t.T())
 

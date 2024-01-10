@@ -3,6 +3,10 @@ app:
   debug: true
 
 service:
-  auth: auth:3002
-  backend: backend:3003
-  file: file:3004
+  auth: localhost:3002
+  backend: localhost:3003
+  file: localhost:3004
+  # Production, when gateway in a container in same network
+  # auth: auth:3002
+  # backend: backend:3003
+  # file: file:3004
