@@ -10,12 +10,11 @@ var ExcludePath = map[string]struct{}{
 }
 
 var AdminPath = map[string]struct{}{
-	"DELETE /user/:id":      {},
-	"POST /pets":            {},
-	"PUT /pets/:id":         {},
-	"PUT /pets/:id/visible": {},
-	"DELETE /pets/:id":      {},
-	//need to add image upload, delete, assignpet
+	"DELETE /user/:id":            {},
+	"POST /pets":                  {},
+	"PUT /pets/:id":               {},
+	"PUT /pets/:id/visible":       {},
+	"DELETE /pets/:id":            {},
 	"POST /images/assign/:pet_id": {},
 	"DELETE /images/:id":          {},
 	"POST /images/":               {},
