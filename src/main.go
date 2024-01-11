@@ -144,7 +144,6 @@ func main() {
 	r.PostLike("", likeHandler.Create)
 	r.DeleteLike("/:id", likeHandler.Delete)
 
-	r.GetImage("/", imageHandler.FindByPetId)
 	r.PostImage("/", imageHandler.Upload)
 	r.DeleteImage("/:id", imageHandler.Delete)
 	r.AssignPet("/assign", imageHandler.AssignPet)
