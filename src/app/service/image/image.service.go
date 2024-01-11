@@ -156,6 +156,12 @@ func (s *Service) AssignPet(in *dto.AssignPetRequest) (*dto.AssignPetResponse, *
 			Str("module", "assign pet").
 			Msg(st.Message())
 		switch st.Code() {
+		case codes.InvalidArgument:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusBadRequest,
+				Message:    constant.InvalidArgumentMessage,
+				Data:       nil,
+			}
 		case codes.NotFound:
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusNotFound,
