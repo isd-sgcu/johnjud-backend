@@ -146,7 +146,7 @@ func main() {
 
 	r.PostImage("/", imageHandler.Upload)
 	r.DeleteImage("/:id", imageHandler.Delete)
-	r.AssignPet("/assign", imageHandler.AssignPet)
+	r.PostImage("/assign", imageHandler.AssignPet)
 
 	v1 := router.NewAPIv1(r, conf.App)
 

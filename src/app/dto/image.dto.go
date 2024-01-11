@@ -17,8 +17,8 @@ type DeleteImageResponse struct {
 }
 
 type AssignPetRequest struct {
-	Ids   []string `json:"ids"`
-	PetId string   `json:"pet_id"`
+	Ids   []string `json:"ids" validate:"required"`
+	PetId string   `json:"pet_id" validate:"required"`
 }
 
 type AssignPetResponse struct {
