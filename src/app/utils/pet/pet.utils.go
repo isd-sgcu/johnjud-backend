@@ -101,30 +101,6 @@ func UpdateDtoToProto(id string, in *dto.UpdatePetRequest) *petproto.UpdatePetRe
 		},
 	}
 
-	if in.IsClubPet == nil {
-		req.Pet.IsClubPet = false
-	} else {
-		req.Pet.IsClubPet = *in.IsClubPet
-	}
-
-	if in.IsSterile == nil {
-		req.Pet.IsSterile = false
-	} else {
-		req.Pet.IsSterile = *in.IsSterile
-	}
-
-	if in.IsVaccinated == nil {
-		req.Pet.IsVaccinated = false
-	} else {
-		req.Pet.IsVaccinated = *in.IsVaccinated
-	}
-
-	if in.IsVisible == nil {
-		req.Pet.IsVisible = false
-	} else {
-		req.Pet.IsVisible = *in.IsVisible
-	}
-
 	return req
 }
 

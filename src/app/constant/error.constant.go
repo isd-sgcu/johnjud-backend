@@ -13,3 +13,4 @@ const InvalidArgumentMessage = "Invalid Argument"
 
 const PetNotFoundMessage = "Pet not found"
 const UserNotFoundMessage = "User not found"
+const ImageNotFoundMessage = "Image not found"

@@ -4,11 +4,6 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
 )
 
-type ImageResponse struct {
-	Id  string `json:"id"`
-	Url string `json:"url"`
-}
-
 type PetResponse struct {
 	Id           string          `json:"id"`
 	Type         string          `json:"type"`

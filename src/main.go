@@ -12,6 +12,7 @@ import (
 
 	authHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/auth"
 	healthcheck "github.com/isd-sgcu/johnjud-gateway/src/app/handler/healthcheck"
+	imageHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/image"
 	likeHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/like"
 	petHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/pet"
 	userHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/user"
@@ -107,6 +108,7 @@ func main() {
 
 	imageClient := imageProto.NewImageServiceClient(fileConn)
 	imageService := imageSvc.NewService(imageClient)
+	imageHandler := imageHdr.NewHandler(imageService, v)
 
 	petClient := petProto.NewPetServiceClient(backendConn)
 	petService := petSvc.NewService(petClient)
@@ -141,6 +143,10 @@ func main() {
 	r.GetLike("/:id", likeHandler.FindByUserId)
 	r.PostLike("", likeHandler.Create)
 	r.DeleteLike("/:id", likeHandler.Delete)
+
+	r.PostImage("/", imageHandler.Upload)
+	r.DeleteImage("/:id", imageHandler.Delete)
+	r.PostImage("/assign", imageHandler.AssignPet)
 
 	v1 := router.NewAPIv1(r, conf.App)
 
