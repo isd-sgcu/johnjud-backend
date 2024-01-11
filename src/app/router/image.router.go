@@ -22,3 +22,10 @@ func (r *FiberRouter) GetImage(path string, h func(ctx *FiberCtx)) {
 		return nil
 	})
 }
+
+func (r *FiberRouter) AssignPet(path string, h func(ctx *FiberCtx)) {
+	r.image.Post(path, func(c *fiber.Ctx) error {
+		h(NewFiberCtx(c))
+		return nil
+	})
+}
