@@ -128,6 +128,6 @@ func (h *Handler) AssignPet(c *router.FiberCtx) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, response)
+	c.JSON(http.StatusOK, response)
 	return
 }
