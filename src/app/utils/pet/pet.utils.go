@@ -31,7 +31,6 @@ func ProtoToDto(in *petproto.Pet, images []*imgproto.Image) *dto.PetResponse {
 	pet := &dto.PetResponse{
 		Id:           in.Id,
 		Type:         in.Type,
-		Species:      in.Species,
 		Name:         in.Name,
 		Birthdate:    in.Birthdate,
 		Gender:       pet.Gender(in.Gender),
@@ -43,7 +42,6 @@ func ProtoToDto(in *petproto.Pet, images []*imgproto.Image) *dto.PetResponse {
 		IsSterile:    &in.IsSterile,
 		IsVaccinated: &in.IsVaccinated,
 		IsVisible:    &in.IsVisible,
-		IsClubPet:    &in.IsClubPet,
 		Origin:       in.Origin,
 		Address:      in.Address,
 		Contact:      in.Contact,
@@ -57,7 +55,6 @@ func CreateDtoToProto(in *dto.CreatePetRequest) *petproto.CreatePetRequest {
 	return &petproto.CreatePetRequest{
 		Pet: &petproto.Pet{
 			Type:         in.Type,
-			Species:      in.Species,
 			Name:         in.Name,
 			Birthdate:    in.Birthdate,
 			Gender:       string(in.Gender),
@@ -70,7 +67,6 @@ func CreateDtoToProto(in *dto.CreatePetRequest) *petproto.CreatePetRequest {
 			IsSterile:    *in.IsSterile,
 			IsVaccinated: *in.IsVaccinated,
 			IsVisible:    *in.IsVisible,
-			IsClubPet:    *in.IsClubPet,
 			Origin:       in.Origin,
 			Address:      in.Address,
 			Contact:      in.Contact,
@@ -84,7 +80,6 @@ func UpdateDtoToProto(id string, in *dto.UpdatePetRequest) *petproto.UpdatePetRe
 		Pet: &petproto.Pet{
 			Id:        id,
 			Type:      in.Type,
-			Species:   in.Species,
 			Name:      in.Name,
 			Birthdate: in.Birthdate,
 			Gender:    string(in.Gender),
@@ -110,7 +105,6 @@ func ProtoToDtoList(in []*petproto.Pet, imagesList [][]*imgproto.Image) []*dto.P
 		pet := &dto.PetResponse{
 			Id:           p.Id,
 			Type:         p.Type,
-			Species:      p.Species,
 			Name:         p.Name,
 			Birthdate:    p.Birthdate,
 			Gender:       pet.Gender(p.Gender),
@@ -122,7 +116,6 @@ func ProtoToDtoList(in []*petproto.Pet, imagesList [][]*imgproto.Image) []*dto.P
 			IsSterile:    &p.IsSterile,
 			IsVaccinated: &p.IsVaccinated,
 			IsVisible:    &p.IsVisible,
-			IsClubPet:    &p.IsClubPet,
 			Origin:       p.Origin,
 			Address:      p.Address,
 			Contact:      p.Contact,

@@ -7,7 +7,6 @@ import (
 type PetResponse struct {
 	Id           string          `json:"id"`
 	Type         string          `json:"type"`
-	Species      string          `json:"species"`
 	Name         string          `json:"name"`
 	Birthdate    string          `json:"birthdate"`
 	Gender       pet.Gender      `json:"gender"`
@@ -19,7 +18,6 @@ type PetResponse struct {
 	IsSterile    *bool           `json:"is_sterile"`
 	IsVaccinated *bool           `json:"is_vaccinated"`
 	IsVisible    *bool           `json:"is_visible"`
-	IsClubPet    *bool           `json:"is_club_pet"`
 	Origin       string          `json:"origin"`
 	Address      string          `json:"address"`
 	Contact      string          `json:"contact"`
@@ -29,7 +27,6 @@ type PetResponse struct {
 
 type CreatePetRequest struct {
 	Type         string     `json:"type" validate:"required"`
-	Species      string     `json:"species" validate:"required"`
 	Name         string     `json:"name" validate:"required"`
 	Birthdate    string     `json:"birthdate" validate:"required"`
 	Gender       pet.Gender `json:"gender" validate:"required" example:"male"`
@@ -41,7 +38,6 @@ type CreatePetRequest struct {
 	IsSterile    *bool      `json:"is_sterile" validate:"required"`
 	IsVaccinated *bool      `json:"is_vaccinated" validate:"required"`
 	IsVisible    *bool      `json:"is_visible" validate:"required"`
-	IsClubPet    *bool      `json:"is_club_pet" validate:"required"`
 	Origin       string     `json:"origin" validate:"required"`
 	Address      string     `json:"address"`
 	Contact      string     `json:"contact"`
@@ -68,7 +64,6 @@ type AdoptByResponse struct {
 
 type UpdatePetRequest struct {
 	Type         string     `json:"type"`
-	Species      string     `json:"species"`
 	Name         string     `json:"name"`
 	Birthdate    string     `json:"birthdate"`
 	Gender       pet.Gender `json:"gender"`
@@ -80,7 +75,6 @@ type UpdatePetRequest struct {
 	IsSterile    *bool      `json:"is_sterile"`
 	IsVaccinated *bool      `json:"is_vaccinated"`
 	IsVisible    *bool      `json:"is_visible"`
-	IsClubPet    *bool      `json:"is_club_pet"`
 	Origin       string     `json:"origin"`
 	Address      string     `json:"address"`
 	Contact      string     `json:"contact"`

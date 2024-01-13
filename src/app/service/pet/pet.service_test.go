@@ -59,7 +59,6 @@ func (t *PetServiceTest) SetupTest() {
 		pet := &petproto.Pet{
 			Id:           faker.UUIDDigit(),
 			Type:         faker.Word(),
-			Species:      faker.Word(),
 			Name:         faker.Name(),
 			Birthdate:    faker.Word(),
 			Gender:       string(genders[rand.Intn(2)]),
@@ -72,7 +71,6 @@ func (t *PetServiceTest) SetupTest() {
 			IsSterile:    true,
 			IsVaccinated: true,
 			IsVisible:    true,
-			IsClubPet:    true,
 			Origin:       faker.Paragraph(),
 			Address:      faker.Paragraph(),
 			Contact:      faker.Paragraph(),
@@ -88,7 +86,6 @@ func (t *PetServiceTest) SetupTest() {
 	t.PetNotVisible = &petproto.Pet{
 		Id:           t.Pet.Id,
 		Type:         t.Pet.Type,
-		Species:      t.Pet.Species,
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
 		Gender:       t.Pet.Gender,
@@ -101,7 +98,6 @@ func (t *PetServiceTest) SetupTest() {
 		IsSterile:    t.Pet.IsSterile,
 		IsVaccinated: t.Pet.IsVaccinated,
 		IsVisible:    false,
-		IsClubPet:    t.Pet.IsClubPet,
 		Origin:       t.Pet.Origin,
 		Address:      t.Pet.Address,
 		Contact:      t.Pet.Contact,
@@ -112,7 +108,6 @@ func (t *PetServiceTest) SetupTest() {
 
 	t.CreatePetDto = &dto.CreatePetRequest{
 		Type:         t.Pet.Type,
-		Species:      t.Pet.Species,
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
 		Gender:       pet.Gender(t.Pet.Gender),
@@ -125,7 +120,6 @@ func (t *PetServiceTest) SetupTest() {
 		IsSterile:    &t.Pet.IsSterile,
 		IsVaccinated: &t.Pet.IsVaccinated,
 		IsVisible:    &t.Pet.IsVisible,
-		IsClubPet:    &t.Pet.IsClubPet,
 		Origin:       t.Pet.Origin,
 		Address:      t.Pet.Address,
 		Contact:      t.Pet.Contact,
@@ -134,7 +128,6 @@ func (t *PetServiceTest) SetupTest() {
 
 	t.UpdatePetDto = &dto.UpdatePetRequest{
 		Type:         t.Pet.Type,
-		Species:      t.Pet.Species,
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
 		Gender:       pet.Gender(t.Pet.Gender),
@@ -147,7 +140,6 @@ func (t *PetServiceTest) SetupTest() {
 		IsSterile:    &t.Pet.IsSterile,
 		IsVaccinated: &t.Pet.IsVaccinated,
 		IsVisible:    &t.Pet.IsVisible,
-		IsClubPet:    &t.Pet.IsClubPet,
 		Origin:       t.Pet.Origin,
 		Address:      t.Pet.Address,
 		Contact:      t.Pet.Contact,
