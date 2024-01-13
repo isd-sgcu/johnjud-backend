@@ -1,7 +1,9 @@
 package pet
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
@@ -136,4 +138,74 @@ func extractImages(images []*imgproto.Image) []dto.ImageResponse {
 		})
 	}
 	return result
+}
+
+func FindAllDtoToProto(in *dto.FindAllPetRequest) *petproto.FindAllPetRequest {
+	return &petproto.FindAllPetRequest{
+		Search:   in.Search,
+		Type:     in.Type,
+		Gender:   in.Gender,
+		Color:    in.Color,
+		Pattern:  in.Pattern,
+		Age:      in.Age,
+		Origin:   in.Origin,
+		PageSize: int32(in.PageSize),
+		Page:     int32(in.Page),
+	}
+}
+
+func MetadataProtoToDto(in *petproto.FindAllPetMetaData) *dto.FindAllMetadata {
+	return &dto.FindAllMetadata{
+		Page:       int(in.Page),
+		TotalPages: int(in.TotalPages),
+		PageSize:   int(in.PageSize),
+		Total:      int(in.Total),
+	}
+}
+
+func QueriesToFindAllDto(queries map[string]string) (*dto.FindAllPetRequest, error) {
+	request := &dto.FindAllPetRequest{
+		Search:   "",
+		Type:     "",
+		Gender:   "",
+		Color:    "",
+		Pattern:  "",
+		Age:      "",
+		Origin:   "",
+		PageSize: 0,
+		Page:     0,
+	}
+
+	for q, v := range queries {
+		switch q {
+		case "search":
+			request.Search = v
+		case "type":
+			request.Type = v
+		case "gender":
+			request.Gender = v
+		case "color":
+			request.Color = v
+		case "pattern":
+			request.Pattern = v
+		case "age":
+			request.Age = v
+		case "origin":
+			request.Origin = v
+		case "pageSize":
+			pageSize, err := strconv.Atoi(v)
+			if err != nil {
+				return nil, errors.New("error pasring pageSize")
+			}
+			request.PageSize = pageSize
+		case "page":
+			page, err := strconv.Atoi(v)
+			if err != nil {
+				return nil, errors.New("error pasring page")
+			}
+			request.Page = page
+		}
+	}
+
+	return request, nil
 }

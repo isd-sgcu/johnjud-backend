@@ -24,11 +24,11 @@ func NewService(petClient petproto.PetServiceClient) *Service {
 	}
 }
 
-func (s *Service) FindAll() (result []*dto.PetResponse, err *dto.ResponseErr) {
+func (s *Service) FindAll(in *dto.FindAllPetRequest) (result *dto.FindAllPetResponse, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	res, errRes := s.petClient.FindAll(ctx, &petproto.FindAllPetRequest{})
+	res, errRes := s.petClient.FindAll(ctx, utils.FindAllDtoToProto(in))
 	if errRes != nil {
 		st, _ := status.FromError(errRes)
 		log.Error().
@@ -51,8 +51,13 @@ func (s *Service) FindAll() (result []*dto.PetResponse, err *dto.ResponseErr) {
 		}
 	}
 	imagesList := utils.MockImageList(len(res.Pets))
-	findAllResponse := utils.ProtoToDtoList(res.Pets, imagesList)
-	return findAllResponse, nil
+	findAllDto := utils.ProtoToDtoList(res.Pets, imagesList)
+	metaData := utils.MetadataProtoToDto(res.Metadata)
+
+	return &dto.FindAllPetResponse{
+		Pets:     findAllDto,
+		Metadata: metaData,
+	}, nil
 }
 
 func (s *Service) FindOne(id string) (result *dto.PetResponse, err *dto.ResponseErr) {

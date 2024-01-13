@@ -19,6 +19,7 @@ type IContext interface {
 	Path() string
 	StoreValue(string, string)
 	Next() error
+	Queries() map[string]string
 }
 
 type FiberCtx struct {
@@ -89,6 +90,10 @@ func (c *FiberCtx) Path() string {
 
 func (c *FiberCtx) StoreValue(k string, v string) {
 	c.Locals(k, v)
+}
+
+func (c *FiberCtx) Queries() map[string]string {
+	return c.Ctx.Queries()
 }
 
 //func (c *FiberCtx) Next() {

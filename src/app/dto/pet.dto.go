@@ -25,6 +25,30 @@ type PetResponse struct {
 	Images       []ImageResponse `json:"images"`
 }
 
+type FindAllPetRequest struct {
+	Search   string `json:"search"`
+	Type     string `json:"type"`
+	Gender   string `json:"gender"`
+	Color    string `json:"color"`
+	Pattern  string `json:"pattern"`
+	Age      string `json:"age"`
+	Origin   string `json:"origin"`
+	PageSize int    `json:"page_size"`
+	Page     int    `json:"page"`
+}
+
+type FindAllMetadata struct {
+	Page       int `json:"page"`
+	TotalPages int `json:"total_pages"`
+	PageSize   int `json:"page_size"`
+	Total      int `json:"total"`
+}
+
+type FindAllPetResponse struct {
+	Pets     []*PetResponse   `json:"pets"`
+	Metadata *FindAllMetadata `json:"metadata"`
+}
+
 type CreatePetRequest struct {
 	Type         string     `json:"type" validate:"required"`
 	Name         string     `json:"name" validate:"required"`
