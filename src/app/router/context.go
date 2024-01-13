@@ -91,6 +91,14 @@ func (c *FiberCtx) StoreValue(k string, v string) {
 	c.Locals(k, v)
 }
 
+func (c *FiberCtx) Queries() map[string]string {
+	return c.Queries()
+}
+
+func (c *FiberCtx) Query(q string) string {
+	return c.Query(q)
+}
+
 //func (c *FiberCtx) Next() {
 //	err := c.Ctx.Next()
 //	fmt.Println(c.Route().Path)
