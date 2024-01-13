@@ -28,6 +28,9 @@ type PetHandlerTest struct {
 	Pet                  *petProto.Pet
 	Pets                 []*petProto.Pet
 	PetDto               *dto.PetResponse
+	QueriesMock          map[string]string
+	Metadata             *dto.FindAllMetadata
+	FindAllPetRequest    *dto.FindAllPetRequest
 	CreatePetRequest     *dto.CreatePetRequest
 	ChangeViewPetRequest *dto.ChangeViewPetRequest
 	UpdatePetRequest     *dto.UpdatePetRequest
@@ -80,6 +83,13 @@ func (t *PetHandlerTest) SetupTest() {
 	t.Pets = pets
 	t.Pet = t.Pets[0]
 
+	t.Metadata = &dto.FindAllMetadata{
+		Page:       1,
+		TotalPages: 1,
+		PageSize:   len(t.Pets),
+		Total:      len(t.Pets),
+	}
+
 	t.PetDto = &dto.PetResponse{
 		Id:           t.Pet.Id,
 		Type:         t.Pet.Type,
@@ -99,6 +109,20 @@ func (t *PetHandlerTest) SetupTest() {
 		Contact:      t.Pet.Contact,
 		AdoptBy:      t.Pet.AdoptBy,
 	}
+
+	t.QueriesMock = map[string]string{
+		"search":   "",
+		"type":     "",
+		"gender":   "",
+		"color":    "",
+		"pattern":  "",
+		"age":      "",
+		"origin":   "",
+		"pageSize": "0",
+		"page":     "0",
+	}
+
+	t.FindAllPetRequest = &dto.FindAllPetRequest{}
 
 	t.CreatePetRequest = &dto.CreatePetRequest{}
 
@@ -134,7 +158,11 @@ func (t *PetHandlerTest) SetupTest() {
 
 func (t *PetHandlerTest) TestFindAllSuccess() {
 	findAllResponse := utils.ProtoToDtoList(t.Pets, t.ImagesList)
-	expectedResponse := findAllResponse
+	metadataResponse := t.Metadata
+	expectedResponse := &dto.FindAllPetResponse{
+		Pets:     findAllResponse,
+		Metadata: metadataResponse,
+	}
 
 	controller := gomock.NewController(t.T())
 
@@ -143,7 +171,8 @@ func (t *PetHandlerTest) TestFindAllSuccess() {
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
-	petSvc.EXPECT().FindAll().Return(findAllResponse, nil)
+	context.EXPECT().Queries().Return(t.QueriesMock)
+	petSvc.EXPECT().FindAll(t.FindAllPetRequest).Return(expectedResponse, nil)
 	context.EXPECT().JSON(http.StatusOK, expectedResponse)
 
 	handler := NewHandler(petSvc, imageSvc, validator)

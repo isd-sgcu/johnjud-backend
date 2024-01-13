@@ -7,6 +7,7 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
+	petUtils "github.com/isd-sgcu/johnjud-gateway/src/app/utils/pet"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
 	imageSvc "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/image"
 	petSvc "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/pet"
@@ -33,7 +34,13 @@ func NewHandler(service petSvc.Service, imageService imageSvc.Service, validate 
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/pets/ [get]
 func (h *Handler) FindAll(c router.IContext) {
-	response, respErr := h.service.FindAll()
+	queries := c.Queries()
+	request, err := petUtils.QueriesToFindAllDto(queries)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
+	}
+
+	response, respErr := h.service.FindAll(request)
 	if respErr != nil {
 		c.JSON(respErr.StatusCode, respErr)
 		return
