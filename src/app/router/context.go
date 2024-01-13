@@ -96,10 +96,6 @@ func (c *FiberCtx) Queries() map[string]string {
 	return c.Ctx.Queries()
 }
 
-func (c *FiberCtx) Query(q string) string {
-	return c.Query(q)
-}
-
 //func (c *FiberCtx) Next() {
 //	err := c.Ctx.Next()
 //	fmt.Println(c.Route().Path)
