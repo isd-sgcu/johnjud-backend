@@ -24,11 +24,11 @@ func NewService(petClient petproto.PetServiceClient) *Service {
 	}
 }
 
-func (s *Service) FindAll() (result []*dto.PetResponse, err *dto.ResponseErr) {
+func (s *Service) FindAll(in *dto.FindAllPetRequest) (result *dto.FindAllPetResponse, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	res, errRes := s.petClient.FindAll(ctx, &petproto.FindAllPetRequest{})
+	res, errRes := s.petClient.FindAll(ctx, utils.FindAllDtoToProto(in))
 	if errRes != nil {
 		st, _ := status.FromError(errRes)
 		log.Error().
@@ -51,8 +51,13 @@ func (s *Service) FindAll() (result []*dto.PetResponse, err *dto.ResponseErr) {
 		}
 	}
 	imagesList := utils.MockImageList(len(res.Pets))
-	findAllResponse := utils.RawToDtoList(res.Pets, imagesList)
-	return findAllResponse, nil
+	findAllDto := utils.ProtoToDtoList(res.Pets, imagesList)
+	metaData := utils.MetadataProtoToDto(res.Metadata)
+
+	return &dto.FindAllPetResponse{
+		Pets:     findAllDto,
+		Metadata: metaData,
+	}, nil
 }
 
 func (s *Service) FindOne(id string) (result *dto.PetResponse, err *dto.ResponseErr) {
@@ -94,7 +99,7 @@ func (s *Service) FindOne(id string) (result *dto.PetResponse, err *dto.Response
 	return findOneResponse, nil
 }
 
-func (s *Service) Create(in *dto.CreatePetRequest) (ressult *dto.PetResponse, err *dto.ResponseErr) {
+func (s *Service) Create(in *dto.CreatePetRequest) (result *dto.PetResponse, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -112,7 +117,7 @@ func (s *Service) Create(in *dto.CreatePetRequest) (ressult *dto.PetResponse, er
 		case codes.InvalidArgument:
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusBadRequest,
-				Message:    constant.InvalidArgument,
+				Message:    constant.InvalidArgumentMessage,
 				Data:       nil,
 			}
 		case codes.Unavailable:
@@ -158,7 +163,7 @@ func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *dto.PetRe
 		case codes.InvalidArgument:
 			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusBadRequest,
-				Message:    constant.InvalidArgument,
+				Message:    constant.InvalidArgumentMessage,
 				Data:       nil,
 			}
 		case codes.Unavailable:
@@ -196,29 +201,24 @@ func (s *Service) Delete(id string) (result *dto.DeleteResponse, err *dto.Respon
 			Msg(st.Message())
 		switch st.Code() {
 		case codes.NotFound:
-			return &dto.DeleteResponse{
-					Success: false,
-				}, &dto.ResponseErr{
-					StatusCode: http.StatusNotFound,
-					Message:    constant.PetNotFoundMessage,
-					Data:       nil,
-				}
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusNotFound,
+				Message:    constant.PetNotFoundMessage,
+				Data:       nil,
+			}
 		case codes.Unavailable:
-			return &dto.DeleteResponse{
-					Success: false,
-				}, &dto.ResponseErr{
-					StatusCode: http.StatusServiceUnavailable,
-					Message:    constant.UnavailableServiceMessage,
-					Data:       nil,
-				}
-		}
-		return &dto.DeleteResponse{
-				Success: false,
-			}, &dto.ResponseErr{
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusServiceUnavailable,
+				Message:    constant.UnavailableServiceMessage,
+				Data:       nil,
+			}
+		default:
+			return nil, &dto.ResponseErr{
 				StatusCode: http.StatusInternalServerError,
 				Message:    constant.InternalErrorMessage,
 				Data:       nil,
 			}
+		}
 	}
 	return &dto.DeleteResponse{
 		Success: res.Success,
@@ -268,6 +268,50 @@ func (s *Service) ChangeView(id string, in *dto.ChangeViewPetRequest) (result *d
 		}
 	}
 	return &dto.ChangeViewPetResponse{
+		Success: res.Success,
+	}, nil
+}
+
+func (s *Service) Adopt(petId string, in *dto.AdoptByRequest) (result *dto.AdoptByResponse, err *dto.ResponseErr) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	res, errRes := s.petClient.AdoptPet(ctx, &petproto.AdoptPetRequest{
+		UserId: in.UserID,
+		PetId:  in.PetID,
+	})
+	if errRes != nil {
+		st, _ := status.FromError(errRes)
+		log.Error().
+			Err(errRes).
+			Str("service", "pet").
+			Str("module", "adopt").
+			Msg(st.Message())
+		switch st.Code() {
+		case codes.NotFound:
+			return nil,
+				&dto.ResponseErr{
+					StatusCode: http.StatusNotFound,
+					Message:    constant.PetNotFoundMessage,
+					Data:       nil,
+				}
+		case codes.Unavailable:
+			return nil,
+				&dto.ResponseErr{
+					StatusCode: http.StatusServiceUnavailable,
+					Message:    constant.UnavailableServiceMessage,
+					Data:       nil,
+				}
+		default:
+			return nil,
+				&dto.ResponseErr{
+					StatusCode: http.StatusServiceUnavailable,
+					Message:    constant.InternalErrorMessage,
+					Data:       nil,
+				}
+		}
+	}
+	return &dto.AdoptByResponse{
 		Success: res.Success,
 	}, nil
 }

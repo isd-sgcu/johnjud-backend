@@ -9,6 +9,7 @@ import (
 
 type IContext interface {
 	UserID() string
+	Role() string
 	Bind(interface{}) error
 	JSON(int, interface{})
 	ID() (string, error)
@@ -18,6 +19,7 @@ type IContext interface {
 	Path() string
 	StoreValue(string, string)
 	Next() error
+	Queries() map[string]string
 }
 
 type FiberCtx struct {
@@ -30,6 +32,10 @@ func NewFiberCtx(c *fiber.Ctx) *FiberCtx {
 
 func (c *FiberCtx) UserID() string {
 	return c.Ctx.Locals("UserId").(string)
+}
+
+func (c *FiberCtx) Role() string {
+	return c.Ctx.Locals("Role").(string)
 }
 
 func (c *FiberCtx) Bind(v interface{}) error {
@@ -84,6 +90,10 @@ func (c *FiberCtx) Path() string {
 
 func (c *FiberCtx) StoreValue(k string, v string) {
 	c.Locals(k, v)
+}
+
+func (c *FiberCtx) Queries() map[string]string {
+	return c.Ctx.Queries()
 }
 
 //func (c *FiberCtx) Next() {

@@ -1,4 +1,19 @@
 definitions:
+  dto.AdoptByRequest:
+    properties:
+      pet_id:
+        type: string
+      user_id:
+        type: string
+    required:
+    - pet_id
+    - user_id
+    type: object
+  dto.AdoptByResponse:
+    properties:
+      success:
+        type: boolean
+    type: object
   dto.BadReqErrResponse:
     properties:
       failed_field:
@@ -6,6 +21,73 @@ definitions:
       message:
         type: string
       value: {}
+    type: object
+  dto.ChangeViewPetRequest:
+    properties:
+      visible:
+        type: boolean
+    required:
+    - visible
+    type: object
+  dto.ChangeViewPetResponse:
+    properties:
+      success:
+        type: boolean
+    required:
+    - success
+    type: object
+  dto.CreatePetRequest:
+    properties:
+      address:
+        type: string
+      adopt_by:
+        type: string
+      background:
+        type: string
+      birthdate:
+        type: string
+      caption:
+        type: string
+      contact:
+        type: string
+      gender:
+        example: 1
+        type: integer
+      habit:
+        type: string
+      images:
+        items:
+          type: string
+        type: array
+      is_club_pet:
+        type: boolean
+      is_sterile:
+        type: boolean
+      is_vaccinated:
+        type: boolean
+      is_visible:
+        type: boolean
+      name:
+        type: string
+      species:
+        type: string
+      status:
+        example: 1
+        type: integer
+      type:
+        type: string
+    required:
+    - birthdate
+    - gender
+    - habit
+    - is_club_pet
+    - is_sterile
+    - is_vaccinated
+    - is_visible
+    - name
+    - species
+    - status
+    - type
     type: object
   dto.Credential:
     properties:
@@ -19,14 +101,67 @@ definitions:
         example: e7e84d54-7518-4...
         type: string
     type: object
+  dto.DeleteResponse:
+    properties:
+      success:
+        type: boolean
+    required:
+    - success
+    type: object
+  dto.ImageResponse:
+    properties:
+      id:
+        type: string
+      url:
+        type: string
+    type: object
+  dto.PetResponse:
+    properties:
+      address:
+        type: string
+      adopt_by:
+        type: string
+      background:
+        type: string
+      birthdate:
+        type: string
+      caption:
+        type: string
+      contact:
+        type: string
+      gender:
+        type: integer
+      habit:
+        type: string
+      id:
+        type: string
+      images:
+        items:
+          $ref: '#/definitions/dto.ImageResponse'
+        type: array
+      is_club_pet:
+        type: boolean
+      is_sterile:
+        type: boolean
+      is_vaccinated:
+        type: boolean
+      is_visible:
+        type: boolean
+      name:
+        type: string
+      species:
+        type: string
+      status:
+        type: integer
+      type:
+        type: string
+    type: object
   dto.RefreshTokenRequest:
     properties:
       refresh_token:
         type: string
     required:
     - refresh_token
-    type: object
-  dto.PetDto:
     type: object
   dto.ResponseBadRequestErr:
     properties:
@@ -135,6 +270,45 @@ definitions:
       id:
         type: string
       lastname:
+        type: string
+    type: object
+  dto.UpdatePetRequest:
+    properties:
+      address:
+        type: string
+      adopt_by:
+        type: string
+      background:
+        type: string
+      birthdate:
+        type: string
+      caption:
+        type: string
+      contact:
+        type: string
+      gender:
+        type: integer
+      habit:
+        type: string
+      images:
+        items:
+          type: string
+        type: array
+      is_club_pet:
+        type: boolean
+      is_sterile:
+        type: boolean
+      is_vaccinated:
+        type: boolean
+      is_visible:
+        type: boolean
+      name:
+        type: string
+      species:
+        type: string
+      status:
+        type: integer
+      type:
         type: string
     type: object
 info:
@@ -287,33 +461,28 @@ paths:
       summary: Signup user
       tags:
       - auth
-  /v1/pet/:
-    get:
+  /v1/pets/:
+    delete:
       consumes:
       - application/json
-      description: Return the data of pets if successfully
+      description: Returns successful status if pet is successfully deleted
       parameters:
-      - description: pet dto
-        in: body
-        name: signup
+      - description: pet id
+        in: path
+        name: id
         required: true
-        schema:
-          $ref: '#/definitions/dto.PetDto'
+        type: string
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/dto.PetDto'
+            $ref: '#/definitions/dto.DeleteResponse'
         "400":
           description: Invalid request body
           schema:
             $ref: '#/definitions/dto.ResponseBadRequestErr'
-        "409":
-          description: Duplicate email
-          schema:
-            $ref: '#/definitions/dto.ResponseConflictErr'
         "500":
           description: Internal service error
           schema:
@@ -322,9 +491,216 @@ paths:
           description: Service is down
           schema:
             $ref: '#/definitions/dto.ResponseServiceDownErr'
-      summary: find all pets
+      summary: deletes pet
       tags:
-      - auth
+      - pet
+    get:
+      consumes:
+      - application/json
+      description: Returns the data of pets if successful
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.PetResponse'
+            type: array
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: finds all pets
+      tags:
+      - pet
+  /v1/pets/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns the data of a pet if successful
+      parameters:
+      - description: pet id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PetResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: finds one pet
+      tags:
+      - pet
+    put:
+      consumes:
+      - application/json
+      description: Returns the data of pet if successfully
+      parameters:
+      - description: update pet dto
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdatePetRequest'
+      - description: pet id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.PetResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: updates pet
+      tags:
+      - pet
+  /v1/pets/{id}/adopt:
+    put:
+      consumes:
+      - application/json
+      description: Return true if the pet is successfully adopted
+      parameters:
+      - description: adopt pet dto
+        in: body
+        name: adoptDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AdoptByRequest'
+      - description: Pet ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.AdoptByResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Change a pet's adoptBy status
+      tags:
+      - pet
+  /v1/pets/{id}/visible:
+    put:
+      consumes:
+      - application/json
+      description: Returns successful status if pet's IsVisible is successfully changed
+      parameters:
+      - description: changeView pet dto
+        in: body
+        name: changeViewDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ChangeViewPetRequest'
+      - description: pet id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ChangeViewPetResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: changes pet's public visiblility
+      tags:
+      - pet
+  /v1/pets/create:
+    post:
+      consumes:
+      - application/json
+      description: Returns the data of pet if successful
+      parameters:
+      - description: pet dto
+        in: body
+        name: create
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreatePetRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.PetResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: creates pet
+      tags:
+      - pet
 schemes:
 - https
 - http

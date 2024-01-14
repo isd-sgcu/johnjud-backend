@@ -12,12 +12,15 @@ import (
 
 	authHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/auth"
 	healthcheck "github.com/isd-sgcu/johnjud-gateway/src/app/handler/healthcheck"
+	imageHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/image"
+	likeHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/like"
 	petHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/pet"
 	userHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/user"
 	guard "github.com/isd-sgcu/johnjud-gateway/src/app/middleware/auth"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	authSvc "github.com/isd-sgcu/johnjud-gateway/src/app/service/auth"
 	imageSvc "github.com/isd-sgcu/johnjud-gateway/src/app/service/image"
+	likeSvc "github.com/isd-sgcu/johnjud-gateway/src/app/service/like"
 	petSvc "github.com/isd-sgcu/johnjud-gateway/src/app/service/pet"
 	userSvc "github.com/isd-sgcu/johnjud-gateway/src/app/service/user"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
@@ -25,6 +28,7 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/src/constant/auth"
 	authProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
 	userProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/user/v1"
+	likeProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/like/v1"
 	petProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	imageProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 	"github.com/rs/zerolog/log"
@@ -100,19 +104,25 @@ func main() {
 	authService := authSvc.NewService(authClient)
 	authHandler := authHdr.NewHandler(authService, userService, v)
 
-	authGuard := guard.NewAuthGuard(authService, auth.ExcludePath, conf.App, auth.VersionList)
+	authGuard := guard.NewAuthGuard(authService, auth.ExcludePath, auth.AdminPath, conf.App, auth.VersionList)
 
 	imageClient := imageProto.NewImageServiceClient(fileConn)
 	imageService := imageSvc.NewService(imageClient)
+	imageHandler := imageHdr.NewHandler(imageService, v)
 
 	petClient := petProto.NewPetServiceClient(backendConn)
 	petService := petSvc.NewService(petClient)
 	petHandler := petHdr.NewHandler(petService, imageService, v)
 
+	likeClient := likeProto.NewLikeServiceClient(backendConn)
+	likeService := likeSvc.NewService(likeClient)
+	likeHandler := likeHdr.NewHandler(likeService, v)
+
 	r := router.NewFiberRouter(&authGuard, conf.App)
 
 	r.GetUser("/:id", userHandler.FindOne)
-	r.PutUser("/", userHandler.Update)
+	r.PutUser("", userHandler.Update)
+	r.DeleteUser("/:id", userHandler.Delete)
 
 	r.PostAuth("/signup", authHandler.Signup)
 	r.PostAuth("/signin", authHandler.SignIn)
@@ -120,14 +130,23 @@ func main() {
 	//r.PostAuth("/me", authHandler.Validate)
 	r.PostAuth("/refreshToken", authHandler.RefreshToken)
 
-	r.GetHealthCheck("/", hc.HealthCheck)
+	r.GetHealthCheck("", hc.HealthCheck)
 
-	r.GetPet("/", petHandler.FindAll)
+	r.GetPet("", petHandler.FindAll)
 	r.GetPet("/:id", petHandler.FindOne)
-	r.PostPet("/create", petHandler.Create)
+	r.PostPet("", petHandler.Create)
 	r.PutPet("/:id", petHandler.Update)
+	r.PutPet("/:id/adopt", petHandler.Adopt)
 	r.PutPet("/:id/visible", petHandler.ChangeView)
 	r.DeletePet("/:id", petHandler.Delete)
+
+	r.GetLike("/:id", likeHandler.FindByUserId)
+	r.PostLike("", likeHandler.Create)
+	r.DeleteLike("/:id", likeHandler.Delete)
+
+	r.PostImage("/", imageHandler.Upload)
+	r.DeleteImage("/:id", imageHandler.Delete)
+	r.PostImage("/assign", imageHandler.AssignPet)
 
 	v1 := router.NewAPIv1(r, conf.App)
 

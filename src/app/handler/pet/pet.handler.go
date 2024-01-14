@@ -6,64 +6,58 @@ import (
 
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
-	imageSvc "github.com/isd-sgcu/johnjud-gateway/src/app/handler/image"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
+	petUtils "github.com/isd-sgcu/johnjud-gateway/src/app/utils/pet"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
-	petconst "github.com/isd-sgcu/johnjud-gateway/src/constant/pet"
+	imageSvc "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/image"
+	petSvc "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/pet"
 )
 
 type Handler struct {
-	service      Service
+	service      petSvc.Service
 	imageService imageSvc.Service
 	validate     validator.IDtoValidator
 }
 
-type Service interface {
-	FindAll() ([]*dto.PetResponse, *dto.ResponseErr)
-	FindOne(string) (*dto.PetResponse, *dto.ResponseErr)
-	Create(*dto.CreatePetRequest) (*dto.PetResponse, *dto.ResponseErr)
-	Update(string, *dto.UpdatePetRequest) (*dto.PetResponse, *dto.ResponseErr)
-	ChangeView(string, *dto.ChangeViewPetRequest) (*dto.ChangeViewPetResponse, *dto.ResponseErr)
-	Delete(string) (*dto.DeleteResponse, *dto.ResponseErr)
-}
-
-func NewHandler(service Service, imageService imageSvc.Service, validate validator.IDtoValidator) *Handler {
+func NewHandler(service petSvc.Service, imageService imageSvc.Service, validate validator.IDtoValidator) *Handler {
 	return &Handler{service, imageService, validate}
 }
 
-// FindAll is a function that return all pets in database
-// @Summary find all pets
-// @Description Return the data of pets if successfully
-// @Tags auth
+// FindAll is a function that returns all pets in database
+// @Summary finds all pets
+// @Description Returns the data of pets if successful
+// @Tags pet
 // @Accept json
 // @Produce json
-// @Success 200 {object} dto.PetDto
+// @Success 200 {object} []dto.PetResponse
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/pets/ [get]
 func (h *Handler) FindAll(c router.IContext) {
-	response, respErr := h.service.FindAll()
+	queries := c.Queries()
+	request, err := petUtils.QueriesToFindAllDto(queries)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
+	}
+
+	response, respErr := h.service.FindAll(request)
 	if respErr != nil {
 		c.JSON(respErr.StatusCode, respErr)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petconst.FindAllPetSuccessMessage,
-		Data:       response,
-	})
+	c.JSON(http.StatusOK, response)
 	return
 }
 
-// FindOne is a function that return all pet in database
-// @Summary find one pet
-// @Description Return the data of pets if successfully
+// FindOne is a function that returns a pet by id in database
+// @Summary finds one pet
+// @Description Returns the data of a pet if successful
 // @Param id path string true "pet id"
-// @Tags auth
+// @Tags pet
 // @Accept json
 // @Produce json
-// @Success 200 {object} dto.PetDto
+// @Success 200 {object} dto.PetResponse
 // @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
@@ -73,7 +67,7 @@ func (h *Handler) FindOne(c router.IContext) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ResponseErr{
 			StatusCode: http.StatusInternalServerError,
-			Message:    "Invalid ID",
+			Message:    constant.InvalidIDMessage,
 			Data:       nil,
 		})
 		return
@@ -85,22 +79,18 @@ func (h *Handler) FindOne(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petconst.FindOnePetSuccessMessage,
-		Data:       response,
-	})
+	c.JSON(http.StatusOK, response)
 	return
 }
 
-// Create is a function that create pet in database
-// @Summary create pet
-// @Description Return the data of pet if successfully
+// Create is a function that creates pet in database
+// @Summary creates pet
+// @Description Returns the data of pet if successful
 // @Param create body dto.CreatePetRequest true "pet dto"
-// @Tags auth
+// @Tags pet
 // @Accept json
 // @Produce json
-// @Success 201 {object} dto.PetDto
+// @Success 201 {object} dto.PetResponse
 // @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
@@ -136,23 +126,19 @@ func (h *Handler) Create(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, dto.ResponseSuccess{
-		StatusCode: http.StatusCreated,
-		Message:    petconst.CreatePetSuccessMessage,
-		Data:       response,
-	})
+	c.JSON(http.StatusCreated, response)
 	return
 }
 
-// Update is a function that update pet in database
-// @Summary update pet
-// @Description Return the data of pet if successfully
+// Update is a function that updates pet in database
+// @Summary updates pet
+// @Description Returns the data of pet if successfully
 // @Param update body dto.UpdatePetRequest true "update pet dto"
-// @Param id path stirng true "pet id"
-// @Tags auth
+// @Param id path string true "pet id"
+// @Tags pet
 // @Accept json
 // @Produce json
-// @Success 201 {object} dto.PetDto
+// @Success 201 {object} dto.PetResponse
 // @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
@@ -199,27 +185,23 @@ func (h *Handler) Update(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petconst.UpdatePetSuccessMessage,
-		Data:       pet,
-	})
+	c.JSON(http.StatusOK, pet)
 	return
 }
 
-// Change is a function that change visibility of pet in database
-// @Summary change view pet
-// @Description Return the status true of pet if successfully else false
-// @Param change view body dto.ChangeViewPetRequest true "change view pet dto"
-// @Param id string true "pet id"
-// @Tags auth
+// ChangeView is a function that changes visibility of pet in database
+// @Summary changes pet's public visiblility
+// @Description Returns successful status if pet's IsVisible is successfully changed
+// @Param changeViewDto body dto.ChangeViewPetRequest true "changeView pet dto"
+// @Param id path string true "pet id"
+// @Tags pet
 // @Accept json
 // @Produce json
-// @Success 201 {object} bool
+// @Success 201 {object} dto.ChangeViewPetResponse
 // @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
-// @Router /v1/pets/ [put]
+// @Router /v1/pets/{id}/visible [put]
 func (h *Handler) ChangeView(c router.IContext) {
 	id, err := c.Param("id")
 	if err != nil {
@@ -262,22 +244,18 @@ func (h *Handler) ChangeView(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petconst.ChangeViewPetSuccessMessage,
-		Data:       res,
-	})
+	c.JSON(http.StatusOK, res)
 	return
 }
 
-// Delete is a function that delete pet in database
-// @Summary delete pet
-// @Description Return the status true of pet if successfully else false
-// @Param id string true "pet id"
-// @Tags auth
+// Delete is a function that deletes pet in database
+// @Summary deletes pet
+// @Description Returns successful status if pet is successfully deleted
+// @Param id path string true "pet id"
+// @Tags pet
 // @Accept json
 // @Produce json
-// @Success 201 {object} bool
+// @Success 201 {object} dto.DeleteResponse
 // @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
@@ -299,10 +277,64 @@ func (h *Handler) Delete(c router.IContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ResponseSuccess{
-		StatusCode: http.StatusOK,
-		Message:    petconst.DeletePetSuccessMessage,
-		Data:       res,
-	})
+	c.JSON(http.StatusOK, res)
+	return
+}
+
+// Adopt is a function that handles the adoption of a pet in the database
+// @Summary Change a pet's adoptBy status
+// @Description Return true if the pet is successfully adopted
+// @Param adoptDto body dto.AdoptByRequest true "adopt pet dto"
+// @Param id path string true "Pet ID"
+// @Tags pet
+// @Accept json
+// @Produce json
+// @Success 201 {object} dto.AdoptByResponse
+// @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
+// @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
+// @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
+// @Router /v1/pets/{id}/adopt [put]
+func (h *Handler) Adopt(c router.IContext) {
+	petId, err := c.Param("id")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, &dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    "Invalid ID",
+			Data:       nil,
+		})
+		return
+	}
+
+	request := &dto.AdoptByRequest{}
+	err = c.Bind(request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.BindingRequestErrorMessage + err.Error(),
+			Data:       nil,
+		})
+		return
+	}
+
+	if err := h.validate.Validate(request); err != nil {
+		var errorMessage []string
+		for _, reqErr := range err {
+			errorMessage = append(errorMessage, reqErr.Message)
+		}
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.InvalidRequestBodyMessage + strings.Join(errorMessage, ", "),
+			Data:       nil,
+		})
+		return
+	}
+
+	res, errRes := h.service.Adopt(petId, request)
+	if errRes != nil {
+		c.JSON(errRes.StatusCode, errRes)
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
 	return
 }

@@ -23,13 +23,17 @@ type PetServiceTest struct {
 	suite.Suite
 	Pets                  []*petproto.Pet
 	Pet                   *petproto.Pet
+	MetadataDto           *dto.FindAllMetadata
+	MetadataProto         *petproto.FindAllPetMetaData
 	PetNotVisible         *petproto.Pet
+	FindAllPetReq         *petproto.FindAllPetRequest
 	UpdatePetReq          *petproto.UpdatePetRequest
 	CreatePetReq          *petproto.CreatePetRequest
 	ChangeViewPetReq      *petproto.ChangeViewPetRequest
 	DeletePetReq          *petproto.DeletePetRequest
 	AdoptReq              *petproto.AdoptPetRequest
 	PetDto                *dto.PetResponse
+	FindAllPetDto         *dto.FindAllPetRequest
 	CreatePetDto          *dto.CreatePetRequest
 	UpdatePetDto          *dto.UpdatePetRequest
 	NotFoundErr           *dto.ResponseErr
@@ -37,6 +41,7 @@ type PetServiceTest struct {
 	InvalidArgumentErr    *dto.ResponseErr
 	InternalErr           *dto.ResponseErr
 	ChangeViewedPetDto    *dto.ChangeViewPetRequest
+	AdoptDto              *dto.AdoptByRequest
 
 	Images     []*imgproto.Image
 	ImagesList [][]*imgproto.Image
@@ -50,25 +55,27 @@ func (t *PetServiceTest) SetupTest() {
 	imagesList := utils.MockImageList(3)
 	t.ImagesList = imagesList
 	t.Images = imagesList[0]
+	genders := []pet.Gender{pet.MALE, pet.FEMALE}
+	statuses := []pet.Status{pet.ADOPTED, pet.FINDHOME}
 
 	var pets []*petproto.Pet
 	for i := 0; i <= 3; i++ {
 		pet := &petproto.Pet{
 			Id:           faker.UUIDDigit(),
 			Type:         faker.Word(),
-			Species:      faker.Word(),
 			Name:         faker.Name(),
 			Birthdate:    faker.Word(),
-			Gender:       petproto.Gender(rand.Intn(1) + 1),
+			Gender:       string(genders[rand.Intn(2)]),
+			Color:        faker.Word(),
+			Pattern:      faker.Word(),
 			Habit:        faker.Paragraph(),
 			Caption:      faker.Paragraph(),
 			Images:       imagesList[i],
-			Status:       petproto.PetStatus(rand.Intn(1) + 1),
+			Status:       string(statuses[rand.Intn(2)]),
 			IsSterile:    true,
 			IsVaccinated: true,
 			IsVisible:    true,
-			IsClubPet:    true,
-			Background:   faker.Paragraph(),
+			Origin:       faker.Paragraph(),
 			Address:      faker.Paragraph(),
 			Contact:      faker.Paragraph(),
 			AdoptBy:      faker.UUIDDigit(),
@@ -77,16 +84,31 @@ func (t *PetServiceTest) SetupTest() {
 		pets = append(pets, pet)
 	}
 
+	t.MetadataDto = &dto.FindAllMetadata{
+		Page:       1,
+		TotalPages: 1,
+		PageSize:   len(t.Pets),
+		Total:      len(t.Pets),
+	}
+
+	t.MetadataProto = &petproto.FindAllPetMetaData{
+		Page:       1,
+		TotalPages: 1,
+		PageSize:   int32(len(t.Pets)),
+		Total:      int32(len(t.Pets)),
+	}
+
 	t.Pets = pets
 	t.Pet = t.Pets[0]
 
 	t.PetNotVisible = &petproto.Pet{
 		Id:           t.Pet.Id,
 		Type:         t.Pet.Type,
-		Species:      t.Pet.Species,
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
 		Gender:       t.Pet.Gender,
+		Color:        t.Pet.Color,
+		Pattern:      t.Pet.Pattern,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
 		Images:       t.Pet.Images,
@@ -94,8 +116,7 @@ func (t *PetServiceTest) SetupTest() {
 		IsSterile:    t.Pet.IsSterile,
 		IsVaccinated: t.Pet.IsVaccinated,
 		IsVisible:    false,
-		IsClubPet:    t.Pet.IsClubPet,
-		Background:   t.Pet.Background,
+		Origin:       t.Pet.Origin,
 		Address:      t.Pet.Address,
 		Contact:      t.Pet.Contact,
 		AdoptBy:      t.Pet.AdoptBy,
@@ -103,12 +124,25 @@ func (t *PetServiceTest) SetupTest() {
 
 	t.PetDto = utils.ProtoToDto(t.Pet, t.Pet.Images)
 
+	t.FindAllPetDto = &dto.FindAllPetRequest{
+		Search:   "",
+		Type:     "",
+		Gender:   "",
+		Color:    "",
+		Pattern:  "",
+		Age:      "",
+		Origin:   "",
+		PageSize: len(t.Pets),
+		Page:     1,
+	}
+
 	t.CreatePetDto = &dto.CreatePetRequest{
 		Type:         t.Pet.Type,
-		Species:      t.Pet.Species,
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
 		Gender:       pet.Gender(t.Pet.Gender),
+		Color:        t.Pet.Color,
+		Pattern:      t.Pet.Pattern,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
 		Images:       []string{},
@@ -116,8 +150,7 @@ func (t *PetServiceTest) SetupTest() {
 		IsSterile:    &t.Pet.IsSterile,
 		IsVaccinated: &t.Pet.IsVaccinated,
 		IsVisible:    &t.Pet.IsVisible,
-		IsClubPet:    &t.Pet.IsClubPet,
-		Background:   t.Pet.Background,
+		Origin:       t.Pet.Origin,
 		Address:      t.Pet.Address,
 		Contact:      t.Pet.Contact,
 		AdoptBy:      t.Pet.AdoptBy,
@@ -125,10 +158,11 @@ func (t *PetServiceTest) SetupTest() {
 
 	t.UpdatePetDto = &dto.UpdatePetRequest{
 		Type:         t.Pet.Type,
-		Species:      t.Pet.Species,
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
 		Gender:       pet.Gender(t.Pet.Gender),
+		Color:        t.Pet.Color,
+		Pattern:      t.Pet.Pattern,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
 		Images:       []string{},
@@ -136,13 +170,13 @@ func (t *PetServiceTest) SetupTest() {
 		IsSterile:    &t.Pet.IsSterile,
 		IsVaccinated: &t.Pet.IsVaccinated,
 		IsVisible:    &t.Pet.IsVisible,
-		IsClubPet:    &t.Pet.IsClubPet,
-		Background:   t.Pet.Background,
+		Origin:       t.Pet.Origin,
 		Address:      t.Pet.Address,
 		Contact:      t.Pet.Contact,
 		AdoptBy:      t.Pet.AdoptBy,
 	}
 
+	t.FindAllPetReq = utils.FindAllDtoToProto(t.FindAllPetDto)
 	t.CreatePetReq = utils.CreateDtoToProto(t.CreatePetDto)
 	t.UpdatePetReq = utils.UpdateDtoToProto(t.Pet.Id, t.UpdatePetDto)
 
@@ -158,6 +192,11 @@ func (t *PetServiceTest) SetupTest() {
 	t.AdoptReq = &petproto.AdoptPetRequest{
 		PetId:  t.Pet.Id,
 		UserId: t.Pet.AdoptBy,
+	}
+
+	t.AdoptDto = &dto.AdoptByRequest{
+		UserID: t.Pet.AdoptBy,
+		PetID:  t.Pet.Id,
 	}
 
 	t.UnavailableServiceErr = &dto.ResponseErr{
@@ -180,41 +219,45 @@ func (t *PetServiceTest) SetupTest() {
 
 	t.InvalidArgumentErr = &dto.ResponseErr{
 		StatusCode: http.StatusBadRequest,
-		Message:    constant.InvalidArgument,
+		Message:    constant.InvalidArgumentMessage,
 		Data:       nil,
 	}
 }
 
 func (t *PetServiceTest) TestFindAllSuccess() {
-	protoReq := &petproto.FindAllPetRequest{}
 	protoResp := &petproto.FindAllPetResponse{
-		Pets: t.Pets,
+		Pets:     t.Pets,
+		Metadata: t.MetadataProto,
 	}
 
-	expected := utils.RawToDtoList(t.Pets, t.ImagesList)
+	findAllPPetsDto := utils.ProtoToDtoList(t.Pets, t.ImagesList)
+	metadataDto := t.MetadataDto
+
+	expected := &dto.FindAllPetResponse{
+		Pets:     findAllPPetsDto,
+		Metadata: metadataDto,
+	}
 
 	client := petmock.PetClientMock{}
-	client.On("FindAll", protoReq).Return(protoResp, nil)
+	client.On("FindAll", t.FindAllPetReq).Return(protoResp, nil)
 
 	svc := NewService(&client)
-	actual, err := svc.FindAll()
+	actual, err := svc.FindAll(t.FindAllPetDto)
 
 	assert.Nil(t.T(), err)
 	assert.Equal(t.T(), expected, actual)
 }
 
 func (t *PetServiceTest) TestFindAllUnavailableServiceError() {
-	protoReq := &petproto.FindAllPetRequest{}
-
 	expected := t.UnavailableServiceErr
 
 	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
 
 	client := petmock.PetClientMock{}
-	client.On("FindAll", protoReq).Return(nil, clientErr)
+	client.On("FindAll", t.FindAllPetReq).Return(nil, clientErr)
 
 	svc := NewService(&client)
-	actual, err := svc.FindAll()
+	actual, err := svc.FindAll(t.FindAllPetDto)
 
 	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
@@ -301,7 +344,7 @@ func (t *PetServiceTest) TestCreateInvalidArgumentError() {
 
 	expected := t.InvalidArgumentErr
 
-	clientErr := status.Error(codes.InvalidArgument, constant.InvalidArgument)
+	clientErr := status.Error(codes.InvalidArgument, constant.InvalidArgumentMessage)
 
 	client := &petmock.PetClientMock{}
 	client.On("Create", protoReq).Return(nil, clientErr)
@@ -434,7 +477,7 @@ func (t *PetServiceTest) TestDeleteNotFound() {
 	svc := NewService(client)
 	actual, err := svc.Delete(t.Pet.Id)
 
-	assert.Equal(t.T(), &dto.DeleteResponse{Success: false}, actual)
+	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
 }
 
@@ -455,7 +498,7 @@ func (t *PetServiceTest) TestDeleteServiceUnavailableError() {
 	svc := NewService(client)
 	actual, err := svc.Delete(t.Pet.Id)
 
-	assert.Equal(t.T(), &dto.DeleteResponse{Success: false}, actual)
+	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
 }
 
@@ -512,5 +555,55 @@ func (t *PetServiceTest) TestChangeViewUnavailableServiceError() {
 	actual, err := svc.ChangeView(t.Pet.Id, t.ChangeViewedPetDto)
 
 	assert.Equal(t.T(), &dto.ChangeViewPetResponse{Success: false}, actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *PetServiceTest) TestAdoptSuccess() {
+	protoReq := t.AdoptReq
+	protoResp := &petproto.AdoptPetResponse{
+		Success: true,
+	}
+
+	client := &petmock.PetClientMock{}
+	client.On("AdoptPet", protoReq).Return(protoResp, nil)
+
+	svc := NewService(client)
+	actual, err := svc.Adopt(t.Pet.Id, t.AdoptDto)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), actual, &dto.AdoptByResponse{Success: true})
+}
+
+func (t *PetServiceTest) TestAdoptNotFoundError() {
+	protoReq := t.AdoptReq
+
+	clientErr := status.Error(codes.NotFound, constant.PetNotFoundMessage)
+
+	expected := t.NotFoundErr
+
+	client := &petmock.PetClientMock{}
+	client.On("AdoptPet", protoReq).Return(nil, clientErr)
+
+	svc := NewService(client)
+	actual, err := svc.Adopt(t.Pet.Id, t.AdoptDto)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *PetServiceTest) TestAdoptUnavailableServiceError() {
+	protoReq := t.AdoptReq
+
+	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
+
+	expected := t.UnavailableServiceErr
+
+	client := &petmock.PetClientMock{}
+	client.On("AdoptPet", protoReq).Return(nil, clientErr)
+
+	svc := NewService(client)
+	actual, err := svc.Adopt(t.Pet.Id, t.AdoptDto)
+
+	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
 }
