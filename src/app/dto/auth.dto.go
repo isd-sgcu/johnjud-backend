@@ -39,3 +39,12 @@ type ForgotPasswordRequest struct {
 type ForgotPasswordResponse struct {
 	IsSuccess bool `json:"is_success"`
 }
+
+type ResetPasswordRequest struct {
+	Token    string `json:"token" validate:"required"`
+	Password string `json:"password" validate:"required"`
+}
+
+type ResetPasswordResponse struct {
+	IsSuccess bool `json:"is_success"`
+}

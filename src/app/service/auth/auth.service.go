@@ -341,3 +341,57 @@ func (s *Service) ForgotPassword(request *dto.ForgotPasswordRequest) (*dto.Forgo
 		IsSuccess: true,
 	}, nil
 }
+
+func (s *Service) ResetPassword(request *dto.ResetPasswordRequest) (*dto.ResetPasswordResponse, *dto.ResponseErr) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	response, err := s.client.ResetPassword(ctx, &authProto.ResetPasswordRequest{
+		Token:    request.Token,
+		Password: request.Password,
+	})
+	if err != nil {
+		st, ok := status.FromError(err)
+		log.Error().
+			Str("service", "auth").
+			Str("action", "ResetPassword").
+			Str("token", request.Token).
+			Msg(st.Message())
+		if !ok {
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusInternalServerError,
+				Message:    constant.InternalErrorMessage,
+				Data:       nil,
+			}
+		}
+		switch st.Code() {
+		case codes.InvalidArgument:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusBadRequest,
+				Message:    constant.ForbiddenSamePasswordMessage,
+				Data:       nil,
+			}
+		case codes.Internal:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusInternalServerError,
+				Message:    constant.InternalErrorMessage,
+				Data:       nil,
+			}
+		default:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusServiceUnavailable,
+				Message:    constant.UnavailableServiceMessage,
+				Data:       nil,
+			}
+		}
+	}
+
+	log.Info().
+		Str("service", "auth").
+		Str("action", "ResetPassword").
+		Str("token", request.Token).
+		Msg("Reset password successfully")
+	return &dto.ResetPasswordResponse{
+		IsSuccess: response.IsSuccess,
+	}, nil
+}
