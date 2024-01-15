@@ -231,6 +231,18 @@ func (h *Handler) ForgotPassword(c router.IContext) {
 	c.JSON(http.StatusOK, response)
 }
 
+// ResetPassword is a function to reset password
+// @Summary Reset Password
+// @Description Return isSuccess
+// @Param request body dto.ResetPasswordRequest true "resetPassword request dto"
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} dto.ResetPasswordResponse
+// @Failure 400 {object} dto.ResponseBadRequestErr "Forbidden the same password"
+// @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
+// @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
+// @Router /v1/auth/reset-password [put]
 func (h *Handler) ResetPassword(c router.IContext) {
 	request := &dto.ResetPasswordRequest{}
 	err := c.Bind(request)
