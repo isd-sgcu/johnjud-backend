@@ -230,3 +230,37 @@ func (h *Handler) ForgotPassword(c router.IContext) {
 
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *Handler) ResetPassword(c router.IContext) {
+	request := &dto.ResetPasswordRequest{}
+	err := c.Bind(request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.BindingRequestErrorMessage + err.Error(),
+			Data:       nil,
+		})
+		return
+	}
+
+	if err := h.validate.Validate(request); err != nil {
+		var errorMessage []string
+		for _, reqErr := range err {
+			errorMessage = append(errorMessage, reqErr.Message)
+		}
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.InvalidRequestBodyMessage + strings.Join(errorMessage, ", "),
+			Data:       nil,
+		})
+		return
+	}
+
+	response, errResp := h.service.ResetPassword(request)
+	if errResp != nil {
+		c.JSON(errResp.StatusCode, errResp)
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
