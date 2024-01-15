@@ -18,6 +18,58 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/v1/auth/forgot-password": {
+            "post": {
+                "description": "Return isSuccess",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Forgot Password",
+                "parameters": [
+                    {
+                        "description": "forgotPassword request dto",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ForgotPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ForgotPasswordResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid email",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseBadRequestErr"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal service error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseInternalErr"
+                        }
+                    },
+                    "503": {
+                        "description": "Service is down",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseServiceDownErr"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/auth/refreshToken": {
             "post": {
                 "description": "Return the credential",
@@ -595,6 +647,156 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/v1/users": {
+            "put": {
+                "description": "Returns the data of user if successfully",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "updates user",
+                "parameters": [
+                    {
+                        "description": "update user dto",
+                        "name": "update",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseBadRequestErr"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal service error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseInternalErr"
+                        }
+                    },
+                    "503": {
+                        "description": "Service is down",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseServiceDownErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/users/{id}": {
+            "get": {
+                "description": "Returns the data of user if successful",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "finds one user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseBadRequestErr"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal service error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseInternalErr"
+                        }
+                    },
+                    "503": {
+                        "description": "Service is down",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseServiceDownErr"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Returns successful status if user is successfully deleted",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "deletes user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DeleteUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseBadRequestErr"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal service error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseInternalErr"
+                        }
+                    },
+                    "503": {
+                        "description": "Service is down",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseServiceDownErr"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -646,9 +848,6 @@ const docTemplate = `{
         },
         "dto.ChangeViewPetResponse": {
             "type": "object",
-            "required": [
-                "success"
-            ],
             "properties": {
                 "success": {
                     "type": "boolean"
@@ -659,14 +858,15 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "birthdate",
+                "color",
                 "gender",
                 "habit",
-                "is_club_pet",
                 "is_sterile",
                 "is_vaccinated",
                 "is_visible",
                 "name",
-                "species",
+                "origin",
+                "pattern",
                 "status",
                 "type"
             ],
@@ -677,21 +877,25 @@ const docTemplate = `{
                 "adopt_by": {
                     "type": "string"
                 },
-                "background": {
-                    "type": "string"
-                },
                 "birthdate": {
                     "type": "string"
                 },
                 "caption": {
                     "type": "string"
                 },
+                "color": {
+                    "type": "string"
+                },
                 "contact": {
                     "type": "string"
                 },
                 "gender": {
-                    "type": "integer",
-                    "example": 1
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/pet.Gender"
+                        }
+                    ],
+                    "example": "male"
                 },
                 "habit": {
                     "type": "string"
@@ -701,9 +905,6 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                },
-                "is_club_pet": {
-                    "type": "boolean"
                 },
                 "is_sterile": {
                     "type": "boolean"
@@ -717,12 +918,19 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "species": {
+                "origin": {
+                    "type": "string"
+                },
+                "pattern": {
                     "type": "string"
                 },
                 "status": {
-                    "type": "integer",
-                    "example": 1
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/pet.Status"
+                        }
+                    ],
+                    "example": "findhome"
                 },
                 "type": {
                     "type": "string"
@@ -748,11 +956,35 @@ const docTemplate = `{
         },
         "dto.DeleteResponse": {
             "type": "object",
-            "required": [
-                "success"
-            ],
             "properties": {
                 "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.DeleteUserResponse": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.ForgotPasswordRequest": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ForgotPasswordResponse": {
+            "type": "object",
+            "properties": {
+                "is_success": {
                     "type": "boolean"
                 }
             }
@@ -761,6 +993,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "id": {
+                    "type": "string"
+                },
+                "object_key": {
                     "type": "string"
                 },
                 "url": {
@@ -777,20 +1012,20 @@ const docTemplate = `{
                 "adopt_by": {
                     "type": "string"
                 },
-                "background": {
-                    "type": "string"
-                },
                 "birthdate": {
                     "type": "string"
                 },
                 "caption": {
                     "type": "string"
                 },
+                "color": {
+                    "type": "string"
+                },
                 "contact": {
                     "type": "string"
                 },
                 "gender": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pet.Gender"
                 },
                 "habit": {
                     "type": "string"
@@ -804,9 +1039,6 @@ const docTemplate = `{
                         "$ref": "#/definitions/dto.ImageResponse"
                     }
                 },
-                "is_club_pet": {
-                    "type": "boolean"
-                },
                 "is_sterile": {
                     "type": "boolean"
                 },
@@ -819,11 +1051,14 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "species": {
+                "origin": {
+                    "type": "string"
+                },
+                "pattern": {
                     "type": "string"
                 },
                 "status": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pet.Status"
                 },
                 "type": {
                     "type": "string"
@@ -1006,20 +1241,20 @@ const docTemplate = `{
                 "adopt_by": {
                     "type": "string"
                 },
-                "background": {
-                    "type": "string"
-                },
                 "birthdate": {
                     "type": "string"
                 },
                 "caption": {
                     "type": "string"
                 },
+                "color": {
+                    "type": "string"
+                },
                 "contact": {
                     "type": "string"
                 },
                 "gender": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pet.Gender"
                 },
                 "habit": {
                     "type": "string"
@@ -1029,9 +1264,6 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                },
-                "is_club_pet": {
-                    "type": "boolean"
                 },
                 "is_sterile": {
                     "type": "boolean"
@@ -1045,16 +1277,83 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "species": {
+                "origin": {
+                    "type": "string"
+                },
+                "pattern": {
                     "type": "string"
                 },
                 "status": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pet.Status"
                 },
                 "type": {
                     "type": "string"
                 }
             }
+        },
+        "dto.UpdateUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "firstname",
+                "lastname",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "firstname": {
+                    "type": "string"
+                },
+                "lastname": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 6
+                }
+            }
+        },
+        "dto.User": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "firstname": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastname": {
+                    "type": "string"
+                }
+            }
+        },
+        "pet.Gender": {
+            "type": "string",
+            "enum": [
+                "male",
+                "female"
+            ],
+            "x-enum-varnames": [
+                "MALE",
+                "FEMALE"
+            ]
+        },
+        "pet.Status": {
+            "type": "string",
+            "enum": [
+                "adopted",
+                "findhome"
+            ],
+            "x-enum-varnames": [
+                "ADOPTED",
+                "FINDHOME"
+            ]
         }
     },
     "securityDefinitions": {
