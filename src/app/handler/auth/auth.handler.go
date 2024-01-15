@@ -184,3 +184,49 @@ func (h *Handler) RefreshToken(c router.IContext) {
 
 	c.JSON(http.StatusOK, response)
 }
+
+// ForgotPassword is a function to send email to reset password when you forgot password
+// @Summary Forgot Password
+// @Description Return isSuccess
+// @Param request body dto.ForgotPasswordRequest true "forgotPassword request dto"
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} dto.ForgotPasswordResponse
+// @Failure 400 {object} dto.ResponseBadRequestErr "Invalid email"
+// @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
+// @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
+// @Router /v1/auth/forgot-password [post]
+func (h *Handler) ForgotPassword(c router.IContext) {
+	request := &dto.ForgotPasswordRequest{}
+	err := c.Bind(request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.BindingRequestErrorMessage + err.Error(),
+			Data:       nil,
+		})
+		return
+	}
+
+	if err := h.validate.Validate(request); err != nil {
+		var errorMessage []string
+		for _, reqErr := range err {
+			errorMessage = append(errorMessage, reqErr.Message)
+		}
+		c.JSON(http.StatusBadRequest, dto.ResponseErr{
+			StatusCode: http.StatusBadRequest,
+			Message:    constant.InvalidRequestBodyMessage + strings.Join(errorMessage, ", "),
+			Data:       nil,
+		})
+		return
+	}
+
+	response, respErr := h.service.ForgotPassword(request)
+	if respErr != nil {
+		c.JSON(respErr.StatusCode, respErr)
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}

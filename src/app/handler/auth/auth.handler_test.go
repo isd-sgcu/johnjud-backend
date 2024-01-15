@@ -18,11 +18,12 @@ import (
 
 type AuthHandlerTest struct {
 	suite.Suite
-	signupRequest       *dto.SignupRequest
-	signInRequest       *dto.SignInRequest
-	refreshTokenRequest *dto.RefreshTokenRequest
-	bindErr             error
-	validateErr         []*dto.BadReqErrResponse
+	signupRequest         *dto.SignupRequest
+	signInRequest         *dto.SignInRequest
+	refreshTokenRequest   *dto.RefreshTokenRequest
+	forgotPasswordRequest *dto.ForgotPasswordRequest
+	bindErr               error
+	validateErr           []*dto.BadReqErrResponse
 }
 
 func TestAuthHandler(t *testing.T) {
@@ -33,6 +34,7 @@ func (t *AuthHandlerTest) SetupTest() {
 	signupRequest := &dto.SignupRequest{}
 	signInRequest := &dto.SignInRequest{}
 	refreshTokenRequest := &dto.RefreshTokenRequest{}
+	forgotPasswordRequest := &dto.ForgotPasswordRequest{}
 	bindErr := errors.New("Binding request failed")
 	validateErr := []*dto.BadReqErrResponse{
 		{
@@ -50,6 +52,7 @@ func (t *AuthHandlerTest) SetupTest() {
 	t.signupRequest = signupRequest
 	t.signInRequest = signInRequest
 	t.refreshTokenRequest = refreshTokenRequest
+	t.forgotPasswordRequest = forgotPasswordRequest
 	t.bindErr = bindErr
 	t.validateErr = validateErr
 }
@@ -377,4 +380,94 @@ func (t *AuthHandlerTest) TestRefreshTokenServiceError() {
 	context.EXPECT().JSON(http.StatusInternalServerError, refreshTokenErr)
 
 	handler.RefreshToken(context)
+}
+
+func (t *AuthHandlerTest) TestForgotPasswordSuccess() {
+	forgotPasswordResponse := &dto.ForgotPasswordResponse{
+		IsSuccess: true,
+	}
+
+	controller := gomock.NewController(t.T())
+
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
+
+	handler := NewHandler(authSvc, userSvc, validator)
+
+	context.EXPECT().Bind(t.forgotPasswordRequest).Return(nil)
+	validator.EXPECT().Validate(t.forgotPasswordRequest).Return(nil)
+	authSvc.EXPECT().ForgotPassword(t.forgotPasswordRequest).Return(forgotPasswordResponse, nil)
+	context.EXPECT().JSON(http.StatusOK, forgotPasswordResponse)
+
+	handler.ForgotPassword(context)
+}
+
+func (t *AuthHandlerTest) TestForgotPasswordBindFailed() {
+	errResponse := dto.ResponseErr{
+		StatusCode: http.StatusBadRequest,
+		Message:    constant.BindingRequestErrorMessage + t.bindErr.Error(),
+		Data:       nil,
+	}
+
+	controller := gomock.NewController(t.T())
+
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
+
+	handler := NewHandler(authSvc, userSvc, validator)
+
+	context.EXPECT().Bind(t.forgotPasswordRequest).Return(t.bindErr)
+	context.EXPECT().JSON(http.StatusBadRequest, errResponse)
+	handler.ForgotPassword(context)
+}
+
+func (t *AuthHandlerTest) TestForgotPasswordValidateFailed() {
+	errResponse := dto.ResponseErr{
+		StatusCode: http.StatusBadRequest,
+		Message:    constant.InvalidRequestBodyMessage + "BadRequestError1, BadRequestError2",
+		Data:       nil,
+	}
+
+	controller := gomock.NewController(t.T())
+
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
+
+	handler := NewHandler(authSvc, userSvc, validator)
+
+	context.EXPECT().Bind(t.forgotPasswordRequest).Return(nil)
+	validator.EXPECT().Validate(t.forgotPasswordRequest).Return(t.validateErr)
+	context.EXPECT().JSON(http.StatusBadRequest, errResponse)
+
+	handler.ForgotPassword(context)
+}
+
+func (t *AuthHandlerTest) TestForgotPasswordServiceError() {
+	forgotPasswordErr := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	controller := gomock.NewController(t.T())
+
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
+
+	handler := NewHandler(authSvc, userSvc, validator)
+
+	context.EXPECT().Bind(t.forgotPasswordRequest).Return(nil)
+	validator.EXPECT().Validate(t.forgotPasswordRequest).Return(nil)
+	authSvc.EXPECT().ForgotPassword(t.forgotPasswordRequest).Return(nil, forgotPasswordErr)
+	context.EXPECT().JSON(http.StatusInternalServerError, forgotPasswordErr)
+
+	handler.ForgotPassword(context)
 }
