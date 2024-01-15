@@ -288,3 +288,56 @@ func (s *Service) RefreshToken(request *dto.RefreshTokenRequest) (*dto.Credentia
 		ExpiresIn:    int(response.Credential.ExpiresIn),
 	}, nil
 }
+
+func (s *Service) ForgotPassword(request *dto.ForgotPasswordRequest) (*dto.ForgotPasswordResponse, *dto.ResponseErr) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := s.client.ForgotPassword(ctx, &authProto.ForgotPasswordRequest{
+		Email: request.Email,
+	})
+	if err != nil {
+		st, ok := status.FromError(err)
+		log.Error().
+			Str("service", "auth").
+			Str("action", "ForgotPassword").
+			Str("email", request.Email).
+			Msg(st.Message())
+		if !ok {
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusInternalServerError,
+				Message:    constant.InternalErrorMessage,
+				Data:       nil,
+			}
+		}
+		switch st.Code() {
+		case codes.NotFound:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusNotFound,
+				Message:    constant.UserNotFoundMessage,
+				Data:       nil,
+			}
+		case codes.Internal:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusInternalServerError,
+				Message:    constant.InternalErrorMessage,
+				Data:       nil,
+			}
+		default:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusServiceUnavailable,
+				Message:    constant.UnavailableServiceMessage,
+				Data:       nil,
+			}
+		}
+	}
+
+	log.Info().
+		Str("service", "auth").
+		Str("action", "ForgotPassword").
+		Str("email", request.Email).
+		Msg("Forgot password successfully")
+	return &dto.ForgotPasswordResponse{
+		IsSuccess: true,
+	}, nil
+}

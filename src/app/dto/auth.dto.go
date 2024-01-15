@@ -31,3 +31,11 @@ type SignOutResponse struct {
 type RefreshTokenRequest struct {
 	RefreshToken string `json:"refresh_token" validate:"required"`
 }
+
+type ForgotPasswordRequest struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
+type ForgotPasswordResponse struct {
+	IsSuccess bool `json:"is_success"`
+}
