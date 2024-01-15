@@ -42,7 +42,7 @@ type ForgotPasswordResponse struct {
 
 type ResetPasswordRequest struct {
 	Token    string `json:"token" validate:"required"`
-	Password string `json:"password" validate:"required"`
+	Password string `json:"password" validate:"required,gte=6,lte=30"`
 }
 
 type ResetPasswordResponse struct {

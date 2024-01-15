@@ -3,7 +3,7 @@ package constant
 const BindingRequestErrorMessage = "Binding Request Error due to:"
 const InvalidRequestBodyMessage = "Invalid Request Body due to:"
 const InvalidTokenMessage = "Invalid token"
-const ForbiddenSamePasswordMessage = "The same password is forbidden "
+const ForbiddenSamePasswordMessage = "The same password is forbidden"
 const IncorrectEmailPasswordMessage = "Incorrect Email or Password"
 const UnauthorizedMessage = "Unauthorized"
 const DuplicateEmailMessage = "Duplicate Email"
