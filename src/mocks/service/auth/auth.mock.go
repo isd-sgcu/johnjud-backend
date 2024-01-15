@@ -64,6 +64,21 @@ func (mr *MockServiceMockRecorder) RefreshToken(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshToken", reflect.TypeOf((*MockService)(nil).RefreshToken), arg0)
 }
 
+// ResetPassword mocks base method.
+func (m *MockService) ResetPassword(arg0 *dto.ResetPasswordRequest) (*dto.ResetPasswordResponse, *dto.ResponseErr) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ResetPassword", arg0)
+	ret0, _ := ret[0].(*dto.ResetPasswordResponse)
+	ret1, _ := ret[1].(*dto.ResponseErr)
+	return ret0, ret1
+}
+
+// ResetPassword indicates an expected call of ResetPassword.
+func (mr *MockServiceMockRecorder) ResetPassword(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResetPassword", reflect.TypeOf((*MockService)(nil).ResetPassword), arg0)
+}
+
 // SignIn mocks base method.
 func (m *MockService) SignIn(arg0 *dto.SignInRequest) (*dto.Credential, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
