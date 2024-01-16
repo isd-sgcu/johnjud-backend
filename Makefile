@@ -13,7 +13,7 @@ test:
 	go tool cover -html=coverage.out -o coverage.html
 
 server:
-	go run ./src/.
+	. ./tools/export-env.sh ; go run ./src/.
 
 mock-gen:
 	mockgen -source ./src/pkg/service/auth/auth.service.go -destination ./src/mocks/service/auth/auth.mock.go

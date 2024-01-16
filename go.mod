@@ -13,9 +13,8 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.5.0
 	github.com/isd-sgcu/johnjud-go-proto v0.5.0
-	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.31.0
-	github.com/spf13/viper v1.18.2
+	github.com/spf13/viper v1.18.1
 	github.com/stretchr/testify v1.8.4
 	github.com/swaggo/swag v1.16.2
 	google.golang.org/grpc v1.60.1
