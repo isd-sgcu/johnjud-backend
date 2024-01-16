@@ -22,7 +22,7 @@ type IGuard interface {
 }
 
 func NewAPIv1(r *FiberRouter, conf config.App) *fiber.App {
-	if conf.Debug {
+	if conf.IsDevelopment() {
 		r.Use(logger.New(logger.Config{Next: func(c *fiber.Ctx) bool {
 			return c.Path() == "/v1/"
 		}}))
@@ -32,7 +32,7 @@ func NewAPIv1(r *FiberRouter, conf config.App) *fiber.App {
 	app := fiber.New(fiber.Config{
 		StrictRouting:     true,
 		AppName:           "JohnJud API",
-		EnablePrintRoutes: conf.Debug,
+		EnablePrintRoutes: conf.IsDevelopment(),
 	})
 
 	app.Mount("/v1", r.App)
