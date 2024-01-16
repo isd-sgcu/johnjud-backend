@@ -1,6 +1,20 @@
 version: "3.9"
 
 services:
+  gateway:
+    container_name: johnjud-gateway
+    restart: unless-stopped
+    build: .
+    ports:
+      - 3001:3001
+    environment:
+      - APP_PORT=3001
+      - APP_ENV=development
+      - SERVICE_AUTH=auth:3002
+      - SERVICE_BACKEND=backend:3003
+      - SERVICE_FILE=file:3004
+    networks:
+      - johnjud
   local-auth:
     image: ghcr.io/isd-sgcu/johnjud-auth
     container_name: auth
@@ -10,7 +24,7 @@ services:
     restart: unless-stopped
     environment:
       - APP_PORT=3004
-      - APP_ENV=development
+      - APP_ENV=production
       - APP_SECRET=secret
       - DB_URL=postgres://root:root@johnjud-local-db:5432/johnjud_db
       - JWT_SECRET=secret
@@ -40,7 +54,7 @@ services:
     restart: unless-stopped
     environment:
       - APP_PORT=3003
-      - APP_ENV=development
+      - APP_ENV=production
       - DB_URL=postgres://root:root@johnjud-local-db:5432/johnjud_db
       - SERVICE_FILE=file:3004
     networks:
