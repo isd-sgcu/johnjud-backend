@@ -11,7 +11,7 @@ import (
 	"time"
 
 	authHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/auth"
-	healthcheck "github.com/isd-sgcu/johnjud-gateway/src/app/handler/healthcheck"
+	"github.com/isd-sgcu/johnjud-gateway/src/app/handler/healthcheck"
 	imageHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/image"
 	likeHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/like"
 	petHdr "github.com/isd-sgcu/johnjud-gateway/src/app/handler/pet"
@@ -129,6 +129,7 @@ func main() {
 	r.PostAuth("/signout", authHandler.SignOut)
 	//r.PostAuth("/me", authHandler.Validate)
 	r.PostAuth("/refreshToken", authHandler.RefreshToken)
+	r.PostAuth("/forgot-password", authHandler.ForgotPassword)
 
 	r.GetHealthCheck("", hc.HealthCheck)
 

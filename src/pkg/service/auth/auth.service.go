@@ -10,4 +10,5 @@ type Service interface {
 	SignOut(string) (*dto.SignOutResponse, *dto.ResponseErr)
 	Validate(string) (*dto.TokenPayloadAuth, *dto.ResponseErr)
 	RefreshToken(*dto.RefreshTokenRequest) (*dto.Credential, *dto.ResponseErr)
+	ForgotPassword(request *dto.ForgotPasswordRequest) (*dto.ForgotPasswordResponse, *dto.ResponseErr)
 }

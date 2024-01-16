@@ -33,8 +33,6 @@ definitions:
     properties:
       success:
         type: boolean
-    required:
-    - success
     type: object
   dto.CreatePetRequest:
     properties:
@@ -42,25 +40,24 @@ definitions:
         type: string
       adopt_by:
         type: string
-      background:
-        type: string
       birthdate:
         type: string
       caption:
         type: string
+      color:
+        type: string
       contact:
         type: string
       gender:
-        example: 1
-        type: integer
+        allOf:
+        - $ref: '#/definitions/pet.Gender'
+        example: male
       habit:
         type: string
       images:
         items:
           type: string
         type: array
-      is_club_pet:
-        type: boolean
       is_sterile:
         type: boolean
       is_vaccinated:
@@ -69,23 +66,27 @@ definitions:
         type: boolean
       name:
         type: string
-      species:
+      origin:
+        type: string
+      pattern:
         type: string
       status:
-        example: 1
-        type: integer
+        allOf:
+        - $ref: '#/definitions/pet.Status'
+        example: findhome
       type:
         type: string
     required:
     - birthdate
+    - color
     - gender
     - habit
-    - is_club_pet
     - is_sterile
     - is_vaccinated
     - is_visible
     - name
-    - species
+    - origin
+    - pattern
     - status
     - type
     type: object
@@ -105,12 +106,29 @@ definitions:
     properties:
       success:
         type: boolean
+    type: object
+  dto.DeleteUserResponse:
+    properties:
+      success:
+        type: boolean
+    type: object
+  dto.ForgotPasswordRequest:
+    properties:
+      email:
+        type: string
     required:
-    - success
+    - email
+    type: object
+  dto.ForgotPasswordResponse:
+    properties:
+      is_success:
+        type: boolean
     type: object
   dto.ImageResponse:
     properties:
       id:
+        type: string
+      object_key:
         type: string
       url:
         type: string
@@ -121,16 +139,16 @@ definitions:
         type: string
       adopt_by:
         type: string
-      background:
-        type: string
       birthdate:
         type: string
       caption:
         type: string
+      color:
+        type: string
       contact:
         type: string
       gender:
-        type: integer
+        $ref: '#/definitions/pet.Gender'
       habit:
         type: string
       id:
@@ -139,8 +157,6 @@ definitions:
         items:
           $ref: '#/definitions/dto.ImageResponse'
         type: array
-      is_club_pet:
-        type: boolean
       is_sterile:
         type: boolean
       is_vaccinated:
@@ -149,10 +165,12 @@ definitions:
         type: boolean
       name:
         type: string
-      species:
+      origin:
+        type: string
+      pattern:
         type: string
       status:
-        type: integer
+        $ref: '#/definitions/pet.Status'
       type:
         type: string
     type: object
@@ -278,24 +296,22 @@ definitions:
         type: string
       adopt_by:
         type: string
-      background:
-        type: string
       birthdate:
         type: string
       caption:
         type: string
+      color:
+        type: string
       contact:
         type: string
       gender:
-        type: integer
+        $ref: '#/definitions/pet.Gender'
       habit:
         type: string
       images:
         items:
           type: string
         type: array
-      is_club_pet:
-        type: boolean
       is_sterile:
         type: boolean
       is_vaccinated:
@@ -304,13 +320,60 @@ definitions:
         type: boolean
       name:
         type: string
-      species:
+      origin:
+        type: string
+      pattern:
         type: string
       status:
-        type: integer
+        $ref: '#/definitions/pet.Status'
       type:
         type: string
     type: object
+  dto.UpdateUserRequest:
+    properties:
+      email:
+        type: string
+      firstname:
+        type: string
+      lastname:
+        type: string
+      password:
+        maxLength: 30
+        minLength: 6
+        type: string
+    required:
+    - email
+    - firstname
+    - lastname
+    - password
+    type: object
+  dto.User:
+    properties:
+      email:
+        type: string
+      firstname:
+        type: string
+      id:
+        type: string
+      lastname:
+        type: string
+    type: object
+  pet.Gender:
+    enum:
+    - male
+    - female
+    type: string
+    x-enum-varnames:
+    - MALE
+    - FEMALE
+  pet.Status:
+    enum:
+    - adopted
+    - findhome
+    type: string
+    x-enum-varnames:
+    - ADOPTED
+    - FINDHOME
 info:
   contact:
     email: sd.team.sgcu@gmail.com
@@ -319,6 +382,40 @@ info:
   title: JohnJud API
   version: "1.0"
 paths:
+  /v1/auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Return isSuccess
+      parameters:
+      - description: forgotPassword request dto
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ForgotPasswordResponse'
+        "400":
+          description: Invalid email
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Forgot Password
+      tags:
+      - auth
   /v1/auth/refreshToken:
     post:
       consumes:
@@ -701,6 +798,105 @@ paths:
       summary: creates pet
       tags:
       - pet
+  /v1/users:
+    put:
+      consumes:
+      - application/json
+      description: Returns the data of user if successfully
+      parameters:
+      - description: update user dto
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.User'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: updates user
+      tags:
+      - auth
+  /v1/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Returns successful status if user is successfully deleted
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.DeleteUserResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: deletes user
+      tags:
+      - user
+    get:
+      consumes:
+      - application/json
+      description: Returns the data of user if successful
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.User'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: finds one user
+      tags:
+      - user
 schemes:
 - https
 - http

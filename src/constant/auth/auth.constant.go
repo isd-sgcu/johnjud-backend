@@ -1,12 +1,13 @@
 package auth
 
 var ExcludePath = map[string]struct{}{
-	"POST /auth/signup": {},
-	"POST /auth/signin": {},
-	"POST /auth/verify": {},
-	"GET /user/:id":     {},
-	"GET /pets":         {},
-	"GET /adopt":        {},
+	"POST /auth/signup":          {},
+	"POST /auth/signin":          {},
+	"POST /auth/verify":          {},
+	"POST /auth/forgot-password": {},
+	"GET /user/:id":              {},
+	"GET /pets":                  {},
+	"GET /adopt":                 {},
 }
 
 var AdminPath = map[string]struct{}{

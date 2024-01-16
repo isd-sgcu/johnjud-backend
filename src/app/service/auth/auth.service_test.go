@@ -18,10 +18,11 @@ import (
 
 type AuthServiceTest struct {
 	suite.Suite
-	signupRequestDto    *dto.SignupRequest
-	signInDto           *dto.SignInRequest
-	token               string
-	refreshTokenRequest *dto.RefreshTokenRequest
+	signupRequestDto      *dto.SignupRequest
+	signInDto             *dto.SignInRequest
+	token                 string
+	refreshTokenRequest   *dto.RefreshTokenRequest
+	forgotPasswordRequest *dto.ForgotPasswordRequest
 }
 
 func TestAuthService(t *testing.T) {
@@ -43,11 +44,15 @@ func (t *AuthServiceTest) SetupTest() {
 	refreshTokenRequest := &dto.RefreshTokenRequest{
 		RefreshToken: faker.UUIDDigit(),
 	}
+	forgotPasswordRequest := &dto.ForgotPasswordRequest{
+		Email: faker.Email(),
+	}
 
 	t.signupRequestDto = signupRequestDto
 	t.signInDto = signInDto
 	t.token = token
 	t.refreshTokenRequest = refreshTokenRequest
+	t.forgotPasswordRequest = forgotPasswordRequest
 }
 
 func (t *AuthServiceTest) TestSignupSuccess() {
@@ -597,6 +602,115 @@ func (t *AuthServiceTest) TestRefreshTokenUnknownError() {
 
 	svc := NewService(&client)
 	actual, err := svc.RefreshToken(t.refreshTokenRequest)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestForgotPasswordSuccess() {
+	protoReq := &authProto.ForgotPasswordRequest{
+		Email: t.forgotPasswordRequest.Email,
+	}
+	protoResp := &authProto.ForgotPasswordResponse{
+		Url: faker.URL(),
+	}
+	expected := &dto.ForgotPasswordResponse{
+		IsSuccess: true,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("ForgotPassword", protoReq).Return(protoResp, nil)
+
+	svc := NewService(&client)
+	actual, err := svc.ForgotPassword(t.forgotPasswordRequest)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), expected, actual)
+}
+
+func (t *AuthServiceTest) TestForgotPasswordNotFound() {
+	protoReq := &authProto.ForgotPasswordRequest{
+		Email: t.forgotPasswordRequest.Email,
+	}
+	protoErr := status.Error(codes.NotFound, "Not found")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusNotFound,
+		Message:    constant.UserNotFoundMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("ForgotPassword", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.ForgotPassword(t.forgotPasswordRequest)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestForgotPasswordInternalErr() {
+	protoReq := &authProto.ForgotPasswordRequest{
+		Email: t.forgotPasswordRequest.Email,
+	}
+	protoErr := status.Error(codes.Internal, "Internal error")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("ForgotPassword", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.ForgotPassword(t.forgotPasswordRequest)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestForgotPasswordUnavailableService() {
+	protoReq := &authProto.ForgotPasswordRequest{
+		Email: t.forgotPasswordRequest.Email,
+	}
+	protoErr := status.Error(codes.Unavailable, "Connection lost")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusServiceUnavailable,
+		Message:    constant.UnavailableServiceMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("ForgotPassword", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.ForgotPassword(t.forgotPasswordRequest)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestForgotPasswordUnknownErr() {
+	protoReq := &authProto.ForgotPasswordRequest{
+		Email: t.forgotPasswordRequest.Email,
+	}
+	protoErr := errors.New("Unknown Error")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("ForgotPassword", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.ForgotPassword(t.forgotPasswordRequest)
 
 	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
