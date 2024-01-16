@@ -21,11 +21,23 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
+	appCfgLdr := viper.New()
+	appCfgLdr.SetEnvPrefix("APP")
+	appCfgLdr.AutomaticEnv()
+	appCfgLdr.AllowEmptyEnv(false)
 	appConfig := App{}
-	LoadEnvGroup(&appConfig, "APP")
+	if err := appCfgLdr.Unmarshal(&appConfig); err != nil {
+		return nil, err
+	}
 
+	serviceCfgLdr := viper.New()
+	serviceCfgLdr.SetEnvPrefix("SERVICE")
+	serviceCfgLdr.AutomaticEnv()
+	serviceCfgLdr.AllowEmptyEnv(false)
 	serviceConfig := Service{}
-	LoadEnvGroup(&serviceConfig, "SERVICE")
+	if err := serviceCfgLdr.Unmarshal(&serviceConfig); err != nil {
+		return nil, err
+	}
 
 	config := &Config{
 		App:     appConfig,
@@ -37,15 +49,4 @@ func LoadConfig() (*Config, error) {
 
 func (ac *App) IsDevelopment() bool {
 	return ac.Env == "development"
-}
-
-func LoadEnvGroup(config interface{}, prefix string) (err error) {
-	cfgLdr := viper.New()
-	cfgLdr.SetEnvPrefix(prefix)
-	cfgLdr.AutomaticEnv()
-	cfgLdr.AllowEmptyEnv(false)
-	if err := cfgLdr.Unmarshal(&config); err != nil {
-		return err
-	}
-	return nil
 }
