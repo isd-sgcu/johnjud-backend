@@ -181,6 +181,23 @@ definitions:
     required:
     - refresh_token
     type: object
+  dto.ResetPasswordRequest:
+    properties:
+      password:
+        maxLength: 30
+        minLength: 6
+        type: string
+      token:
+        type: string
+    required:
+    - password
+    - token
+    type: object
+  dto.ResetPasswordResponse:
+    properties:
+      is_success:
+        type: boolean
+    type: object
   dto.ResponseBadRequestErr:
     properties:
       data:
@@ -452,6 +469,40 @@ paths:
           schema:
             $ref: '#/definitions/dto.ResponseServiceDownErr'
       summary: Refresh token
+      tags:
+      - auth
+  /v1/auth/reset-password:
+    put:
+      consumes:
+      - application/json
+      description: Return isSuccess
+      parameters:
+      - description: resetPassword request dto
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ResetPasswordResponse'
+        "400":
+          description: Forbidden the same password
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Reset Password
       tags:
       - auth
   /v1/auth/signin:

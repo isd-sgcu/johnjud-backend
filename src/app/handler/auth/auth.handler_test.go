@@ -22,6 +22,7 @@ type AuthHandlerTest struct {
 	signInRequest         *dto.SignInRequest
 	refreshTokenRequest   *dto.RefreshTokenRequest
 	forgotPasswordRequest *dto.ForgotPasswordRequest
+	resetPasswordRequest  *dto.ResetPasswordRequest
 	bindErr               error
 	validateErr           []*dto.BadReqErrResponse
 }
@@ -35,6 +36,7 @@ func (t *AuthHandlerTest) SetupTest() {
 	signInRequest := &dto.SignInRequest{}
 	refreshTokenRequest := &dto.RefreshTokenRequest{}
 	forgotPasswordRequest := &dto.ForgotPasswordRequest{}
+	resetPasswordRequest := &dto.ResetPasswordRequest{}
 	bindErr := errors.New("Binding request failed")
 	validateErr := []*dto.BadReqErrResponse{
 		{
@@ -53,6 +55,7 @@ func (t *AuthHandlerTest) SetupTest() {
 	t.signInRequest = signInRequest
 	t.refreshTokenRequest = refreshTokenRequest
 	t.forgotPasswordRequest = forgotPasswordRequest
+	t.resetPasswordRequest = resetPasswordRequest
 	t.bindErr = bindErr
 	t.validateErr = validateErr
 }
@@ -470,4 +473,95 @@ func (t *AuthHandlerTest) TestForgotPasswordServiceError() {
 	context.EXPECT().JSON(http.StatusInternalServerError, forgotPasswordErr)
 
 	handler.ForgotPassword(context)
+}
+
+func (t *AuthHandlerTest) TestResetPasswordSuccess() {
+	resetPasswordResponse := &dto.ResetPasswordResponse{
+		IsSuccess: true,
+	}
+
+	controller := gomock.NewController(t.T())
+
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
+
+	handler := NewHandler(authSvc, userSvc, validator)
+
+	context.EXPECT().Bind(t.resetPasswordRequest).Return(nil)
+	validator.EXPECT().Validate(t.resetPasswordRequest).Return(nil)
+	authSvc.EXPECT().ResetPassword(t.resetPasswordRequest).Return(resetPasswordResponse, nil)
+	context.EXPECT().JSON(http.StatusOK, resetPasswordResponse)
+
+	handler.ResetPassword(context)
+}
+
+func (t *AuthHandlerTest) TestResetPasswordBindFailed() {
+	errResponse := dto.ResponseErr{
+		StatusCode: http.StatusBadRequest,
+		Message:    constant.BindingRequestErrorMessage + t.bindErr.Error(),
+		Data:       nil,
+	}
+
+	controller := gomock.NewController(t.T())
+
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
+
+	handler := NewHandler(authSvc, userSvc, validator)
+
+	context.EXPECT().Bind(t.resetPasswordRequest).Return(t.bindErr)
+	context.EXPECT().JSON(http.StatusBadRequest, errResponse)
+
+	handler.ResetPassword(context)
+}
+
+func (t *AuthHandlerTest) TestResetPasswordValidateFailed() {
+	errResponse := dto.ResponseErr{
+		StatusCode: http.StatusBadRequest,
+		Message:    constant.InvalidRequestBodyMessage + "BadRequestError1, BadRequestError2",
+		Data:       nil,
+	}
+
+	controller := gomock.NewController(t.T())
+
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
+
+	handler := NewHandler(authSvc, userSvc, validator)
+
+	context.EXPECT().Bind(t.resetPasswordRequest).Return(nil)
+	validator.EXPECT().Validate(t.resetPasswordRequest).Return(t.validateErr)
+	context.EXPECT().JSON(http.StatusBadRequest, errResponse)
+
+	handler.ResetPassword(context)
+}
+
+func (t *AuthHandlerTest) TestResetPasswordServiceError() {
+	resetPasswordErr := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	controller := gomock.NewController(t.T())
+
+	authSvc := authMock.NewMockService(controller)
+	userSvc := userMock.NewMockService(controller)
+	validator := validatorMock.NewMockIDtoValidator(controller)
+	context := routerMock.NewMockIContext(controller)
+
+	handler := NewHandler(authSvc, userSvc, validator)
+
+	context.EXPECT().Bind(t.resetPasswordRequest).Return(nil)
+	validator.EXPECT().Validate(t.resetPasswordRequest).Return(nil)
+	authSvc.EXPECT().ResetPassword(t.resetPasswordRequest).Return(nil, resetPasswordErr)
+	context.EXPECT().JSON(http.StatusInternalServerError, resetPasswordErr)
+
+	handler.ResetPassword(context)
 }

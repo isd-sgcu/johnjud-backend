@@ -5,6 +5,7 @@ var ExcludePath = map[string]struct{}{
 	"POST /auth/signin":          {},
 	"POST /auth/verify":          {},
 	"POST /auth/forgot-password": {},
+	"PUT /auth/reset-password":   {},
 	"GET /user/:id":              {},
 	"GET /pets":                  {},
 	"GET /adopt":                 {},

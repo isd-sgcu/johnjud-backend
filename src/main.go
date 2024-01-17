@@ -130,6 +130,7 @@ func main() {
 	//r.PostAuth("/me", authHandler.Validate)
 	r.PostAuth("/refreshToken", authHandler.RefreshToken)
 	r.PostAuth("/forgot-password", authHandler.ForgotPassword)
+	r.PutAuth("/reset-password", authHandler.ResetPassword)
 
 	r.GetHealthCheck("", hc.HealthCheck)
 

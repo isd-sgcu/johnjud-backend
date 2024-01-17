@@ -23,6 +23,7 @@ type AuthServiceTest struct {
 	token                 string
 	refreshTokenRequest   *dto.RefreshTokenRequest
 	forgotPasswordRequest *dto.ForgotPasswordRequest
+	resetPasswordRequest *dto.ResetPasswordRequest
 }
 
 func TestAuthService(t *testing.T) {
@@ -47,12 +48,17 @@ func (t *AuthServiceTest) SetupTest() {
 	forgotPasswordRequest := &dto.ForgotPasswordRequest{
 		Email: faker.Email(),
 	}
+	resetPasswordRequest := &dto.ResetPasswordRequest{
+		Token:    faker.Word(),
+		Password: faker.Password(),
+	}
 
 	t.signupRequestDto = signupRequestDto
 	t.signInDto = signInDto
 	t.token = token
 	t.refreshTokenRequest = refreshTokenRequest
 	t.forgotPasswordRequest = forgotPasswordRequest
+	t.resetPasswordRequest = resetPasswordRequest
 }
 
 func (t *AuthServiceTest) TestSignupSuccess() {
@@ -711,6 +717,121 @@ func (t *AuthServiceTest) TestForgotPasswordUnknownErr() {
 
 	svc := NewService(&client)
 	actual, err := svc.ForgotPassword(t.forgotPasswordRequest)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestResetPasswordSuccess() {
+	protoReq := &authProto.ResetPasswordRequest{
+		Token:    t.resetPasswordRequest.Token,
+		Password: t.resetPasswordRequest.Password,
+	}
+	protoResp := &authProto.ResetPasswordResponse{
+		IsSuccess: true,
+	}
+
+	expected := &dto.ResetPasswordResponse{
+		IsSuccess: true,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("ResetPassword", protoReq).Return(protoResp, nil)
+
+	svc := NewService(&client)
+	actual, err := svc.ResetPassword(t.resetPasswordRequest)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), expected, actual)
+}
+
+func (t *AuthServiceTest) TestResetPasswordInvalid() {
+	protoReq := &authProto.ResetPasswordRequest{
+		Token:    t.resetPasswordRequest.Token,
+		Password: t.resetPasswordRequest.Password,
+	}
+	protoErr := status.Error(codes.InvalidArgument, "Same password")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusBadRequest,
+		Message:    constant.ForbiddenSamePasswordMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("ResetPassword", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.ResetPassword(t.resetPasswordRequest)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestResetPasswordInternalErr() {
+	protoReq := &authProto.ResetPasswordRequest{
+		Token:    t.resetPasswordRequest.Token,
+		Password: t.resetPasswordRequest.Password,
+	}
+	protoErr := status.Error(codes.Internal, "Internal error")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("ResetPassword", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.ResetPassword(t.resetPasswordRequest)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestResetPasswordUnavailableService() {
+	protoReq := &authProto.ResetPasswordRequest{
+		Token:    t.resetPasswordRequest.Token,
+		Password: t.resetPasswordRequest.Password,
+	}
+	protoErr := status.Error(codes.Unavailable, "Connection lost")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusServiceUnavailable,
+		Message:    constant.UnavailableServiceMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("ResetPassword", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.ResetPassword(t.resetPasswordRequest)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *AuthServiceTest) TestResetPasswordUnknownErr() {
+	protoReq := &authProto.ResetPasswordRequest{
+		Token:    t.resetPasswordRequest.Token,
+		Password: t.resetPasswordRequest.Password,
+	}
+	protoErr := errors.New("Unknown Error")
+
+	expected := &dto.ResponseErr{
+		StatusCode: http.StatusInternalServerError,
+		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+
+	client := auth.AuthClientMock{}
+	client.On("ResetPassword", protoReq).Return(nil, protoErr)
+
+	svc := NewService(&client)
+	actual, err := svc.ResetPassword(t.resetPasswordRequest)
 
 	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
