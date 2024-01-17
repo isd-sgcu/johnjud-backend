@@ -1,42 +1,52 @@
 package config
 
 import (
-	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
 
 type App struct {
-	Port  int  `mapstructure:"port"`
-	Debug bool `mapstructure:"debug"`
+	Port int    `mapstructure:"PORT"`
+	Env  string `mapstructure:"ENV"`
 }
 
 type Service struct {
-	Auth    string `mapstructure:"auth"`
-	Backend string `mapstructure:"backend"`
-	File    string `mapstructure:"file"`
+	Auth    string `mapstructure:"AUTH"`
+	Backend string `mapstructure:"BACKEND"`
+	File    string `mapstructure:"FILE"`
 }
 
 type Config struct {
-	App     App     `mapstructure:"app"`
-	Service Service `mapstructure:"service"`
+	App     App
+	Service Service
 }
 
-func LoadConfig() (config *Config, err error) {
-	viper.AddConfigPath("./config")
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-
-	viper.AutomaticEnv()
-
-	err = viper.ReadInConfig()
-	if err != nil {
-		return nil, errors.Wrap(err, "error occurs while reading the config")
+func LoadConfig() (*Config, error) {
+	appCfgLdr := viper.New()
+	appCfgLdr.SetEnvPrefix("APP")
+	appCfgLdr.AutomaticEnv()
+	appCfgLdr.AllowEmptyEnv(false)
+	appConfig := App{}
+	if err := appCfgLdr.Unmarshal(&appConfig); err != nil {
+		return nil, err
 	}
 
-	err = viper.Unmarshal(&config)
-	if err != nil {
-		return nil, errors.Wrap(err, "error occurs while unmarshal the config")
+	serviceCfgLdr := viper.New()
+	serviceCfgLdr.SetEnvPrefix("SERVICE")
+	serviceCfgLdr.AutomaticEnv()
+	serviceCfgLdr.AllowEmptyEnv(false)
+	serviceConfig := Service{}
+	if err := serviceCfgLdr.Unmarshal(&serviceConfig); err != nil {
+		return nil, err
 	}
 
-	return
+	config := &Config{
+		App:     appConfig,
+		Service: serviceConfig,
+	}
+
+	return config, nil
+}
+
+func (ac *App) IsDevelopment() bool {
+	return ac.Env == "development"
 }
