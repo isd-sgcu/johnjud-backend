@@ -337,6 +337,102 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/images/": {
+            "post": {
+                "description": "Returns the data of image. If updating pet, add petId. If creating pet, petId is not specified, but keep the imageId.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "image"
+                ],
+                "summary": "Upload image",
+                "parameters": [
+                    {
+                        "description": "upload image request dto",
+                        "name": "image",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UploadImageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ImageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseBadRequestErr"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal service error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseInternalErr"
+                        }
+                    },
+                    "503": {
+                        "description": "Service is down",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseServiceDownErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/images/{id}": {
+            "delete": {
+                "description": "Returns status of deleting image",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "image"
+                ],
+                "summary": "Delete image",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "image id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DeleteResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal service error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseInternalErr"
+                        }
+                    },
+                    "503": {
+                        "description": "Service is down",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseServiceDownErr"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/pets/": {
             "get": {
                 "description": "Returns the data of pets if successful",
@@ -358,54 +454,6 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/dto.PetResponse"
                             }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal service error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ResponseInternalErr"
-                        }
-                    },
-                    "503": {
-                        "description": "Service is down",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ResponseServiceDownErr"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Returns successful status if pet is successfully deleted",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "pet"
-                ],
-                "summary": "deletes pet",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "pet id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/dto.DeleteResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request body",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ResponseBadRequestErr"
                         }
                     },
                     "500": {
@@ -559,6 +607,54 @@ const docTemplate = `{
                         "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/dto.PetResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseBadRequestErr"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal service error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseInternalErr"
+                        }
+                    },
+                    "503": {
+                        "description": "Service is down",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseServiceDownErr"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Returns successful status if pet is successfully deleted",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pet"
+                ],
+                "summary": "deletes pet",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "pet id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DeleteResponse"
                         }
                     },
                     "400": {
@@ -1390,6 +1486,28 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 30,
                     "minLength": 6
+                }
+            }
+        },
+        "dto.UploadImageRequest": {
+            "type": "object",
+            "required": [
+                "data",
+                "filename",
+                "pet_id"
+            ],
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "filename": {
+                    "type": "string"
+                },
+                "pet_id": {
+                    "type": "string"
                 }
             }
         },

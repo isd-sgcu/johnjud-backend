@@ -364,6 +364,21 @@ definitions:
     - lastname
     - password
     type: object
+  dto.UploadImageRequest:
+    properties:
+      data:
+        items:
+          type: integer
+        type: array
+      filename:
+        type: string
+      pet_id:
+        type: string
+    required:
+    - data
+    - filename
+    - pet_id
+    type: object
   dto.User:
     properties:
       email:
@@ -609,7 +624,96 @@ paths:
       summary: Signup user
       tags:
       - auth
+  /v1/images/:
+    post:
+      consumes:
+      - application/json
+      description: Returns the data of image. If updating pet, add petId. If creating
+        pet, petId is not specified, but keep the imageId.
+      parameters:
+      - description: upload image request dto
+        in: body
+        name: image
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UploadImageRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ImageResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Upload image
+      tags:
+      - image
+  /v1/images/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Returns status of deleting image
+      parameters:
+      - description: image id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.DeleteResponse'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Delete image
+      tags:
+      - image
   /v1/pets/:
+    get:
+      consumes:
+      - application/json
+      description: Returns the data of pets if successful
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.PetResponse'
+            type: array
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: finds all pets
+      tags:
+      - pet
+  /v1/pets/{id}:
     delete:
       consumes:
       - application/json
@@ -642,31 +746,6 @@ paths:
       summary: deletes pet
       tags:
       - pet
-    get:
-      consumes:
-      - application/json
-      description: Returns the data of pets if successful
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/dto.PetResponse'
-            type: array
-        "500":
-          description: Internal service error
-          schema:
-            $ref: '#/definitions/dto.ResponseInternalErr'
-        "503":
-          description: Service is down
-          schema:
-            $ref: '#/definitions/dto.ResponseServiceDownErr'
-      summary: finds all pets
-      tags:
-      - pet
-  /v1/pets/{id}:
     get:
       consumes:
       - application/json
