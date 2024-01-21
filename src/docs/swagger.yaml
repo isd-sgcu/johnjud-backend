@@ -1042,3 +1042,15 @@ tags:
     # Auth Tag API Documentation
     **Auth** functions goes here
   name: auth
+- description: |-
+    # Image Tag API Documentation
+    **Image** functions goes here
+  name: image
+- description: |-
+    # Pet Tag API Documentation
+    **Pet** functions goes here
+  name: pet
+- description: |-
+    # User Tag API Documentation
+    **User** functions goes here
+  name: user

@@ -1559,6 +1559,18 @@
         {
             "description": "# Auth Tag API Documentation\n**Auth** functions goes here",
             "name": "auth"
+        },
+        {
+            "description": "# Image Tag API Documentation\n**Image** functions goes here",
+            "name": "image"
+        },
+        {
+            "description": "# Pet Tag API Documentation\n**Pet** functions goes here",
+            "name": "pet"
+        },
+        {
+            "description": "# User Tag API Documentation\n**User** functions goes here",
+            "name": "user"
         }
     ]
 }
