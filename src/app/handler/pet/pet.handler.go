@@ -259,7 +259,7 @@ func (h *Handler) ChangeView(c router.IContext) {
 // @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
-// @Router /v1/pets/ [delete]
+// @Router /v1/pets/{id} [delete]
 func (h *Handler) Delete(c router.IContext) {
 	id, err := c.Param("id")
 	if err != nil {
