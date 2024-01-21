@@ -53,6 +53,15 @@ import (
 // @tag.name auth
 // @tag.description.markdown
 
+// @tag.name image
+// @tag.description.markdown
+
+// @tag.name pet
+// @tag.description.markdown
+
+// @tag.name user
+// @tag.description.markdown
+
 func main() {
 	conf, err := config.LoadConfig()
 	if err != nil {
