@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/isd-sgcu/johnjud-gateway/src/config"
+	_ "github.com/isd-sgcu/johnjud-gateway/src/docs"
 )
 
 type FiberRouter struct {
