@@ -32,6 +32,8 @@ type FindAllPetRequest struct {
 	Color    string `json:"color"`
 	Pattern  string `json:"pattern"`
 	Age      string `json:"age"`
+	MinAge   int    `json:"min_age"`
+	MaxAge   int    `json:"max_age"`
 	Origin   string `json:"origin"`
 	PageSize int    `json:"page_size"`
 	Page     int    `json:"page"`
