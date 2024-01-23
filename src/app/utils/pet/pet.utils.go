@@ -147,10 +147,11 @@ func FindAllDtoToProto(in *dto.FindAllPetRequest) *petproto.FindAllPetRequest {
 		Gender:   in.Gender,
 		Color:    in.Color,
 		Pattern:  in.Pattern,
-		Age:      in.Age,
 		Origin:   in.Origin,
 		PageSize: int32(in.PageSize),
 		Page:     int32(in.Page),
+		MaxAge:   int32(in.MaxAge),
+		MinAge:   int32(in.MinAge),
 	}
 }
 
@@ -170,7 +171,8 @@ func QueriesToFindAllDto(queries map[string]string) (*dto.FindAllPetRequest, err
 		Gender:   "",
 		Color:    "",
 		Pattern:  "",
-		Age:      "",
+		MinAge:   0,
+		MaxAge:   0,
 		Origin:   "",
 		PageSize: 0,
 		Page:     0,
@@ -188,8 +190,18 @@ func QueriesToFindAllDto(queries map[string]string) (*dto.FindAllPetRequest, err
 			request.Color = v
 		case "pattern":
 			request.Pattern = v
-		case "age":
-			request.Age = v
+		case "minAge":
+			minAge, err := strconv.Atoi(v)
+			if err != nil {
+				return nil, errors.New("error parsing minAge")
+			}
+			request.MinAge = minAge
+		case "maxAge":
+			maxAge, err := strconv.Atoi(v)
+			if err != nil {
+				return nil, errors.New("error parsing maxAge")
+			}
+			request.MaxAge = maxAge
 		case "origin":
 			request.Origin = v
 		case "pageSize":
