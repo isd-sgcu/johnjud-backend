@@ -9,7 +9,7 @@ services:
       - local-cache
     restart: unless-stopped
     environment:
-      - APP_PORT=3004
+      - APP_PORT=3002
       - APP_ENV=development
       - APP_SECRET=secret
       - DB_URL=postgres://root:root@local-db:5432/johnjud_db
@@ -18,7 +18,7 @@ services:
       - JWT_REFRESH_TOKEN_TTL=604800
       - JWT_ISSUER=issuer
       - JWT_RESET_TOKEN_TTL=900
-      - REDIS_HOST=localhost
+      - REDIS_HOST=local-cache
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
       - AUTH_CLIENT_URL=http://localhost:3000
