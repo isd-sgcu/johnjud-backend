@@ -60,11 +60,11 @@ services:
       - APP_PORT=3004
       - APP_ENV=production
       - DB_URL=postgres://root:root@local-db:5432/johnjud_db
-      - BUCKET_ENDPOINT=BUCKET_ENDPOINT
+      - BUCKET_ENDPOINT=minio-api.isd.sgcu.in.th
       - BUCKET_ACCESS_KEY=BUCKET_ACCESS_KEY
       - BUCKET_SECRET_KEY=BUCKET_SECRET_KEY
       - BUCKET_NAME=johnjud-pet-images
-      - BUCKET_USE_SSL=false
+      - BUCKET_USE_SSL=true
     networks:
       - johnjud-local
       - database
