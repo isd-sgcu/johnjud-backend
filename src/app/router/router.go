@@ -42,7 +42,10 @@ func NewAPIv1(r *FiberRouter, conf config.App) *fiber.App {
 }
 
 func NewFiberRouter(authGuard IGuard, conf config.App) *FiberRouter {
-	r := fiber.New(fiber.Config{})
+	r := fiber.New(fiber.Config{
+		AppName:   "JohnJud API",
+		BodyLimit: int(conf.MaxFileSize * 1024 * 1024),
+	})
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: "*",
