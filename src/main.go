@@ -155,7 +155,7 @@ func main() {
 	r.PostLike("", likeHandler.Create)
 	r.DeleteLike("/:id", likeHandler.Delete)
 
-	r.PostImage("/", imageHandler.Upload)
+	r.PostImage("", imageHandler.Upload)
 	r.DeleteImage("/:id", imageHandler.Delete)
 
 	v1 := router.NewAPIv1(r, conf.App)
