@@ -31,7 +31,7 @@ func NewHandler(service imageSvc.Service, validate validator.IDtoValidator) *Han
 // @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
-// @Router /v1/images/ [post]
+// @Router /v1/images [post]
 func (h *Handler) Upload(c *router.FiberCtx) {
 	request := &dto.UploadImageRequest{}
 	err := c.Bind(request)
