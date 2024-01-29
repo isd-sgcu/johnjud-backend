@@ -8,6 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	dto "github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 )
 
 // MockIContext is a mock of IContext interface.
@@ -45,6 +46,35 @@ func (m *MockIContext) Bind(arg0 interface{}) error {
 func (mr *MockIContextMockRecorder) Bind(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Bind", reflect.TypeOf((*MockIContext)(nil).Bind), arg0)
+}
+
+// File mocks base method.
+func (m *MockIContext) File(arg0 string, arg1 map[string]struct{}, arg2 int64) (*dto.DecomposedFile, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "File", arg0, arg1, arg2)
+	ret0, _ := ret[0].(*dto.DecomposedFile)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// File indicates an expected call of File.
+func (mr *MockIContextMockRecorder) File(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "File", reflect.TypeOf((*MockIContext)(nil).File), arg0, arg1, arg2)
+}
+
+// GetFormData mocks base method.
+func (m *MockIContext) GetFormData(arg0 string) string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFormData", arg0)
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetFormData indicates an expected call of GetFormData.
+func (mr *MockIContextMockRecorder) GetFormData(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFormData", reflect.TypeOf((*MockIContext)(nil).GetFormData), arg0)
 }
 
 // ID mocks base method.

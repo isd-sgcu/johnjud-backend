@@ -1,5 +1,10 @@
 package dto
 
+type DecomposedFile struct {
+	Filename string
+	Data     []byte
+}
+
 type ImageResponse struct {
 	Id        string `json:"id"`
 	Url       string `json:"url"`

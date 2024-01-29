@@ -35,18 +35,18 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 }
 
 // ForgotPassword mocks base method.
-func (m *MockService) ForgotPassword(request *dto.ForgotPasswordRequest) (*dto.ForgotPasswordResponse, *dto.ResponseErr) {
+func (m *MockService) ForgotPassword(arg0 *dto.ForgotPasswordRequest) (*dto.ForgotPasswordResponse, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ForgotPassword", request)
+	ret := m.ctrl.Call(m, "ForgotPassword", arg0)
 	ret0, _ := ret[0].(*dto.ForgotPasswordResponse)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // ForgotPassword indicates an expected call of ForgotPassword.
-func (mr *MockServiceMockRecorder) ForgotPassword(request interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) ForgotPassword(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ForgotPassword", reflect.TypeOf((*MockService)(nil).ForgotPassword), request)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ForgotPassword", reflect.TypeOf((*MockService)(nil).ForgotPassword), arg0)
 }
 
 // RefreshToken mocks base method.
