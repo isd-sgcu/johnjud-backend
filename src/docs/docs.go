@@ -337,7 +337,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/images/": {
+        "/v1/images": {
             "post": {
                 "description": "Returns the data of image. If updating pet, add petId. If creating pet, petId is not specified, but keep the imageId.",
                 "consumes": [
@@ -1493,8 +1493,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "data",
-                "filename",
-                "pet_id"
+                "filename"
             ],
             "properties": {
                 "data": {

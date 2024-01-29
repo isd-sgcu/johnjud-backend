@@ -377,7 +377,6 @@ definitions:
     required:
     - data
     - filename
-    - pet_id
     type: object
   dto.User:
     properties:
@@ -624,7 +623,7 @@ paths:
       summary: Signup user
       tags:
       - auth
-  /v1/images/:
+  /v1/images:
     post:
       consumes:
       - application/json

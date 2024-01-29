@@ -333,7 +333,7 @@
                 }
             }
         },
-        "/v1/images/": {
+        "/v1/images": {
             "post": {
                 "description": "Returns the data of image. If updating pet, add petId. If creating pet, petId is not specified, but keep the imageId.",
                 "consumes": [
@@ -1489,8 +1489,7 @@
             "type": "object",
             "required": [
                 "data",
-                "filename",
-                "pet_id"
+                "filename"
             ],
             "properties": {
                 "data": {
