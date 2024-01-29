@@ -30,7 +30,7 @@ func ProtoToDtoList(in []*imageProto.Image) []*dto.ImageResponse {
 func CreateDtoToProto(in *dto.UploadImageRequest) *imageProto.UploadImageRequest {
 	return &imageProto.UploadImageRequest{
 		Filename: in.Filename,
-		Data:     in.Data,
+		Data:     in.File,
 		PetId:    in.PetId,
 	}
 }

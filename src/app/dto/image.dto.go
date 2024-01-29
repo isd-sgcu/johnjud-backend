@@ -1,5 +1,10 @@
 package dto
 
+type DecomposedFile struct {
+	Filename string
+	Data     []byte
+}
+
 type ImageResponse struct {
 	Id        string `json:"id"`
 	Url       string `json:"url"`
@@ -8,7 +13,7 @@ type ImageResponse struct {
 
 type UploadImageRequest struct {
 	Filename string `json:"filename" validate:"required"`
-	Data     []byte `json:"data" validate:"required"`
+	File     []byte `json:"file" validate:"required"`
 	PetId    string `json:"pet_id"`
 }
 

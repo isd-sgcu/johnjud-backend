@@ -1,10 +1,16 @@
 package router
 
 import (
+	"bytes"
+	"errors"
+	"fmt"
+	"io"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
+	"github.com/isd-sgcu/johnjud-gateway/src/app/utils"
 )
 
 type IContext interface {
@@ -20,6 +26,8 @@ type IContext interface {
 	StoreValue(string, string)
 	Next() error
 	Queries() map[string]string
+	File(string, map[string]struct{}, int64) (*dto.DecomposedFile, error)
+	GetFormData(string) string
 }
 
 type FiberCtx struct {
@@ -94,6 +102,41 @@ func (c *FiberCtx) StoreValue(k string, v string) {
 
 func (c *FiberCtx) Queries() map[string]string {
 	return c.Ctx.Queries()
+}
+
+func (c *FiberCtx) File(key string, allowContent map[string]struct{}, maxSize int64) (*dto.DecomposedFile, error) {
+	file, err := c.Ctx.FormFile(key)
+	if err != nil {
+		return nil, err
+	}
+
+	if !utils.IsExisted(allowContent, file.Header["Content-Type"][0]) {
+		return nil, errors.New("Not allow content")
+	}
+
+	if file.Size > maxSize {
+		return nil, errors.New(fmt.Sprintf("Max file size is %v", maxSize))
+	}
+	content, err := file.Open()
+	if err != nil {
+		return nil, errors.New("Cannot read file")
+	}
+
+	defer content.Close()
+
+	buf := bytes.NewBuffer(nil)
+	if _, err := io.Copy(buf, content); err != nil {
+		return nil, err
+	}
+
+	return &dto.DecomposedFile{
+		Filename: file.Filename,
+		Data:     buf.Bytes(),
+	}, nil
+}
+
+func (c *FiberCtx) GetFormData(key string) string {
+	return c.Ctx.FormValue(key)
 }
 
 //func (c *FiberCtx) Next() {

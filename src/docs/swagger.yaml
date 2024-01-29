@@ -366,7 +366,7 @@ definitions:
     type: object
   dto.UploadImageRequest:
     properties:
-      data:
+      file:
         items:
           type: integer
         type: array
@@ -375,7 +375,7 @@ definitions:
       pet_id:
         type: string
     required:
-    - data
+    - file
     - filename
     type: object
   dto.User:
@@ -626,7 +626,7 @@ paths:
   /v1/images:
     post:
       consumes:
-      - application/json
+      - multipart/form-data
       description: Returns the data of image. If updating pet, add petId. If creating
         pet, petId is not specified, but keep the imageId.
       parameters:

@@ -341,7 +341,7 @@ const docTemplate = `{
             "post": {
                 "description": "Returns the data of image. If updating pet, add petId. If creating pet, petId is not specified, but keep the imageId.",
                 "consumes": [
-                    "application/json"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -1492,11 +1492,11 @@ const docTemplate = `{
         "dto.UploadImageRequest": {
             "type": "object",
             "required": [
-                "data",
+                "file",
                 "filename"
             ],
             "properties": {
-                "data": {
+                "file": {
                     "type": "array",
                     "items": {
                         "type": "integer"
