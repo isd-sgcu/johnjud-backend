@@ -5,8 +5,9 @@ import (
 )
 
 type App struct {
-	Port int    `mapstructure:"PORT"`
-	Env  string `mapstructure:"ENV"`
+	Port        int    `mapstructure:"PORT"`
+	Env         string `mapstructure:"ENV"`
+	MaxFileSize int64  `mapstructure:"MAX_FILE_SIZE"`
 }
 
 type Service struct {
