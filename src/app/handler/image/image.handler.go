@@ -2,22 +2,24 @@ package image
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/router"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/validator"
+	"github.com/isd-sgcu/johnjud-gateway/src/constant/file"
 	imageSvc "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/image"
+	"github.com/rs/zerolog/log"
 )
 
 type Handler struct {
-	service  imageSvc.Service
-	validate validator.IDtoValidator
+	service     imageSvc.Service
+	validate    validator.IDtoValidator
+	maxFileSize int64
 }
 
-func NewHandler(service imageSvc.Service, validate validator.IDtoValidator) *Handler {
-	return &Handler{service, validate}
+func NewHandler(service imageSvc.Service, validate validator.IDtoValidator, maxFileSize int64) *Handler {
+	return &Handler{service, validate, maxFileSize}
 }
 
 // Upload is a function for uploading image to bucket
@@ -33,28 +35,27 @@ func NewHandler(service imageSvc.Service, validate validator.IDtoValidator) *Han
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/images [post]
 func (h *Handler) Upload(c *router.FiberCtx) {
-	request := &dto.UploadImageRequest{}
-	err := c.Bind(request)
+	filename := c.GetFormData("filename")
+	petId := c.GetFormData("petId")
+	file, err := c.File("file", file.AllowContentType, h.maxFileSize)
 	if err != nil {
+		log.Error().
+			Err(err).
+			Str("service", "image").
+			Str("module", "upload").
+			Msg("Invalid content")
 		c.JSON(http.StatusBadRequest, dto.ResponseErr{
 			StatusCode: http.StatusBadRequest,
-			Message:    constant.BindingRequestErrorMessage + err.Error(),
+			Message:    constant.InvalidContentMessage,
 			Data:       nil,
 		})
 		return
 	}
 
-	if err := h.validate.Validate(request); err != nil {
-		var errorMessage []string
-		for _, reqErr := range err {
-			errorMessage = append(errorMessage, reqErr.Message)
-		}
-		c.JSON(http.StatusBadRequest, dto.ResponseErr{
-			StatusCode: http.StatusBadRequest,
-			Message:    constant.InvalidRequestBodyMessage + strings.Join(errorMessage, ", "),
-			Data:       nil,
-		})
-		return
+	request := &dto.UploadImageRequest{
+		Filename: filename,
+		Data:     file.Data,
+		PetId:    petId,
 	}
 
 	response, respErr := h.service.Upload(request)
