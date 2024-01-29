@@ -10,6 +10,7 @@ services:
     environment:
       - APP_PORT=3001
       - APP_ENV=development
+      - APP_MAX_FILE_SIZE=10
       - SERVICE_AUTH=auth:3002
       - SERVICE_BACKEND=backend:3003
       - SERVICE_FILE=file:3004
