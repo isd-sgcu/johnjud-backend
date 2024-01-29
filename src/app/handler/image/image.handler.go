@@ -31,7 +31,7 @@ func NewHandler(service imageSvc.Service, validate validator.IDtoValidator, maxF
 // @Description Returns the data of image. If updating pet, add petId. If creating pet, petId is not specified, but keep the imageId.
 // @Param image body dto.UploadImageRequest true "upload image request dto"
 // @Tags image
-// @Accept json
+// @Accept multipart/form-data
 // @Produce json
 // @Success 201 {object} dto.ImageResponse
 // @Failure 400 {object} dto.ResponseBadRequestErr "Invalid request body"
@@ -58,7 +58,7 @@ func (h *Handler) Upload(c *router.FiberCtx) {
 
 	request := &dto.UploadImageRequest{
 		Filename: filename,
-		Data:     file.Data,
+		File:     file.Data,
 		PetId:    petId,
 	}
 
