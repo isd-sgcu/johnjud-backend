@@ -19,7 +19,11 @@ type Handler struct {
 }
 
 func NewHandler(service imageSvc.Service, validate validator.IDtoValidator, maxFileSize int64) *Handler {
-	return &Handler{service, validate, maxFileSize}
+	return &Handler{
+		service:     service,
+		validate:    validate,
+		maxFileSize: int64(maxFileSize * 1024 * 1024),
+	}
 }
 
 // Upload is a function for uploading image to bucket
