@@ -39,8 +39,7 @@ func NewHandler(service imageSvc.Service, validate validator.IDtoValidator, maxF
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/images [post]
 func (h *Handler) Upload(c *router.FiberCtx) {
-	filename := c.GetFormData("filename")
-	petId := c.GetFormData("petId")
+	petId := c.GetFormData("pet_id")
 	file, err := c.File("file", file.AllowContentType, h.maxFileSize)
 	if err != nil {
 		log.Error().
@@ -57,7 +56,7 @@ func (h *Handler) Upload(c *router.FiberCtx) {
 	}
 
 	request := &dto.UploadImageRequest{
-		Filename: filename,
+		Filename: file.Filename,
 		File:     file.Data,
 		PetId:    petId,
 	}
