@@ -120,7 +120,7 @@ func main() {
 	imageHandler := imageHdr.NewHandler(imageService, v, conf.App.MaxFileSize)
 
 	petClient := petProto.NewPetServiceClient(backendConn)
-	petService := petSvc.NewService(petClient)
+	petService := petSvc.NewService(petClient, imageService)
 	petHandler := petHdr.NewHandler(petService, imageService, v)
 
 	likeClient := likeProto.NewLikeServiceClient(backendConn)
