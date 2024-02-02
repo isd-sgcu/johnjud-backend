@@ -7,7 +7,9 @@ import (
 
 	"github.com/isd-sgcu/johnjud-gateway/src/app/constant"
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
+
 	utils "github.com/isd-sgcu/johnjud-gateway/src/app/utils/pet"
+	imageSvc "github.com/isd-sgcu/johnjud-gateway/src/pkg/service/image"
 	petproto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
@@ -15,12 +17,14 @@ import (
 )
 
 type Service struct {
-	petClient petproto.PetServiceClient
+	petClient    petproto.PetServiceClient
+	imageService imageSvc.Service
 }
 
-func NewService(petClient petproto.PetServiceClient) *Service {
+func NewService(petClient petproto.PetServiceClient, imageService imageSvc.Service) *Service {
 	return &Service{
-		petClient: petClient,
+		petClient:    petClient,
+		imageService: imageService,
 	}
 }
 
@@ -94,8 +98,13 @@ func (s *Service) FindOne(id string) (result *dto.PetResponse, err *dto.Response
 			}
 		}
 	}
-	images := utils.MockImageList(1)[0]
-	findOneResponse := utils.ProtoToDto(res.Pet, images)
+
+	imgRes, imgErrRes := s.imageService.FindByPetId(res.Pet.Id)
+	if imgErrRes != nil {
+		return nil, imgErrRes
+	}
+
+	findOneResponse := utils.ProtoToDto(res.Pet, imgRes)
 	return findOneResponse, nil
 }
 
@@ -134,8 +143,27 @@ func (s *Service) Create(in *dto.CreatePetRequest) (result *dto.PetResponse, err
 			}
 		}
 	}
-	images := utils.MockImageList(1)[0]
-	createPetResponse := utils.ProtoToDto(res.Pet, images)
+
+	assignRes, assignErr := s.imageService.AssignPet(&dto.AssignPetRequest{
+		Ids:   in.Images,
+		PetId: res.Pet.Id,
+	})
+	if assignErr != nil {
+		return nil, assignErr
+	}
+	if assignRes.Success == false {
+		return nil, &dto.ResponseErr{
+			StatusCode: http.StatusInternalServerError,
+			Message:    constant.InternalErrorMessage,
+			Data:       nil,
+		}
+	}
+
+	imgRes, imgErrRes := s.imageService.FindByPetId(res.Pet.Id)
+	if imgErrRes != nil {
+		return nil, imgErrRes
+	}
+	createPetResponse := utils.ProtoToDto(res.Pet, imgRes)
 	return createPetResponse, nil
 }
 
@@ -181,7 +209,7 @@ func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *dto.PetRe
 		}
 	}
 	images := utils.MockImageList(1)[0]
-	updatePetResponse := utils.ProtoToDto(res.Pet, images)
+	updatePetResponse := utils.ProtoToDto(res.Pet, utils.ImageProtoToDto(images))
 	return updatePetResponse, nil
 }
 
