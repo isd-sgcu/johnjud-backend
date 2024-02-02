@@ -24,8 +24,10 @@ type ImageServiceTest struct {
 	PetId          uuid.UUID
 	UploadProtoReq *imageProto.UploadImageRequest
 	UploadDtoReq   *dto.UploadImageRequest
+	DeleteProtoReq *imageProto.DeleteImageRequest
 
-	NotFoundErr           *dto.ResponseErr
+	PetNotFoundErr        *dto.ResponseErr
+	ImageNotFoundErr      *dto.ResponseErr
 	UnavailableServiceErr *dto.ResponseErr
 	InternalErr           *dto.ResponseErr
 	InvalidArgumentErr    *dto.ResponseErr
@@ -77,10 +79,18 @@ func (t *ImageServiceTest) SetupTest() {
 		File:     t.UploadProtoReq.Data,
 		PetId:    t.UploadProtoReq.PetId,
 	}
+	t.DeleteProtoReq = &imageProto.DeleteImageRequest{
+		Id: t.Image.Id,
+	}
 
-	t.NotFoundErr = &dto.ResponseErr{
+	t.PetNotFoundErr = &dto.ResponseErr{
 		StatusCode: http.StatusNotFound,
 		Message:    constant.PetNotFoundMessage,
+		Data:       nil,
+	}
+	t.ImageNotFoundErr = &dto.ResponseErr{
+		StatusCode: http.StatusNotFound,
+		Message:    constant.ImageNotFoundMessage,
 		Data:       nil,
 	}
 	t.UnavailableServiceErr = &dto.ResponseErr{
@@ -127,7 +137,7 @@ func (t *ImageServiceTest) TestFindByPetIdNotFoundError() {
 
 	clientErr := status.Error(codes.NotFound, constant.PetNotFoundMessage)
 
-	expected := t.NotFoundErr
+	expected := t.PetNotFoundErr
 
 	client := imageMock.ImageClientMock{}
 	client.On("FindByPetId", protoReq).Return(nil, clientErr)
@@ -241,6 +251,73 @@ func (t *ImageServiceTest) TestUploadInternalError() {
 
 	svc := NewService(&client)
 	actual, err := svc.Upload(t.UploadDtoReq)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *ImageServiceTest) TestDeleteSuccess() {
+	protoReq := t.DeleteProtoReq
+	protoResp := &imageProto.DeleteImageResponse{Success: true}
+
+	expected := &dto.DeleteImageResponse{Success: true}
+
+	client := imageMock.ImageClientMock{}
+	client.On("Delete", protoReq).Return(protoResp, nil)
+
+	svc := NewService(&client)
+	actual, err := svc.Delete(t.Image.Id)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), expected, actual)
+}
+
+func (t *ImageServiceTest) TestDeleteNotFoundError() {
+	protoReq := t.DeleteProtoReq
+
+	clientErr := status.Error(codes.NotFound, constant.ImageNotFoundMessage)
+
+	expected := t.ImageNotFoundErr
+
+	client := imageMock.ImageClientMock{}
+	client.On("Delete", protoReq).Return(nil, clientErr)
+
+	svc := NewService(&client)
+	actual, err := svc.Delete(t.Image.Id)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *ImageServiceTest) TestDeleteUnavailableServiceError() {
+	protoReq := t.DeleteProtoReq
+
+	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
+
+	expected := t.UnavailableServiceErr
+
+	client := imageMock.ImageClientMock{}
+	client.On("Delete", protoReq).Return(nil, clientErr)
+
+	svc := NewService(&client)
+	actual, err := svc.Delete(t.Image.Id)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *ImageServiceTest) TestDeleteInternalError() {
+	protoReq := t.DeleteProtoReq
+
+	clientErr := status.Error(codes.Internal, constant.InternalErrorMessage)
+
+	expected := t.InternalErr
+
+	client := imageMock.ImageClientMock{}
+	client.On("Delete", protoReq).Return(nil, clientErr)
+
+	svc := NewService(&client)
+	actual, err := svc.Delete(t.Image.Id)
 
 	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
