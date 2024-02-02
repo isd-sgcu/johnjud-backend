@@ -19,12 +19,14 @@ import (
 
 type ImageServiceTest struct {
 	suite.Suite
-	Image          *imageProto.Image
-	Images         []*imageProto.Image
-	PetId          uuid.UUID
-	UploadProtoReq *imageProto.UploadImageRequest
-	UploadDtoReq   *dto.UploadImageRequest
-	DeleteProtoReq *imageProto.DeleteImageRequest
+	Image             *imageProto.Image
+	Images            []*imageProto.Image
+	PetId             uuid.UUID
+	UploadProtoReq    *imageProto.UploadImageRequest
+	UploadDtoReq      *dto.UploadImageRequest
+	DeleteProtoReq    *imageProto.DeleteImageRequest
+	AssignPetProtoReq *imageProto.AssignPetRequest
+	AssignPetDtoReq   *dto.AssignPetRequest
 
 	PetNotFoundErr        *dto.ResponseErr
 	ImageNotFoundErr      *dto.ResponseErr
@@ -81,6 +83,14 @@ func (t *ImageServiceTest) SetupTest() {
 	}
 	t.DeleteProtoReq = &imageProto.DeleteImageRequest{
 		Id: t.Image.Id,
+	}
+	t.AssignPetProtoReq = &imageProto.AssignPetRequest{
+		Ids:   []string{faker.UUIDDigit(), faker.UUIDDigit(), faker.UUIDDigit()},
+		PetId: t.PetId.String(),
+	}
+	t.AssignPetDtoReq = &dto.AssignPetRequest{
+		Ids:   t.AssignPetProtoReq.Ids,
+		PetId: t.AssignPetProtoReq.PetId,
 	}
 
 	t.PetNotFoundErr = &dto.ResponseErr{
@@ -318,6 +328,90 @@ func (t *ImageServiceTest) TestDeleteInternalError() {
 
 	svc := NewService(&client)
 	actual, err := svc.Delete(t.Image.Id)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *ImageServiceTest) TestAssignPetSuccess() {
+	protoReq := t.AssignPetProtoReq
+	protoResp := &imageProto.AssignPetResponse{Success: true}
+
+	expected := &dto.AssignPetResponse{Success: true}
+
+	client := imageMock.ImageClientMock{}
+	client.On("AssignPet", protoReq).Return(protoResp, nil)
+
+	svc := NewService(&client)
+	actual, err := svc.AssignPet(t.AssignPetDtoReq)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), expected, actual)
+}
+
+func (t *ImageServiceTest) TestAssignPetInvalidArgumentError() {
+	protoReq := t.AssignPetProtoReq
+
+	clientErr := status.Error(codes.InvalidArgument, constant.InvalidArgumentMessage)
+
+	expected := t.InvalidArgumentErr
+
+	client := imageMock.ImageClientMock{}
+	client.On("AssignPet", protoReq).Return(nil, clientErr)
+
+	svc := NewService(&client)
+	actual, err := svc.AssignPet(t.AssignPetDtoReq)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *ImageServiceTest) TestAssignPetNotFoundError() {
+	protoReq := t.AssignPetProtoReq
+
+	clientErr := status.Error(codes.NotFound, constant.PetNotFoundMessage)
+
+	expected := t.PetNotFoundErr
+
+	client := imageMock.ImageClientMock{}
+	client.On("AssignPet", protoReq).Return(nil, clientErr)
+
+	svc := NewService(&client)
+	actual, err := svc.AssignPet(t.AssignPetDtoReq)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *ImageServiceTest) TestAssignPetUnavailableServiceError() {
+	protoReq := t.AssignPetProtoReq
+
+	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
+
+	expected := t.UnavailableServiceErr
+
+	client := imageMock.ImageClientMock{}
+	client.On("AssignPet", protoReq).Return(nil, clientErr)
+
+	svc := NewService(&client)
+	actual, err := svc.AssignPet(t.AssignPetDtoReq)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *ImageServiceTest) TestAssignPetInternalError() {
+	protoReq := t.AssignPetProtoReq
+
+	clientErr := status.Error(codes.Internal, constant.InternalErrorMessage)
+
+	expected := t.InternalErr
+
+	client := imageMock.ImageClientMock{}
+	client.On("AssignPet", protoReq).Return(nil, clientErr)
+
+	svc := NewService(&client)
+	actual, err := svc.AssignPet(t.AssignPetDtoReq)
 
 	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
