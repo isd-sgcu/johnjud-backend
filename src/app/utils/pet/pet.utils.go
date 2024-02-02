@@ -29,7 +29,35 @@ func MockImageList(n int) [][]*imgproto.Image {
 	return imagesList
 }
 
-func ProtoToDto(in *petproto.Pet, images []*imgproto.Image) *dto.PetResponse {
+func ImageProtoToDto(images []*imgproto.Image) []*dto.ImageResponse {
+	var imageDto []*dto.ImageResponse
+	for _, image := range images {
+		imageDto = append(imageDto, &dto.ImageResponse{
+			Id:        image.Id,
+			Url:       image.ImageUrl,
+			ObjectKey: image.ObjectKey,
+		})
+	}
+	return imageDto
+}
+
+func ImageListProtoToDto(imagesList [][]*imgproto.Image) [][]*dto.ImageResponse {
+	var imageListDto [][]*dto.ImageResponse
+	for _, images := range imagesList {
+		var imageDto []*dto.ImageResponse
+		for _, image := range images {
+			imageDto = append(imageDto, &dto.ImageResponse{
+				Id:        image.Id,
+				Url:       image.ImageUrl,
+				ObjectKey: image.ObjectKey,
+			})
+		}
+		imageListDto = append(imageListDto, imageDto)
+	}
+	return imageListDto
+}
+
+func ProtoToDto(in *petproto.Pet, images []*dto.ImageResponse) *dto.PetResponse {
 	pet := &dto.PetResponse{
 		Id:           in.Id,
 		Type:         in.Type,
@@ -48,7 +76,7 @@ func ProtoToDto(in *petproto.Pet, images []*imgproto.Image) *dto.PetResponse {
 		Address:      in.Address,
 		Contact:      in.Contact,
 		AdoptBy:      in.AdoptBy,
-		Images:       extractImages(images),
+		Images:       images,
 	}
 	return pet
 }
@@ -122,7 +150,7 @@ func ProtoToDtoList(in []*petproto.Pet, imagesList [][]*imgproto.Image) []*dto.P
 			Address:      p.Address,
 			Contact:      p.Contact,
 			AdoptBy:      p.AdoptBy,
-			Images:       extractImages(imagesList[i]),
+			Images:       ImageProtoToDto(imagesList[i]),
 		}
 		resp = append(resp, pet)
 	}
