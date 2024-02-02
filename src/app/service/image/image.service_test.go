@@ -19,8 +19,11 @@ import (
 
 type ImageServiceTest struct {
 	suite.Suite
-	Images []*imageProto.Image
-	PetId  uuid.UUID
+	Image          *imageProto.Image
+	Images         []*imageProto.Image
+	PetId          uuid.UUID
+	UploadProtoReq *imageProto.UploadImageRequest
+	UploadDtoReq   *dto.UploadImageRequest
 
 	NotFoundErr           *dto.ResponseErr
 	UnavailableServiceErr *dto.ResponseErr
@@ -33,6 +36,12 @@ func TestImageService(t *testing.T) {
 
 func (t *ImageServiceTest) SetupTest() {
 	t.PetId = uuid.New()
+	t.Image = &imageProto.Image{
+		Id:        faker.UUIDDigit(),
+		PetId:     t.PetId.String(),
+		ImageUrl:  faker.URL(),
+		ObjectKey: faker.Word(),
+	}
 	t.Images = []*imageProto.Image{
 		{
 			Id:        faker.UUIDDigit(),
@@ -55,6 +64,17 @@ func (t *ImageServiceTest) SetupTest() {
 			ImageUrl:  faker.URL(),
 			ObjectKey: faker.Word(),
 		},
+	}
+
+	t.UploadProtoReq = &imageProto.UploadImageRequest{
+		Filename: faker.Name(),
+		Data:     []byte{1, 2, 3, 4, 5},
+		PetId:    t.PetId.String(),
+	}
+	t.UploadDtoReq = &dto.UploadImageRequest{
+		Filename: t.UploadProtoReq.Filename,
+		File:     t.UploadProtoReq.Data,
+		PetId:    t.UploadProtoReq.PetId,
 	}
 
 	t.NotFoundErr = &dto.ResponseErr{
@@ -149,4 +169,22 @@ func (t *ImageServiceTest) TestFindByPetIdInternalError() {
 
 	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), expected, err)
+}
+
+func (t *ImageServiceTest) TestUploadSuccess() {
+	protoReq := t.UploadProtoReq
+	protoResp := &imageProto.UploadImageResponse{
+		Image: t.Image,
+	}
+
+	expected := utils.ProtoToDto(t.Image)
+
+	client := imageMock.ImageClientMock{}
+	client.On("Upload", protoReq).Return(protoResp, nil)
+
+	svc := NewService(&client)
+	actual, err := svc.Upload(t.UploadDtoReq)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), expected, actual)
 }
