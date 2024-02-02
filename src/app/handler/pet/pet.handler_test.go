@@ -180,7 +180,7 @@ func (t *PetHandlerTest) TestFindAllSuccess() {
 }
 
 func (t *PetHandlerTest) TestFindOneSuccess() {
-	findOneResponse := utils.ProtoToDto(t.Pet, t.Images)
+	findOneResponse := utils.ProtoToDto(t.Pet, utils.ImageProtoToDto(t.Images))
 	expectedResponse := findOneResponse
 
 	controller := gomock.NewController(t.T())
@@ -235,7 +235,7 @@ func (t *PetHandlerTest) TestFindOneGrpcErr() {
 }
 
 func (t *PetHandlerTest) TestCreateSuccess() {
-	createResponse := utils.ProtoToDto(t.Pet, t.Images)
+	createResponse := utils.ProtoToDto(t.Pet, utils.ImageProtoToDto(t.Images))
 	expectedResponse := createResponse
 
 	controller := gomock.NewController(t.T())
@@ -274,7 +274,7 @@ func (t *PetHandlerTest) TestCreateGrpcErr() {
 }
 
 func (t *PetHandlerTest) TestUpdateSuccess() {
-	updateResponse := utils.ProtoToDto(t.Pet, t.Images)
+	updateResponse := utils.ProtoToDto(t.Pet, utils.ImageProtoToDto(t.Images))
 	expectedResponse := updateResponse
 
 	controller := gomock.NewController(t.T())
