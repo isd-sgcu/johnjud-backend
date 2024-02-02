@@ -28,6 +28,7 @@ type ImageServiceTest struct {
 	NotFoundErr           *dto.ResponseErr
 	UnavailableServiceErr *dto.ResponseErr
 	InternalErr           *dto.ResponseErr
+	InvalidArgumentErr    *dto.ResponseErr
 }
 
 func TestImageService(t *testing.T) {
@@ -90,6 +91,11 @@ func (t *ImageServiceTest) SetupTest() {
 	t.InternalErr = &dto.ResponseErr{
 		StatusCode: http.StatusInternalServerError,
 		Message:    constant.InternalErrorMessage,
+		Data:       nil,
+	}
+	t.InvalidArgumentErr = &dto.ResponseErr{
+		StatusCode: http.StatusBadRequest,
+		Message:    constant.InvalidArgumentMessage,
 		Data:       nil,
 	}
 }
@@ -187,4 +193,55 @@ func (t *ImageServiceTest) TestUploadSuccess() {
 
 	assert.Nil(t.T(), err)
 	assert.Equal(t.T(), expected, actual)
+}
+
+func (t *ImageServiceTest) TestUploadInvalidArgumentError() {
+	protoReq := t.UploadProtoReq
+
+	clientErr := status.Error(codes.InvalidArgument, constant.InvalidArgumentMessage)
+
+	expected := t.InvalidArgumentErr
+
+	client := imageMock.ImageClientMock{}
+	client.On("Upload", protoReq).Return(nil, clientErr)
+
+	svc := NewService(&client)
+	actual, err := svc.Upload(t.UploadDtoReq)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *ImageServiceTest) TestUploadUnavailableServiceError() {
+	protoReq := t.UploadProtoReq
+
+	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
+
+	expected := t.UnavailableServiceErr
+
+	client := imageMock.ImageClientMock{}
+	client.On("Upload", protoReq).Return(nil, clientErr)
+
+	svc := NewService(&client)
+	actual, err := svc.Upload(t.UploadDtoReq)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
+}
+
+func (t *ImageServiceTest) TestUploadInternalError() {
+	protoReq := t.UploadProtoReq
+
+	clientErr := status.Error(codes.Internal, constant.InternalErrorMessage)
+
+	expected := t.InternalErr
+
+	client := imageMock.ImageClientMock{}
+	client.On("Upload", protoReq).Return(nil, clientErr)
+
+	svc := NewService(&client)
+	actual, err := svc.Upload(t.UploadDtoReq)
+
+	assert.Nil(t.T(), actual)
+	assert.Equal(t.T(), expected, err)
 }
