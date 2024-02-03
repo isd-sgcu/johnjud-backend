@@ -144,19 +144,12 @@ func (s *Service) Create(in *dto.CreatePetRequest) (result *dto.PetResponse, err
 		}
 	}
 
-	assignRes, assignErr := s.imageService.AssignPet(&dto.AssignPetRequest{
+	_, assignErr := s.imageService.AssignPet(&dto.AssignPetRequest{
 		Ids:   in.Images,
 		PetId: res.Pet.Id,
 	})
 	if assignErr != nil {
 		return nil, assignErr
-	}
-	if assignRes.Success == false {
-		return nil, &dto.ResponseErr{
-			StatusCode: http.StatusInternalServerError,
-			Message:    constant.InternalErrorMessage,
-			Data:       nil,
-		}
 	}
 
 	imgRes, imgErrRes := s.imageService.FindByPetId(res.Pet.Id)
