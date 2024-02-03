@@ -5,24 +5,24 @@ import (
 )
 
 type PetResponse struct {
-	Id           string          `json:"id"`
-	Type         string          `json:"type"`
-	Name         string          `json:"name"`
-	Birthdate    string          `json:"birthdate"`
-	Gender       pet.Gender      `json:"gender"`
-	Color        string          `json:"color"`
-	Pattern      string          `json:"pattern"`
-	Habit        string          `json:"habit"`
-	Caption      string          `json:"caption"`
-	Status       pet.Status      `json:"status"`
-	IsSterile    *bool           `json:"is_sterile"`
-	IsVaccinated *bool           `json:"is_vaccinated"`
-	IsVisible    *bool           `json:"is_visible"`
-	Origin       string          `json:"origin"`
-	Address      string          `json:"address"`
-	Contact      string          `json:"contact"`
-	AdoptBy      string          `json:"adopt_by"`
-	Images       []ImageResponse `json:"images"`
+	Id           string           `json:"id"`
+	Type         string           `json:"type"`
+	Name         string           `json:"name"`
+	Birthdate    string           `json:"birthdate"`
+	Gender       pet.Gender       `json:"gender"`
+	Color        string           `json:"color"`
+	Pattern      string           `json:"pattern"`
+	Habit        string           `json:"habit"`
+	Caption      string           `json:"caption"`
+	Status       pet.Status       `json:"status"`
+	IsSterile    *bool            `json:"is_sterile"`
+	IsVaccinated *bool            `json:"is_vaccinated"`
+	IsVisible    *bool            `json:"is_visible"`
+	Origin       string           `json:"origin"`
+	Address      string           `json:"address"`
+	Contact      string           `json:"contact"`
+	AdoptBy      string           `json:"adopt_by"`
+	Images       []*ImageResponse `json:"images"`
 }
 
 type FindAllPetRequest struct {
