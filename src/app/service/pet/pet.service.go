@@ -156,6 +156,7 @@ func (s *Service) Create(in *dto.CreatePetRequest) (result *dto.PetResponse, err
 	if imgErrRes != nil {
 		return nil, imgErrRes
 	}
+
 	createPetResponse := utils.ProtoToDto(res.Pet, imgRes)
 	return createPetResponse, nil
 }
