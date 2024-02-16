@@ -24,6 +24,35 @@ func NewService(client proto.ImageServiceClient) *Service {
 	}
 }
 
+func (s *Service) FindAll() ([]*dto.ImageResponse, *dto.ResponseErr) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	res, errRes := s.client.FindAll(ctx, &proto.FindAllImageRequest{})
+	if errRes != nil {
+		st, _ := status.FromError(errRes)
+		log.Error().
+			Str("service", "image").
+			Str("module", "find all").
+			Msg(st.Message())
+		switch st.Code() {
+		case codes.Unavailable:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusServiceUnavailable,
+				Message:    constant.UnavailableServiceMessage,
+				Data:       nil,
+			}
+		default:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusInternalServerError,
+				Message:    constant.InternalErrorMessage,
+				Data:       nil,
+			}
+		}
+	}
+	return utils.ProtoToDtoList(res.Images), nil
+}
+
 func (s *Service) FindByPetId(petId string) ([]*dto.ImageResponse, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
