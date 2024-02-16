@@ -23,7 +23,7 @@ type AuthServiceTest struct {
 	token                 string
 	refreshTokenRequest   *dto.RefreshTokenRequest
 	forgotPasswordRequest *dto.ForgotPasswordRequest
-	resetPasswordRequest *dto.ResetPasswordRequest
+	resetPasswordRequest  *dto.ResetPasswordRequest
 }
 
 func TestAuthService(t *testing.T) {
