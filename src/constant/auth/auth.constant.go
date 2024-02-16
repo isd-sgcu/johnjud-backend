@@ -8,6 +8,7 @@ var ExcludePath = map[string]struct{}{
 	"PUT /auth/reset-password":   {},
 	"GET /user/:id":              {},
 	"GET /pets":                  {},
+	"GET /pets/:id":              {},
 	"GET /adopt":                 {},
 }
 
