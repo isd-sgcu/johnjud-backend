@@ -40,7 +40,7 @@ type PetHandlerTest struct {
 	ServiceDownErr       *dto.ResponseErr
 	InternalErr          *dto.ResponseErr
 	Images               []*imgProto.Image
-	ImagesList           [][]*imgProto.Image
+	ImagesList           map[string][]*imgProto.Image
 }
 
 func TestPetHandler(t *testing.T) {
@@ -48,9 +48,21 @@ func TestPetHandler(t *testing.T) {
 }
 
 func (t *PetHandlerTest) SetupTest() {
-	imagesList := utils.MockImageList(3)
+	petIds := []string{faker.UUIDDigit(), faker.UUIDDigit(), faker.UUIDDigit(), faker.UUIDDigit()}
+	imagesList := make(map[string][]*imgProto.Image)
+	for i := 0; i <= 3; i++ {
+		for j := 0; j <= 3; j++ {
+			img := &imgProto.Image{
+				Id:        faker.UUIDDigit(),
+				PetId:     petIds[i],
+				ImageUrl:  faker.URL(),
+				ObjectKey: faker.Word(),
+			}
+			imagesList[petIds[i]] = append(imagesList[petIds[i]], img)
+		}
+	}
 	t.ImagesList = imagesList
-	t.Images = imagesList[0]
+	t.Images = imagesList[petIds[0]]
 	var pets []*petProto.Pet
 	genders := []petConst.Gender{petConst.MALE, petConst.FEMALE}
 	statuses := []petConst.Status{petConst.ADOPTED, petConst.FINDHOME}

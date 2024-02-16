@@ -29,6 +29,7 @@ type PetServiceTest struct {
 	MetadataProto         *petproto.FindAllPetMetaData
 	PetNotVisible         *petproto.Pet
 	FindAllPetReq         *petproto.FindAllPetRequest
+	FindAllImageReq       *imgproto.FindAllImageRequest
 	UpdatePetReq          *petproto.UpdatePetRequest
 	CreatePetReq          *petproto.CreatePetRequest
 	ChangeViewPetReq      *petproto.ChangeViewPetRequest
@@ -46,7 +47,8 @@ type PetServiceTest struct {
 	AdoptDto              *dto.AdoptByRequest
 
 	Images     []*imgproto.Image
-	ImagesList [][]*imgproto.Image
+	AllImages  []*imgproto.Image
+	ImagesList map[string][]*imgproto.Image
 
 	AssignPetReq *imgproto.AssignPetRequest
 	AssignPetDto *dto.AssignPetRequest
@@ -59,16 +61,30 @@ func TestPetService(t *testing.T) {
 }
 
 func (t *PetServiceTest) SetupTest() {
-	imagesList := utils.MockImageList(3)
+	petIds := []string{faker.UUIDDigit(), faker.UUIDDigit(), faker.UUIDDigit(), faker.UUIDDigit()}
+	t.AllImages = []*imgproto.Image{}
+	imagesList := make(map[string][]*imgproto.Image)
+	for i := 0; i <= 3; i++ {
+		for j := 0; j <= 3; j++ {
+			img := &imgproto.Image{
+				Id:        faker.UUIDDigit(),
+				PetId:     petIds[i],
+				ImageUrl:  faker.URL(),
+				ObjectKey: faker.Word(),
+			}
+			imagesList[petIds[i]] = append(imagesList[petIds[i]], img)
+			t.AllImages = append(t.AllImages, img)
+		}
+	}
 	t.ImagesList = imagesList
-	t.Images = imagesList[0]
+	t.Images = imagesList[petIds[0]]
 	genders := []pet.Gender{pet.MALE, pet.FEMALE}
 	statuses := []pet.Status{pet.ADOPTED, pet.FINDHOME}
 
 	var pets []*petproto.Pet
 	for i := 0; i <= 3; i++ {
 		pet := &petproto.Pet{
-			Id:           faker.UUIDDigit(),
+			Id:           petIds[i],
 			Type:         faker.Word(),
 			Name:         faker.Name(),
 			Birthdate:    faker.Word(),
@@ -77,7 +93,7 @@ func (t *PetServiceTest) SetupTest() {
 			Pattern:      faker.Word(),
 			Habit:        faker.Paragraph(),
 			Caption:      faker.Paragraph(),
-			Images:       imagesList[i],
+			Images:       imagesList[petIds[i]],
 			Status:       string(statuses[rand.Intn(2)]),
 			IsSterile:    true,
 			IsVaccinated: true,
@@ -206,6 +222,8 @@ func (t *PetServiceTest) SetupTest() {
 		PetID:  t.Pet.Id,
 	}
 
+	t.FindAllImageReq = &imgproto.FindAllImageRequest{}
+
 	t.AssignPetReq = &imgproto.AssignPetRequest{
 		Ids:   []string{},
 		PetId: t.Pet.Id,
@@ -262,7 +280,11 @@ func (t *PetServiceTest) TestFindAllSuccess() {
 	client := petmock.PetClientMock{}
 	client.On("FindAll", t.FindAllPetReq).Return(protoResp, nil)
 
+	findAllImageResp := &imgproto.FindAllImageResponse{
+		Images: t.AllImages,
+	}
 	imageClient := imagemock.ImageClientMock{}
+	imageClient.On("FindAll", t.FindAllImageReq).Return(findAllImageResp, nil)
 
 	imageSvc := imageSvc.NewService(&imageClient)
 	svc := NewService(&client, imageSvc)
@@ -468,7 +490,11 @@ func (t *PetServiceTest) TestUpdateSuccess() {
 	client := &petmock.PetClientMock{}
 	client.On("Update", protoReq).Return(protoResp, nil)
 
+	findByPetIdResp := &imgproto.FindImageByPetIdResponse{
+		Images: t.Images,
+	}
 	imageClient := imagemock.ImageClientMock{}
+	imageClient.On("FindByPetId", t.FindByPetIdReq).Return(findByPetIdResp, nil)
 
 	imageSvc := imageSvc.NewService(&imageClient)
 	svc := NewService(client, imageSvc)
