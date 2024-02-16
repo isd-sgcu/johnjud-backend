@@ -54,7 +54,13 @@ func (s *Service) FindAll(in *dto.FindAllPetRequest) (result *dto.FindAllPetResp
 			Data:       nil,
 		}
 	}
-	imagesList := utils.MockImageList(len(res.Pets))
+
+	images, errSvc := s.imageService.FindAll()
+	if errSvc != nil {
+		return nil, errSvc
+	}
+
+	imagesList := utils.ImageList(images)
 	findAllDto := utils.ProtoToDtoList(res.Pets, imagesList)
 	metaData := utils.MetadataProtoToDto(res.Metadata)
 
@@ -202,8 +208,13 @@ func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *dto.PetRe
 			}
 		}
 	}
-	images := utils.MockImageList(1)[0]
-	updatePetResponse := utils.ProtoToDto(res.Pet, utils.ImageProtoToDto(images))
+
+	images, errSvc := s.imageService.FindByPetId(res.Pet.Id)
+	if errSvc != nil {
+		return nil, errSvc
+	}
+
+	updatePetResponse := utils.ProtoToDto(res.Pet, images)
 	return updatePetResponse, nil
 }
 

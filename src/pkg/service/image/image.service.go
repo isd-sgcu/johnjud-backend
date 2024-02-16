@@ -5,6 +5,7 @@ import (
 )
 
 type Service interface {
+	FindAll() ([]*dto.ImageResponse, *dto.ResponseErr)
 	FindByPetId(string) ([]*dto.ImageResponse, *dto.ResponseErr)
 	Upload(*dto.UploadImageRequest) (*dto.ImageResponse, *dto.ResponseErr)
 	Delete(string) (*dto.DeleteImageResponse, *dto.ResponseErr)

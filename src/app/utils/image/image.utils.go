@@ -1,8 +1,6 @@
 package image
 
 import (
-	"fmt"
-
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
 	imageProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 )
@@ -10,6 +8,7 @@ import (
 func ProtoToDto(in *imageProto.Image) *dto.ImageResponse {
 	return &dto.ImageResponse{
 		Id:        in.Id,
+		PetId:     in.PetId,
 		Url:       in.ImageUrl,
 		ObjectKey: in.ObjectKey,
 	}
@@ -20,6 +19,7 @@ func ProtoToDtoList(in []*imageProto.Image) []*dto.ImageResponse {
 	for _, i := range in {
 		res = append(res, &dto.ImageResponse{
 			Id:        i.Id,
+			PetId:     i.PetId,
 			Url:       i.ImageUrl,
 			ObjectKey: i.ObjectKey,
 		})
@@ -35,19 +35,16 @@ func CreateDtoToProto(in *dto.UploadImageRequest) *imageProto.UploadImageRequest
 	}
 }
 
-func MockImageList(n int) [][]*imageProto.Image {
-	var imagesList [][]*imageProto.Image
-	for i := 0; i <= n; i++ {
-		var images []*imageProto.Image
-		for j := 0; j <= 3; j++ {
-			images = append(images, &imageProto.Image{
-				Id:        fmt.Sprintf("%v%v", i, j),
-				PetId:     fmt.Sprintf("%v%v", i, j),
-				ImageUrl:  fmt.Sprintf("%v%v", i, j),
-				ObjectKey: fmt.Sprintf("%v%v", i, j),
-			})
+func ImageList(in []*dto.ImageResponse) map[string][]*imageProto.Image {
+	imagesList := make(map[string][]*imageProto.Image)
+	for _, image := range in {
+		img := &imageProto.Image{
+			Id:        image.Id,
+			PetId:     image.PetId,
+			ImageUrl:  image.Url,
+			ObjectKey: image.ObjectKey,
 		}
-		imagesList = append(imagesList, images)
+		imagesList[image.PetId] = append(imagesList[image.PetId], img)
 	}
 
 	return imagesList

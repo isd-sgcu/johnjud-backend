@@ -7,6 +7,7 @@ type DecomposedFile struct {
 
 type ImageResponse struct {
 	Id        string `json:"id"`
+	PetId     string `json:"pet_id"`
 	Url       string `json:"url"`
 	ObjectKey string `json:"object_key"`
 }

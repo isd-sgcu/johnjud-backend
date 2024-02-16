@@ -21,6 +21,15 @@ func (c *ImageClientMock) Upload(_ context.Context, in *imageProto.UploadImageRe
 	return res, args.Error(1)
 }
 
+func (c *ImageClientMock) FindAll(_ context.Context, in *imageProto.FindAllImageRequest, _ ...grpc.CallOption) (res *imageProto.FindAllImageResponse, err error) {
+	args := c.Called(in)
+
+	if args.Get(0) != nil {
+		res = args.Get(0).(*imageProto.FindAllImageResponse)
+	}
+	return res, args.Error(1)
+}
+
 func (c *ImageClientMock) FindByPetId(_ context.Context, in *imageProto.FindImageByPetIdRequest, _ ...grpc.CallOption) (res *imageProto.FindImageByPetIdResponse, err error) {
 	args := c.Called(in)
 
@@ -44,6 +53,15 @@ func (c *ImageClientMock) Delete(_ context.Context, in *imageProto.DeleteImageRe
 
 	if args.Get(0) != nil {
 		res = args.Get(0).(*imageProto.DeleteImageResponse)
+	}
+	return res, args.Error(1)
+}
+
+func (c *ImageClientMock) DeleteByPetId(_ context.Context, in *imageProto.DeleteByPetIdRequest, _ ...grpc.CallOption) (res *imageProto.DeleteByPetIdResponse, err error) {
+	args := c.Called(in)
+
+	if args.Get(0) != nil {
+		res = args.Get(0).(*imageProto.DeleteByPetIdResponse)
 	}
 	return res, args.Error(1)
 }

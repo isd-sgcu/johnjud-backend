@@ -2,7 +2,6 @@ package pet
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 
 	"github.com/isd-sgcu/johnjud-gateway/src/app/dto"
@@ -11,19 +10,16 @@ import (
 	imgproto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 )
 
-func MockImageList(n int) [][]*imgproto.Image {
-	var imagesList [][]*imgproto.Image
-	for i := 0; i <= n; i++ {
-		var images []*imgproto.Image
-		for j := 0; j <= 3; j++ {
-			images = append(images, &imgproto.Image{
-				Id:        fmt.Sprintf("%v%v", i, j),
-				PetId:     fmt.Sprintf("%v%v", i, j),
-				ImageUrl:  fmt.Sprintf("%v%v", i, j),
-				ObjectKey: fmt.Sprintf("%v%v", i, j),
-			})
+func ImageList(in []*dto.ImageResponse) map[string][]*imgproto.Image {
+	imagesList := make(map[string][]*imgproto.Image)
+	for _, image := range in {
+		img := &imgproto.Image{
+			Id:        image.Id,
+			PetId:     image.PetId,
+			ImageUrl:  image.Url,
+			ObjectKey: image.ObjectKey,
 		}
-		imagesList = append(imagesList, images)
+		imagesList[image.PetId] = append(imagesList[image.PetId], img)
 	}
 
 	return imagesList
@@ -34,6 +30,7 @@ func ImageProtoToDto(images []*imgproto.Image) []*dto.ImageResponse {
 	for _, image := range images {
 		imageDto = append(imageDto, &dto.ImageResponse{
 			Id:        image.Id,
+			PetId:     image.PetId,
 			Url:       image.ImageUrl,
 			ObjectKey: image.ObjectKey,
 		})
@@ -48,6 +45,7 @@ func ImageListProtoToDto(imagesList [][]*imgproto.Image) [][]*dto.ImageResponse 
 		for _, image := range images {
 			imageDto = append(imageDto, &dto.ImageResponse{
 				Id:        image.Id,
+				PetId:     image.PetId,
 				Url:       image.ImageUrl,
 				ObjectKey: image.ObjectKey,
 			})
@@ -129,9 +127,9 @@ func UpdateDtoToProto(id string, in *dto.UpdatePetRequest) *petproto.UpdatePetRe
 	return req
 }
 
-func ProtoToDtoList(in []*petproto.Pet, imagesList [][]*imgproto.Image) []*dto.PetResponse {
+func ProtoToDtoList(in []*petproto.Pet, imagesList map[string][]*imgproto.Image) []*dto.PetResponse {
 	var resp []*dto.PetResponse
-	for i, p := range in {
+	for _, p := range in {
 		pet := &dto.PetResponse{
 			Id:           p.Id,
 			Type:         p.Type,
@@ -150,7 +148,7 @@ func ProtoToDtoList(in []*petproto.Pet, imagesList [][]*imgproto.Image) []*dto.P
 			Address:      p.Address,
 			Contact:      p.Contact,
 			AdoptBy:      p.AdoptBy,
-			Images:       ImageProtoToDto(imagesList[i]),
+			Images:       ImageProtoToDto(imagesList[p.Id]),
 		}
 		resp = append(resp, pet)
 	}

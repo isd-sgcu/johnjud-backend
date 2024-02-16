@@ -12,12 +12,12 @@ require (
 	github.com/gofiber/fiber/v2 v2.52.0
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.5.0
-	github.com/isd-sgcu/johnjud-go-proto v0.5.2
+	github.com/isd-sgcu/johnjud-go-proto v0.6.0
 	github.com/rs/zerolog v1.31.0
 	github.com/spf13/viper v1.18.1
 	github.com/stretchr/testify v1.8.4
 	github.com/swaggo/swag v1.16.2
-	google.golang.org/grpc v1.60.1
+	google.golang.org/grpc v1.61.0
 )
 
 require (
