@@ -104,23 +104,39 @@ func CreateDtoToProto(in *dto.CreatePetRequest) *petproto.CreatePetRequest {
 }
 
 func UpdateDtoToProto(id string, in *dto.UpdatePetRequest) *petproto.UpdatePetRequest {
+	isSterile := false
+	if in.IsSterile != nil {
+		isSterile = *in.IsSterile
+	}
+	isVaccinated := false
+	if in.IsVaccinated != nil {
+		isVaccinated = *in.IsVaccinated
+	}
+	isVisible := false
+	if in.IsVisible != nil {
+		isVisible = *in.IsVisible
+	}
+
 	req := &petproto.UpdatePetRequest{
 		Pet: &petproto.Pet{
-			Id:        id,
-			Type:      in.Type,
-			Name:      in.Name,
-			Birthdate: in.Birthdate,
-			Gender:    string(in.Gender),
-			Color:     in.Color,
-			Pattern:   in.Pattern,
-			Habit:     in.Habit,
-			Caption:   in.Caption,
-			Images:    []*imgproto.Image{},
-			Status:    string(in.Status),
-			Origin:    in.Origin,
-			Address:   in.Address,
-			Contact:   in.Contact,
-			AdoptBy:   in.AdoptBy,
+			Id:           id,
+			Type:         in.Type,
+			Name:         in.Name,
+			Birthdate:    in.Birthdate,
+			Gender:       string(in.Gender),
+			Color:        in.Color,
+			Pattern:      in.Pattern,
+			Habit:        in.Habit,
+			Caption:      in.Caption,
+			Images:       []*imgproto.Image{},
+			Status:       string(in.Status),
+			IsSterile:    isSterile,
+			IsVaccinated: isVaccinated,
+			IsVisible:    isVisible,
+			Origin:       in.Origin,
+			Address:      in.Address,
+			Contact:      in.Contact,
+			AdoptBy:      in.AdoptBy,
 		},
 	}
 
