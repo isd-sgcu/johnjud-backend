@@ -253,6 +253,12 @@ func (s *Service) Delete(id string) (result *dto.DeleteResponse, err *dto.Respon
 			}
 		}
 	}
+
+	_, errSvc := s.imageService.DeleteByPetId(id)
+	if errSvc != nil {
+		return nil, errSvc
+	}
+
 	return &dto.DeleteResponse{
 		Success: res.Success,
 	}, nil

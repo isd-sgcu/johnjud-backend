@@ -543,19 +543,26 @@ func (t *PetServiceTest) TestUpdateUnavailableServiceError() {
 }
 
 func (t *PetServiceTest) TestDeleteSuccess() {
-	protoReq := &petproto.DeletePetRequest{
+	petProtoReq := &petproto.DeletePetRequest{
 		Id: t.Pet.Id,
 	}
-	protoResp := &petproto.DeletePetResponse{
+	petProtoResp := &petproto.DeletePetResponse{
+		Success: true,
+	}
+	imageProtoReq := &imgproto.DeleteByPetIdRequest{
+		PetId: t.Pet.Id,
+	}
+	imageProtoResp := &imgproto.DeleteByPetIdResponse{
 		Success: true,
 	}
 
 	expected := &dto.DeleteResponse{Success: true}
 
 	client := &petmock.PetClientMock{}
-	client.On("Delete", protoReq).Return(protoResp, nil)
+	client.On("Delete", petProtoReq).Return(petProtoResp, nil)
 
 	imageClient := imagemock.ImageClientMock{}
+	imageClient.On("DeleteByPetId", imageProtoReq).Return(imageProtoResp, nil)
 
 	imageSvc := imageSvc.NewService(&imageClient)
 	svc := NewService(client, imageSvc)
