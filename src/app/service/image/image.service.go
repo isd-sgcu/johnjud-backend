@@ -167,6 +167,48 @@ func (s *Service) Delete(id string) (*dto.DeleteImageResponse, *dto.ResponseErr)
 	}, nil
 }
 
+func (s *Service) DeleteByPetId(petId string) (*dto.DeleteImageResponse, *dto.ResponseErr) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	request := &proto.DeleteByPetIdRequest{
+		PetId: petId,
+	}
+
+	res, errRes := s.client.DeleteByPetId(ctx, request)
+	if errRes != nil {
+		st, _ := status.FromError(errRes)
+		log.Error().
+			Err(errRes).
+			Str("service", "image").
+			Str("module", "delete by pet id").
+			Msg(st.Message())
+		switch st.Code() {
+		case codes.NotFound:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusNotFound,
+				Message:    constant.ImageNotFoundMessage,
+				Data:       nil,
+			}
+		case codes.Unavailable:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusServiceUnavailable,
+				Message:    constant.UnavailableServiceMessage,
+				Data:       nil,
+			}
+		default:
+			return nil, &dto.ResponseErr{
+				StatusCode: http.StatusInternalServerError,
+				Message:    constant.InternalErrorMessage,
+				Data:       nil,
+			}
+		}
+	}
+	return &dto.DeleteImageResponse{
+		Success: res.Success,
+	}, nil
+}
+
 func (s *Service) AssignPet(in *dto.AssignPetRequest) (*dto.AssignPetResponse, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

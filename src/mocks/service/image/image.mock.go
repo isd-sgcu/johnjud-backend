@@ -64,6 +64,21 @@ func (mr *MockServiceMockRecorder) Delete(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockService)(nil).Delete), arg0)
 }
 
+// DeleteByPetId mocks base method.
+func (m *MockService) DeleteByPetId(arg0 string) (*dto.DeleteImageResponse, *dto.ResponseErr) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteByPetId", arg0)
+	ret0, _ := ret[0].(*dto.DeleteImageResponse)
+	ret1, _ := ret[1].(*dto.ResponseErr)
+	return ret0, ret1
+}
+
+// DeleteByPetId indicates an expected call of DeleteByPetId.
+func (mr *MockServiceMockRecorder) DeleteByPetId(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteByPetId", reflect.TypeOf((*MockService)(nil).DeleteByPetId), arg0)
+}
+
 // FindAll mocks base method.
 func (m *MockService) FindAll() ([]*dto.ImageResponse, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
