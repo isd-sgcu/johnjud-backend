@@ -317,7 +317,7 @@ func (s *Service) Adopt(petId string, in *dto.AdoptByRequest) (result *dto.Adopt
 
 	res, errRes := s.petClient.AdoptPet(ctx, &petproto.AdoptPetRequest{
 		UserId: in.UserID,
-		PetId:  in.PetID,
+		PetId:  petId,
 	})
 	if errRes != nil {
 		st, _ := status.FromError(errRes)

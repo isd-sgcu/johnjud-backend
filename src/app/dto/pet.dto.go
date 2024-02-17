@@ -72,7 +72,7 @@ type CreatePetRequest struct {
 }
 
 type ChangeViewPetRequest struct {
-	Visible bool `json:"visible" validate:"required"`
+	Visible bool `json:"visible"`
 }
 
 type ChangeViewPetResponse struct {
@@ -81,7 +81,6 @@ type ChangeViewPetResponse struct {
 
 type AdoptByRequest struct {
 	UserID string `json:"user_id" validate:"required"`
-	PetID  string `json:"pet_id" validate:"required"`
 }
 
 type AdoptByResponse struct {

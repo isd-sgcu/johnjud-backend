@@ -951,13 +951,9 @@ const docTemplate = `{
         "dto.AdoptByRequest": {
             "type": "object",
             "required": [
-                "pet_id",
                 "user_id"
             ],
             "properties": {
-                "pet_id": {
-                    "type": "string"
-                },
                 "user_id": {
                     "type": "string"
                 }
@@ -985,9 +981,6 @@ const docTemplate = `{
         },
         "dto.ChangeViewPetRequest": {
             "type": "object",
-            "required": [
-                "visible"
-            ],
             "properties": {
                 "visible": {
                     "type": "boolean"
@@ -1144,6 +1137,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "object_key": {
+                    "type": "string"
+                },
+                "pet_id": {
                     "type": "string"
                 },
                 "url": {

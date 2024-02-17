@@ -1,12 +1,9 @@
 definitions:
   dto.AdoptByRequest:
     properties:
-      pet_id:
-        type: string
       user_id:
         type: string
     required:
-    - pet_id
     - user_id
     type: object
   dto.AdoptByResponse:
@@ -26,8 +23,6 @@ definitions:
     properties:
       visible:
         type: boolean
-    required:
-    - visible
     type: object
   dto.ChangeViewPetResponse:
     properties:
@@ -129,6 +124,8 @@ definitions:
       id:
         type: string
       object_key:
+        type: string
+      pet_id:
         type: string
       url:
         type: string

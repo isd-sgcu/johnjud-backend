@@ -219,7 +219,6 @@ func (t *PetServiceTest) SetupTest() {
 
 	t.AdoptDto = &dto.AdoptByRequest{
 		UserID: t.Pet.AdoptBy,
-		PetID:  t.Pet.Id,
 	}
 
 	t.FindAllImageReq = &imgproto.FindAllImageRequest{}
