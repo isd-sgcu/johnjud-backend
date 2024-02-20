@@ -578,6 +578,13 @@ func (t *PetServiceTest) TestDeleteNotFound() {
 	protoResp := &petproto.DeletePetResponse{
 		Success: false,
 	}
+	imageProtoReq := &imgproto.DeleteByPetIdRequest{
+		PetId: t.Pet.Id,
+	}
+	imageProtoResp := &imgproto.DeleteByPetIdResponse{
+		Success: true,
+	}
+
 	clientErr := status.Error(codes.NotFound, constant.PetNotFoundMessage)
 
 	expected := t.NotFoundErr
@@ -586,6 +593,7 @@ func (t *PetServiceTest) TestDeleteNotFound() {
 	client.On("Delete", protoReq).Return(protoResp, clientErr)
 
 	imageClient := imagemock.ImageClientMock{}
+	imageClient.On("DeleteByPetId", imageProtoReq).Return(imageProtoResp, nil)
 
 	imageSvc := imageSvc.NewService(&imageClient)
 	svc := NewService(client, imageSvc)
@@ -602,6 +610,13 @@ func (t *PetServiceTest) TestDeleteServiceUnavailableError() {
 	protoResp := &petproto.DeletePetResponse{
 		Success: false,
 	}
+	imageProtoReq := &imgproto.DeleteByPetIdRequest{
+		PetId: t.Pet.Id,
+	}
+	imageProtoResp := &imgproto.DeleteByPetIdResponse{
+		Success: true,
+	}
+
 	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
 
 	expected := t.UnavailableServiceErr
@@ -610,6 +625,7 @@ func (t *PetServiceTest) TestDeleteServiceUnavailableError() {
 	client.On("Delete", protoReq).Return(protoResp, clientErr)
 
 	imageClient := imagemock.ImageClientMock{}
+	imageClient.On("DeleteByPetId", imageProtoReq).Return(imageProtoResp, nil)
 
 	imageSvc := imageSvc.NewService(&imageClient)
 	svc := NewService(client, imageSvc)
