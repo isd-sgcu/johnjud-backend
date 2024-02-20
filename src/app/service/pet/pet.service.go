@@ -222,6 +222,11 @@ func (s *Service) Delete(id string) (result *dto.DeleteResponse, err *dto.Respon
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	_, errSvc := s.imageService.DeleteByPetId(id)
+	if errSvc != nil {
+		return nil, errSvc
+	}
+
 	res, errRes := s.petClient.Delete(ctx, &petproto.DeletePetRequest{
 		Id: id,
 	})
@@ -252,11 +257,6 @@ func (s *Service) Delete(id string) (result *dto.DeleteResponse, err *dto.Respon
 				Data:       nil,
 			}
 		}
-	}
-
-	_, errSvc := s.imageService.DeleteByPetId(id)
-	if errSvc != nil {
-		return nil, errSvc
 	}
 
 	return &dto.DeleteResponse{
