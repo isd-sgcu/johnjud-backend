@@ -5,7 +5,7 @@ import (
 )
 
 type Service interface {
-	FindAll(*dto.FindAllPetRequest) (*dto.FindAllPetResponse, *dto.ResponseErr)
+	FindAll(*dto.FindAllPetRequest, bool) (*dto.FindAllPetResponse, *dto.ResponseErr)
 	FindOne(string) (*dto.PetResponse, *dto.ResponseErr)
 	Create(*dto.CreatePetRequest) (*dto.PetResponse, *dto.ResponseErr)
 	Update(string, *dto.UpdatePetRequest) (*dto.PetResponse, *dto.ResponseErr)

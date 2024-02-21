@@ -199,7 +199,7 @@ func (t *PetServiceTest) SetupTest() {
 		AdoptBy:      t.Pet.AdoptBy,
 	}
 
-	t.FindAllPetReq = utils.FindAllDtoToProto(t.FindAllPetDto)
+	t.FindAllPetReq = utils.FindAllDtoToProto(t.FindAllPetDto, true)
 	t.CreatePetReq = utils.CreateDtoToProto(t.CreatePetDto)
 	t.UpdatePetReq = utils.UpdateDtoToProto(t.Pet.Id, t.UpdatePetDto)
 
@@ -268,7 +268,7 @@ func (t *PetServiceTest) TestFindAllSuccess() {
 		Metadata: t.MetadataProto,
 	}
 
-	findAllPPetsDto := utils.ProtoToDtoList(t.Pets, t.ImagesList)
+	findAllPPetsDto := utils.ProtoToDtoList(t.Pets, t.ImagesList, false)
 	metadataDto := t.MetadataDto
 
 	expected := &dto.FindAllPetResponse{
@@ -287,7 +287,7 @@ func (t *PetServiceTest) TestFindAllSuccess() {
 
 	imageSvc := imageSvc.NewService(&imageClient)
 	svc := NewService(&client, imageSvc)
-	actual, err := svc.FindAll(t.FindAllPetDto)
+	actual, err := svc.FindAll(t.FindAllPetDto, true)
 
 	assert.Nil(t.T(), err)
 	assert.Equal(t.T(), expected, actual)
@@ -305,7 +305,7 @@ func (t *PetServiceTest) TestFindAllUnavailableServiceError() {
 
 	imageSvc := imageSvc.NewService(&imageClient)
 	svc := NewService(&client, imageSvc)
-	actual, err := svc.FindAll(t.FindAllPetDto)
+	actual, err := svc.FindAll(t.FindAllPetDto, true)
 
 	assert.Nil(t.T(), actual)
 	assert.Equal(t.T(), expected, err)

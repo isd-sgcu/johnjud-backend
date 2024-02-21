@@ -169,7 +169,7 @@ func (t *PetHandlerTest) SetupTest() {
 }
 
 func (t *PetHandlerTest) TestFindAllSuccess() {
-	findAllResponse := utils.ProtoToDtoList(t.Pets, t.ImagesList)
+	findAllResponse := utils.ProtoToDtoList(t.Pets, t.ImagesList, false)
 	metadataResponse := t.Metadata
 	expectedResponse := &dto.FindAllPetResponse{
 		Pets:     findAllResponse,
@@ -184,7 +184,7 @@ func (t *PetHandlerTest) TestFindAllSuccess() {
 	context := routerMock.NewMockIContext(controller)
 
 	context.EXPECT().Queries().Return(t.QueriesMock)
-	petSvc.EXPECT().FindAll(t.FindAllPetRequest).Return(expectedResponse, nil)
+	petSvc.EXPECT().FindAll(t.FindAllPetRequest, false).Return(expectedResponse, nil)
 	context.EXPECT().JSON(http.StatusOK, expectedResponse)
 
 	handler := NewHandler(petSvc, imageSvc, validator)

@@ -23,7 +23,7 @@ func NewHandler(service petSvc.Service, imageService imageSvc.Service, validate 
 	return &Handler{service, imageService, validate}
 }
 
-// FindAll is a function that returns all pets in database
+// FindAll is a function that returns all VISIBLE pets in database
 // @Summary finds all pets
 // @Description Returns the data of pets if successful
 // @Tags pet
@@ -40,7 +40,34 @@ func (h *Handler) FindAll(c router.IContext) {
 		c.JSON(http.StatusBadRequest, err)
 	}
 
-	response, respErr := h.service.FindAll(request)
+	response, respErr := h.service.FindAll(request, false)
+	if respErr != nil {
+		c.JSON(respErr.StatusCode, respErr)
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+	return
+}
+
+// FindAllAdmin is a function that returns ALL pets in database
+// @Summary finds all pets
+// @Description Returns the data of pets if successful
+// @Tags pet
+// @Accept json
+// @Produce json
+// @Success 200 {object} []dto.PetResponse
+// @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
+// @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
+// @Router /v1/pets/admin [get]
+func (h *Handler) FindAllAdmin(c router.IContext) {
+	queries := c.Queries()
+	request, err := petUtils.QueriesToFindAllDto(queries)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
+	}
+
+	response, respErr := h.service.FindAll(request, true)
 	if respErr != nil {
 		c.JSON(respErr.StatusCode, respErr)
 		return
