@@ -54,6 +54,9 @@ func (s *Service) FindAll(in *dto.FindAllPetRequest, isAdmin bool) (result *dto.
 			Data:       nil,
 		}
 	}
+	log.Info().
+		Str("service", "pet").
+		Str("module", "petClient.FindAll").Interface("res", res).Msg("")
 
 	images, errSvc := s.imageService.FindAll()
 	if errSvc != nil {
@@ -63,6 +66,9 @@ func (s *Service) FindAll(in *dto.FindAllPetRequest, isAdmin bool) (result *dto.
 	imagesList := utils.ImageList(images)
 	findAllDto := utils.ProtoToDtoList(res.Pets, imagesList, isAdmin)
 	metaData := utils.MetadataProtoToDto(res.Metadata)
+	log.Info().
+		Str("service", "pet").
+		Str("module", "findAllDto").Interface("dto", findAllDto).Msg("")
 
 	return &dto.FindAllPetResponse{
 		Pets:     findAllDto,
