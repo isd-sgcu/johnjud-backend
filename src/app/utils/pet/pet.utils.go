@@ -143,9 +143,12 @@ func UpdateDtoToProto(id string, in *dto.UpdatePetRequest) *petproto.UpdatePetRe
 	return req
 }
 
-func ProtoToDtoList(in []*petproto.Pet, imagesList map[string][]*imgproto.Image) []*dto.PetResponse {
+func ProtoToDtoList(in []*petproto.Pet, imagesList map[string][]*imgproto.Image, isAdmin bool) []*dto.PetResponse {
 	var resp []*dto.PetResponse
 	for _, p := range in {
+		if !isAdmin && !p.IsVisible {
+			continue
+		}
 		pet := &dto.PetResponse{
 			Id:           p.Id,
 			Type:         p.Type,
@@ -182,7 +185,7 @@ func extractImages(images []*imgproto.Image) []dto.ImageResponse {
 	return result
 }
 
-func FindAllDtoToProto(in *dto.FindAllPetRequest) *petproto.FindAllPetRequest {
+func FindAllDtoToProto(in *dto.FindAllPetRequest, isAdmin bool) *petproto.FindAllPetRequest {
 	return &petproto.FindAllPetRequest{
 		Search:   in.Search,
 		Type:     in.Type,
@@ -194,6 +197,7 @@ func FindAllDtoToProto(in *dto.FindAllPetRequest) *petproto.FindAllPetRequest {
 		Page:     int32(in.Page),
 		MaxAge:   int32(in.MaxAge),
 		MinAge:   int32(in.MinAge),
+		IsAdmin:  isAdmin,
 	}
 }
 

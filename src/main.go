@@ -144,6 +144,7 @@ func main() {
 	r.GetHealthCheck("", hc.HealthCheck)
 
 	r.GetPet("", petHandler.FindAll)
+	r.GetPet("/admin", petHandler.FindAllAdmin)
 	r.GetPet("/:id", petHandler.FindOne)
 	r.PostPet("", petHandler.Create)
 	r.PutPet("/:id", petHandler.Update)

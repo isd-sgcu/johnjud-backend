@@ -95,18 +95,18 @@ func (mr *MockServiceMockRecorder) Delete(arg0 interface{}) *gomock.Call {
 }
 
 // FindAll mocks base method.
-func (m *MockService) FindAll(arg0 *dto.FindAllPetRequest) (*dto.FindAllPetResponse, *dto.ResponseErr) {
+func (m *MockService) FindAll(arg0 *dto.FindAllPetRequest, arg1 bool) (*dto.FindAllPetResponse, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", arg0)
+	ret := m.ctrl.Call(m, "FindAll", arg0, arg1)
 	ret0, _ := ret[0].(*dto.FindAllPetResponse)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // FindAll indicates an expected call of FindAll.
-func (mr *MockServiceMockRecorder) FindAll(arg0 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) FindAll(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockService)(nil).FindAll), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockService)(nil).FindAll), arg0, arg1)
 }
 
 // FindOne mocks base method.
