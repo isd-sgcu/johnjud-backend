@@ -13,16 +13,15 @@ var ExcludePath = map[string]struct{}{
 }
 
 var AdminPath = map[string]struct{}{
-	// "DELETE /user/:id":            {},
-	// "GET /pets/admin":             {},
-	// "POST /pets":                  {},
-	// "PUT /pets/:id":               {},
-	// "PUT /pets/:id/visible":       {},
-	// "DELETE /pets/:id":            {},
-	// "POST /images/assign/:pet_id": {},
-	// "DELETE /images/:id":          {},
-	// "POST /images/":               {},
-	// "GET /images/:id":             {},
+	"DELETE /user/:id":            {},
+	"GET /pets/admin":             {},
+	"POST /pets":                  {},
+	"PUT /pets/:id":               {},
+	"PUT /pets/:id/visible":       {},
+	"DELETE /pets/:id":            {},
+	"POST /images/assign/:pet_id": {},
+	"DELETE /images/:id":          {},
+	"POST /images/":               {},
 }
 
 var VersionList = map[string]struct{}{
