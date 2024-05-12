@@ -19,9 +19,9 @@ type PetResponse struct {
 	IsVaccinated *bool            `json:"is_vaccinated"`
 	IsVisible    *bool            `json:"is_visible"`
 	Origin       string           `json:"origin"`
-	Address      string           `json:"address"`
+	Owner        string           `json:"owner"`
 	Contact      string           `json:"contact"`
-	AdoptBy      string           `json:"adopt_by"`
+	Tel          string           `json:"tel"`
 	Images       []*ImageResponse `json:"images"`
 }
 
@@ -66,8 +66,9 @@ type CreatePetRequest struct {
 	IsVisible    *bool      `json:"is_visible" validate:"required"`
 	Origin       string     `json:"origin" validate:"required"`
 	Address      string     `json:"address"`
+	Owner        string     `json:"owner"`
 	Contact      string     `json:"contact"`
-	AdoptBy      string     `json:"adopt_by"`
+	Tel          string     `json:"tel"`
 	Images       []string   `json:"images"`
 }
 
@@ -101,9 +102,9 @@ type UpdatePetRequest struct {
 	IsVaccinated *bool      `json:"is_vaccinated"`
 	IsVisible    *bool      `json:"is_visible"`
 	Origin       string     `json:"origin"`
-	Address      string     `json:"address"`
+	Owner        string     `json:"owner"`
 	Contact      string     `json:"contact"`
-	AdoptBy      string     `json:"adopt_by"`
+	Tel          string     `json:"tel"`
 	Images       []string   `json:"images"`
 }
 type DeleteRequest struct {

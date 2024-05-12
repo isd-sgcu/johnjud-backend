@@ -71,9 +71,9 @@ func ProtoToDto(in *petproto.Pet, images []*dto.ImageResponse) *dto.PetResponse 
 		IsVaccinated: &in.IsVaccinated,
 		IsVisible:    &in.IsVisible,
 		Origin:       in.Origin,
-		Address:      in.Address,
+		Owner:        in.Owner,
 		Contact:      in.Contact,
-		AdoptBy:      in.AdoptBy,
+		Tel:          in.Tel,
 		Images:       images,
 	}
 	return pet
@@ -96,9 +96,9 @@ func CreateDtoToProto(in *dto.CreatePetRequest) *petproto.CreatePetRequest {
 			IsVaccinated: *in.IsVaccinated,
 			IsVisible:    *in.IsVisible,
 			Origin:       in.Origin,
-			Address:      in.Address,
+			Owner:        in.Owner,
 			Contact:      in.Contact,
-			AdoptBy:      in.AdoptBy,
+			Tel:          in.Tel,
 		},
 	}
 }
@@ -134,9 +134,9 @@ func UpdateDtoToProto(id string, in *dto.UpdatePetRequest) *petproto.UpdatePetRe
 			IsVaccinated: isVaccinated,
 			IsVisible:    isVisible,
 			Origin:       in.Origin,
-			Address:      in.Address,
+			Owner:        in.Owner,
 			Contact:      in.Contact,
-			AdoptBy:      in.AdoptBy,
+			Tel:          in.Tel,
 		},
 	}
 
@@ -164,9 +164,9 @@ func ProtoToDtoList(in []*petproto.Pet, imagesList map[string][]*imgproto.Image,
 			IsVaccinated: &p.IsVaccinated,
 			IsVisible:    &p.IsVisible,
 			Origin:       p.Origin,
-			Address:      p.Address,
+			Owner:        p.Owner,
 			Contact:      p.Contact,
-			AdoptBy:      p.AdoptBy,
+			Tel:          p.Tel,
 			Images:       ImageProtoToDto(imagesList[p.Id]),
 		}
 		resp = append(resp, pet)
