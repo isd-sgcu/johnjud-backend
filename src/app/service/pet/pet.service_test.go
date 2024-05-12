@@ -99,9 +99,9 @@ func (t *PetServiceTest) SetupTest() {
 			IsVaccinated: true,
 			IsVisible:    true,
 			Origin:       faker.Paragraph(),
-			Address:      faker.Paragraph(),
+			Owner:        faker.Paragraph(),
 			Contact:      faker.Paragraph(),
-			AdoptBy:      faker.UUIDDigit(),
+			Tel:          faker.UUIDDigit(),
 		}
 
 		pets = append(pets, pet)
@@ -140,9 +140,9 @@ func (t *PetServiceTest) SetupTest() {
 		IsVaccinated: t.Pet.IsVaccinated,
 		IsVisible:    false,
 		Origin:       t.Pet.Origin,
-		Address:      t.Pet.Address,
+		Owner:        t.Pet.Owner,
 		Contact:      t.Pet.Contact,
-		AdoptBy:      t.Pet.AdoptBy,
+		Tel:          t.Pet.Tel,
 	}
 
 	t.PetDto = utils.ProtoToDto(t.Pet, utils.ImageProtoToDto(t.Pet.Images))
@@ -174,9 +174,9 @@ func (t *PetServiceTest) SetupTest() {
 		IsVaccinated: &t.Pet.IsVaccinated,
 		IsVisible:    &t.Pet.IsVisible,
 		Origin:       t.Pet.Origin,
-		Address:      t.Pet.Address,
+		Owner:        t.Pet.Owner,
 		Contact:      t.Pet.Contact,
-		AdoptBy:      t.Pet.AdoptBy,
+		Tel:          t.Pet.Tel,
 	}
 
 	t.UpdatePetDto = &dto.UpdatePetRequest{
@@ -194,9 +194,9 @@ func (t *PetServiceTest) SetupTest() {
 		IsVaccinated: &t.Pet.IsVaccinated,
 		IsVisible:    &t.Pet.IsVisible,
 		Origin:       t.Pet.Origin,
-		Address:      t.Pet.Address,
+		Owner:        t.Pet.Owner,
 		Contact:      t.Pet.Contact,
-		AdoptBy:      t.Pet.AdoptBy,
+		Tel:          t.Pet.Tel,
 	}
 
 	t.FindAllPetReq = utils.FindAllDtoToProto(t.FindAllPetDto, true)
@@ -214,11 +214,11 @@ func (t *PetServiceTest) SetupTest() {
 
 	t.AdoptReq = &petproto.AdoptPetRequest{
 		PetId:  t.Pet.Id,
-		UserId: t.Pet.AdoptBy,
+		UserId: t.Pet.Owner,
 	}
 
 	t.AdoptDto = &dto.AdoptByRequest{
-		UserID: t.Pet.AdoptBy,
+		UserID: t.Pet.Owner,
 	}
 
 	t.FindAllImageReq = &imgproto.FindAllImageRequest{}

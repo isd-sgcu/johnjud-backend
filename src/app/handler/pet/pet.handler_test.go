@@ -84,9 +84,9 @@ func (t *PetHandlerTest) SetupTest() {
 			IsVaccinated: true,
 			IsVisible:    true,
 			Origin:       faker.Paragraph(),
-			Address:      faker.Paragraph(),
+			Owner:        faker.Paragraph(),
 			Contact:      faker.Paragraph(),
-			AdoptBy:      "",
+			Tel:          "",
 		}
 
 		pets = append(pets, pet)
@@ -117,9 +117,9 @@ func (t *PetHandlerTest) SetupTest() {
 		IsVaccinated: &t.Pet.IsVaccinated,
 		IsVisible:    &t.Pet.IsVisible,
 		Origin:       t.Pet.Origin,
-		Address:      t.Pet.Address,
+		Owner:        t.Pet.Owner,
 		Contact:      t.Pet.Contact,
-		AdoptBy:      t.Pet.AdoptBy,
+		Tel:          t.Pet.Tel,
 	}
 
 	t.QueriesMock = map[string]string{
