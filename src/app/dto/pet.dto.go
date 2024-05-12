@@ -65,7 +65,6 @@ type CreatePetRequest struct {
 	IsVaccinated *bool      `json:"is_vaccinated" validate:"required"`
 	IsVisible    *bool      `json:"is_visible" validate:"required"`
 	Origin       string     `json:"origin" validate:"required"`
-	Address      string     `json:"address"`
 	Owner        string     `json:"owner"`
 	Contact      string     `json:"contact"`
 	Tel          string     `json:"tel"`
