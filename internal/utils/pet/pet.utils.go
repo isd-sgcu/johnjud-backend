@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/isd-sgcu/johnjud-gateway/constant/pet"
+	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
 	petproto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	imgproto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
@@ -61,12 +61,12 @@ func ProtoToDto(in *petproto.Pet, images []*dto.ImageResponse) *dto.PetResponse 
 		Type:         in.Type,
 		Name:         in.Name,
 		Birthdate:    in.Birthdate,
-		Gender:       pet.Gender(in.Gender),
+		Gender:       constant.Gender(in.Gender),
 		Color:        in.Color,
 		Pattern:      in.Pattern,
 		Habit:        in.Habit,
 		Caption:      in.Caption,
-		Status:       pet.Status(in.Status),
+		Status:       constant.Status(in.Status),
 		IsSterile:    &in.IsSterile,
 		IsVaccinated: &in.IsVaccinated,
 		IsVisible:    &in.IsVisible,
@@ -154,12 +154,12 @@ func ProtoToDtoList(in []*petproto.Pet, imagesList map[string][]*imgproto.Image,
 			Type:         p.Type,
 			Name:         p.Name,
 			Birthdate:    p.Birthdate,
-			Gender:       pet.Gender(p.Gender),
+			Gender:       constant.Gender(p.Gender),
 			Color:        p.Color,
 			Pattern:      p.Pattern,
 			Habit:        p.Habit,
 			Caption:      p.Caption,
-			Status:       pet.Status(p.Status),
+			Status:       constant.Status(p.Status),
 			IsSterile:    &p.IsSterile,
 			IsVaccinated: &p.IsVaccinated,
 			IsVisible:    &p.IsVisible,

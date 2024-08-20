@@ -1,4 +1,4 @@
-package file
+package constant
 
 var AllowContentType = map[string]struct{}{
 	"image/jpeg": {},

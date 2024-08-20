@@ -7,7 +7,7 @@ import (
 
 	"github.com/bxcodec/faker/v4"
 	"github.com/golang/mock/gomock"
-	"github.com/isd-sgcu/johnjud-gateway/constant/pet"
+	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
 	routerMock "github.com/isd-sgcu/johnjud-gateway/mocks/router"
 	imageMock "github.com/isd-sgcu/johnjud-gateway/mocks/service/image"
@@ -15,7 +15,6 @@ import (
 	validatorMock "github.com/isd-sgcu/johnjud-gateway/mocks/validator"
 
 	errConst "github.com/isd-sgcu/johnjud-gateway/constant"
-	petConst "github.com/isd-sgcu/johnjud-gateway/constant/pet"
 	utils "github.com/isd-sgcu/johnjud-gateway/internal/utils/pet"
 	petProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	imgProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
@@ -64,8 +63,8 @@ func (t *PetHandlerTest) SetupTest() {
 	t.ImagesList = imagesList
 	t.Images = imagesList[petIds[0]]
 	var pets []*petProto.Pet
-	genders := []petConst.Gender{petConst.MALE, petConst.FEMALE}
-	statuses := []petConst.Status{petConst.ADOPTED, petConst.FINDHOME}
+	genders := []constant.Gender{constant.MALE, constant.FEMALE}
+	statuses := []constant.Status{constant.ADOPTED, constant.FINDHOME}
 
 	for i := 0; i <= 3; i++ {
 		pet := &petProto.Pet{
@@ -107,12 +106,12 @@ func (t *PetHandlerTest) SetupTest() {
 		Type:         t.Pet.Type,
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
-		Gender:       pet.Gender(t.Pet.Gender),
+		Gender:       constant.Gender(t.Pet.Gender),
 		Color:        t.Pet.Color,
 		Pattern:      t.Pet.Pattern,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
-		Status:       pet.Status(t.Pet.Status),
+		Status:       constant.Status(t.Pet.Status),
 		IsSterile:    &t.Pet.IsSterile,
 		IsVaccinated: &t.Pet.IsVaccinated,
 		IsVisible:    &t.Pet.IsVisible,

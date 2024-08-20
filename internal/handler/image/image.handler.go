@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/isd-sgcu/johnjud-gateway/constant"
-	"github.com/isd-sgcu/johnjud-gateway/constant/file"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
 	imageSvc "github.com/isd-sgcu/johnjud-gateway/internal/pkg/service/image"
 	"github.com/isd-sgcu/johnjud-gateway/internal/router"
@@ -40,7 +39,7 @@ func NewHandler(service imageSvc.Service, validate validator.IDtoValidator, maxF
 // @Router /v1/images [post]
 func (h *Handler) Upload(c *router.FiberCtx) {
 	petId := c.GetFormData("pet_id")
-	file, err := c.File("file", file.AllowContentType, h.maxFileSize)
+	file, err := c.File("file", constant.AllowContentType, h.maxFileSize)
 	if err != nil {
 		log.Error().
 			Err(err).

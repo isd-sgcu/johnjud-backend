@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/isd-sgcu/johnjud-gateway/config"
-	"github.com/isd-sgcu/johnjud-gateway/constant/user"
+	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
 	authPkg "github.com/isd-sgcu/johnjud-gateway/internal/pkg/service/auth"
 	"github.com/isd-sgcu/johnjud-gateway/internal/router"
@@ -59,7 +59,7 @@ func (m *Guard) Use(ctx router.IContext) error {
 	ctx.StoreValue("UserId", payload.UserId)
 	ctx.StoreValue("Role", payload.Role)
 
-	if utils.IsExisted(m.adminpath, path) && payload.Role != string(user.ADMIN) {
+	if utils.IsExisted(m.adminpath, path) && payload.Role != string(constant.ADMIN) {
 		ctx.JSON(http.StatusUnauthorized, dto.ResponseErr{
 			StatusCode: http.StatusUnauthorized,
 			Message:    "Limited access",

@@ -1,4 +1,4 @@
-package pet
+package constant
 
 import (
 	"encoding/json"

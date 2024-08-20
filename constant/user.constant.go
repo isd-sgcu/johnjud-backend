@@ -1,4 +1,4 @@
-package user
+package constant
 
 const FindOneUserSuccessMessage = "find one user success"
 const UpdateUserSuccessMessage = "update user success"

@@ -1,4 +1,4 @@
-package auth
+package constant
 
 var ExcludePath = map[string]struct{}{
 	"POST /auth/signup":          {},

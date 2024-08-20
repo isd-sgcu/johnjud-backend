@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-faker/faker/v4"
 	"github.com/isd-sgcu/johnjud-gateway/constant"
-	"github.com/isd-sgcu/johnjud-gateway/constant/pet"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
 	imageSvc "github.com/isd-sgcu/johnjud-gateway/internal/service/image"
 	utils "github.com/isd-sgcu/johnjud-gateway/internal/utils/pet"
@@ -78,8 +77,8 @@ func (t *PetServiceTest) SetupTest() {
 	}
 	t.ImagesList = imagesList
 	t.Images = imagesList[petIds[0]]
-	genders := []pet.Gender{pet.MALE, pet.FEMALE}
-	statuses := []pet.Status{pet.ADOPTED, pet.FINDHOME}
+	genders := []constant.Gender{constant.MALE, constant.FEMALE}
+	statuses := []constant.Status{constant.ADOPTED, constant.FINDHOME}
 
 	var pets []*petproto.Pet
 	for i := 0; i <= 3; i++ {
@@ -163,13 +162,13 @@ func (t *PetServiceTest) SetupTest() {
 		Type:         t.Pet.Type,
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
-		Gender:       pet.Gender(t.Pet.Gender),
+		Gender:       constant.Gender(t.Pet.Gender),
 		Color:        t.Pet.Color,
 		Pattern:      t.Pet.Pattern,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
 		Images:       []string{},
-		Status:       pet.Status(t.Pet.Status),
+		Status:       constant.Status(t.Pet.Status),
 		IsSterile:    &t.Pet.IsSterile,
 		IsVaccinated: &t.Pet.IsVaccinated,
 		IsVisible:    &t.Pet.IsVisible,
@@ -183,13 +182,13 @@ func (t *PetServiceTest) SetupTest() {
 		Type:         t.Pet.Type,
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
-		Gender:       pet.Gender(t.Pet.Gender),
+		Gender:       constant.Gender(t.Pet.Gender),
 		Color:        t.Pet.Color,
 		Pattern:      t.Pet.Pattern,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
 		Images:       []string{},
-		Status:       pet.Status(t.Pet.Status),
+		Status:       constant.Status(t.Pet.Status),
 		IsSterile:    &t.Pet.IsSterile,
 		IsVaccinated: &t.Pet.IsVaccinated,
 		IsVisible:    &t.Pet.IsVisible,

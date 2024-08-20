@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/isd-sgcu/johnjud-gateway/config"
-	"github.com/isd-sgcu/johnjud-gateway/constant/auth"
+	"github.com/isd-sgcu/johnjud-gateway/constant"
 	authHdr "github.com/isd-sgcu/johnjud-gateway/internal/handler/auth"
 	"github.com/isd-sgcu/johnjud-gateway/internal/handler/healthcheck"
 	imageHdr "github.com/isd-sgcu/johnjud-gateway/internal/handler/image"
@@ -113,7 +113,7 @@ func main() {
 	authService := authSvc.NewService(authClient)
 	authHandler := authHdr.NewHandler(authService, userService, v)
 
-	authGuard := guard.NewAuthGuard(authService, auth.ExcludePath, auth.AdminPath, conf.App, auth.VersionList)
+	authGuard := guard.NewAuthGuard(authService, constant.ExcludePath, constant.AdminPath, conf.App, constant.VersionList)
 
 	imageClient := imageProto.NewImageServiceClient(fileConn)
 	imageService := imageSvc.NewService(imageClient)
