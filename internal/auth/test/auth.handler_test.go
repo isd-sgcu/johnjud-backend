@@ -1,4 +1,4 @@
-package auth
+package test
 
 import (
 	"errors"
@@ -8,6 +8,7 @@ import (
 	"github.com/go-faker/faker/v4"
 	"github.com/golang/mock/gomock"
 	"github.com/isd-sgcu/johnjud-gateway/constant"
+	"github.com/isd-sgcu/johnjud-gateway/internal/auth"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
 	routerMock "github.com/isd-sgcu/johnjud-gateway/mocks/router"
 	authMock "github.com/isd-sgcu/johnjud-gateway/mocks/service/auth"
@@ -79,7 +80,7 @@ func (t *AuthHandlerTest) TestSignupSuccess() {
 	authSvc.EXPECT().Signup(t.signupRequest).Return(signupResponse, nil)
 	context.EXPECT().JSON(http.StatusOK, signupResponse)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	handler.Signup(context)
 }
@@ -101,7 +102,7 @@ func (t *AuthHandlerTest) TestSignupBindFailed() {
 	context.EXPECT().Bind(t.signupRequest).Return(t.bindErr)
 	context.EXPECT().JSON(http.StatusBadRequest, errResponse)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	handler.Signup(context)
 }
@@ -124,7 +125,7 @@ func (t *AuthHandlerTest) TestSignupValidateFailed() {
 	validator.EXPECT().Validate(t.signupRequest).Return(t.validateErr)
 	context.EXPECT().JSON(http.StatusBadRequest, errResponse)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	handler.Signup(context)
 }
@@ -148,7 +149,7 @@ func (t *AuthHandlerTest) TestSignupServiceError() {
 	authSvc.EXPECT().Signup(t.signupRequest).Return(nil, signupError)
 	context.EXPECT().JSON(http.StatusInternalServerError, signupError)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	handler.Signup(context)
 }
@@ -172,7 +173,7 @@ func (t *AuthHandlerTest) TestSignInSuccess() {
 	authSvc.EXPECT().SignIn(t.signInRequest).Return(signInResponse, nil)
 	context.EXPECT().JSON(http.StatusOK, signInResponse)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	handler.SignIn(context)
 }
@@ -194,7 +195,7 @@ func (t *AuthHandlerTest) TestSignInBindFailed() {
 	context.EXPECT().Bind(t.signInRequest).Return(t.bindErr)
 	context.EXPECT().JSON(http.StatusBadRequest, errResponse)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	handler.SignIn(context)
 }
@@ -217,7 +218,7 @@ func (t *AuthHandlerTest) TestSignInValidateFailed() {
 	validator.EXPECT().Validate(t.signInRequest).Return(t.validateErr)
 	context.EXPECT().JSON(http.StatusBadRequest, errResponse)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	handler.SignIn(context)
 }
@@ -241,7 +242,7 @@ func (t *AuthHandlerTest) TestSignInServiceError() {
 	authSvc.EXPECT().SignIn(t.signInRequest).Return(nil, signInErrResponse)
 	context.EXPECT().JSON(http.StatusInternalServerError, signInErrResponse)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	handler.SignIn(context)
 }
@@ -263,7 +264,7 @@ func (t *AuthHandlerTest) TestSignOutSuccess() {
 	authSvc.EXPECT().SignOut(token).Return(signOutResponse, nil)
 	context.EXPECT().JSON(http.StatusOK, signOutResponse)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	handler.SignOut(context)
 }
@@ -283,7 +284,7 @@ func (t *AuthHandlerTest) TestSignOutServiceError() {
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	context.EXPECT().Token().Return(token)
 	authSvc.EXPECT().SignOut(token).Return(nil, errResponse)
@@ -306,7 +307,7 @@ func (t *AuthHandlerTest) TestRefreshTokenSuccess() {
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	context.EXPECT().Bind(t.refreshTokenRequest).Return(nil)
 	validator.EXPECT().Validate(t.refreshTokenRequest).Return(nil)
@@ -330,7 +331,7 @@ func (t *AuthHandlerTest) TestRefreshTokenBindFailed() {
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	context.EXPECT().Bind(t.refreshTokenRequest).Return(t.bindErr)
 	context.EXPECT().JSON(http.StatusBadRequest, errResponse)
@@ -352,7 +353,7 @@ func (t *AuthHandlerTest) TestRefreshTokenValidateFailed() {
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	context.EXPECT().Bind(t.refreshTokenRequest).Return(nil)
 	validator.EXPECT().Validate(t.refreshTokenRequest).Return(t.validateErr)
@@ -375,7 +376,7 @@ func (t *AuthHandlerTest) TestRefreshTokenServiceError() {
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	context.EXPECT().Bind(t.refreshTokenRequest).Return(nil)
 	validator.EXPECT().Validate(t.refreshTokenRequest).Return(nil)
@@ -397,7 +398,7 @@ func (t *AuthHandlerTest) TestForgotPasswordSuccess() {
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	context.EXPECT().Bind(t.forgotPasswordRequest).Return(nil)
 	validator.EXPECT().Validate(t.forgotPasswordRequest).Return(nil)
@@ -421,7 +422,7 @@ func (t *AuthHandlerTest) TestForgotPasswordBindFailed() {
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	context.EXPECT().Bind(t.forgotPasswordRequest).Return(t.bindErr)
 	context.EXPECT().JSON(http.StatusBadRequest, errResponse)
@@ -442,7 +443,7 @@ func (t *AuthHandlerTest) TestForgotPasswordValidateFailed() {
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	context.EXPECT().Bind(t.forgotPasswordRequest).Return(nil)
 	validator.EXPECT().Validate(t.forgotPasswordRequest).Return(t.validateErr)
@@ -465,7 +466,7 @@ func (t *AuthHandlerTest) TestForgotPasswordServiceError() {
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	context.EXPECT().Bind(t.forgotPasswordRequest).Return(nil)
 	validator.EXPECT().Validate(t.forgotPasswordRequest).Return(nil)
@@ -487,7 +488,7 @@ func (t *AuthHandlerTest) TestResetPasswordSuccess() {
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	context.EXPECT().Bind(t.resetPasswordRequest).Return(nil)
 	validator.EXPECT().Validate(t.resetPasswordRequest).Return(nil)
@@ -511,7 +512,7 @@ func (t *AuthHandlerTest) TestResetPasswordBindFailed() {
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	context.EXPECT().Bind(t.resetPasswordRequest).Return(t.bindErr)
 	context.EXPECT().JSON(http.StatusBadRequest, errResponse)
@@ -533,7 +534,7 @@ func (t *AuthHandlerTest) TestResetPasswordValidateFailed() {
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	context.EXPECT().Bind(t.resetPasswordRequest).Return(nil)
 	validator.EXPECT().Validate(t.resetPasswordRequest).Return(t.validateErr)
@@ -556,7 +557,7 @@ func (t *AuthHandlerTest) TestResetPasswordServiceError() {
 	validator := validatorMock.NewMockIDtoValidator(controller)
 	context := routerMock.NewMockIContext(controller)
 
-	handler := NewHandler(authSvc, userSvc, validator)
+	handler := auth.NewHandler(authSvc, userSvc, validator)
 
 	context.EXPECT().Bind(t.resetPasswordRequest).Return(nil)
 	validator.EXPECT().Validate(t.resetPasswordRequest).Return(nil)

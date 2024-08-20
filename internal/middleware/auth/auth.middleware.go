@@ -5,22 +5,21 @@ import (
 
 	"github.com/isd-sgcu/johnjud-gateway/config"
 	"github.com/isd-sgcu/johnjud-gateway/constant"
+	"github.com/isd-sgcu/johnjud-gateway/internal/auth"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	authPkg "github.com/isd-sgcu/johnjud-gateway/internal/pkg/service/auth"
 	"github.com/isd-sgcu/johnjud-gateway/internal/router"
 	"github.com/isd-sgcu/johnjud-gateway/internal/utils"
-	"github.com/isd-sgcu/johnjud-gateway/internal/utils/auth"
 )
 
 type Guard struct {
-	service     authPkg.Service
+	service     auth.Service
 	excludes    map[string]struct{}
 	adminpath   map[string]struct{}
 	conf        config.App
 	versionList map[string]struct{}
 }
 
-func NewAuthGuard(s authPkg.Service, e map[string]struct{}, a map[string]struct{}, conf config.App, versionList map[string]struct{}) Guard {
+func NewAuthGuard(s auth.Service, e map[string]struct{}, a map[string]struct{}, conf config.App, versionList map[string]struct{}) Guard {
 	return Guard{
 		service:     s,
 		excludes:    e,

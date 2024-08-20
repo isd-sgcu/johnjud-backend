@@ -6,20 +6,19 @@ import (
 
 	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	"github.com/isd-sgcu/johnjud-gateway/internal/pkg/service/auth"
 	"github.com/isd-sgcu/johnjud-gateway/internal/pkg/service/user"
 	"github.com/isd-sgcu/johnjud-gateway/internal/router"
 	"github.com/isd-sgcu/johnjud-gateway/internal/validator"
 )
 
-type Handler struct {
-	service     auth.Service
+type handlerImpl struct {
+	service     Service
 	userService user.Service
 	validate    validator.IDtoValidator
 }
 
-func NewHandler(service auth.Service, userService user.Service, validate validator.IDtoValidator) *Handler {
-	return &Handler{service, userService, validate}
+func NewHandler(service Service, userService user.Service, validate validator.IDtoValidator) *handlerImpl {
+	return &handlerImpl{service, userService, validate}
 }
 
 // Signup is a function that create user in database
@@ -35,7 +34,7 @@ func NewHandler(service auth.Service, userService user.Service, validate validat
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/auth/signup [post]
-func (h *Handler) Signup(c router.IContext) {
+func (h *handlerImpl) Signup(c router.IContext) {
 	request := &dto.SignupRequest{}
 	err := c.Bind(request)
 	if err != nil {
@@ -82,7 +81,7 @@ func (h *Handler) Signup(c router.IContext) {
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/auth/signin [post]
-func (h *Handler) SignIn(c router.IContext) {
+func (h *handlerImpl) SignIn(c router.IContext) {
 	request := &dto.SignInRequest{}
 	err := c.Bind(request)
 	if err != nil {
@@ -127,7 +126,7 @@ func (h *Handler) SignIn(c router.IContext) {
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/auth/signout [post]
-func (h *Handler) SignOut(c router.IContext) {
+func (h *handlerImpl) SignOut(c router.IContext) {
 	token := c.Token()
 
 	response, respErr := h.service.SignOut(token)
@@ -152,7 +151,7 @@ func (h *Handler) SignOut(c router.IContext) {
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/auth/refreshToken [post]
-func (h *Handler) RefreshToken(c router.IContext) {
+func (h *handlerImpl) RefreshToken(c router.IContext) {
 	request := &dto.RefreshTokenRequest{}
 	err := c.Bind(request)
 	if err != nil {
@@ -198,7 +197,7 @@ func (h *Handler) RefreshToken(c router.IContext) {
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/auth/forgot-password [post]
-func (h *Handler) ForgotPassword(c router.IContext) {
+func (h *handlerImpl) ForgotPassword(c router.IContext) {
 	request := &dto.ForgotPasswordRequest{}
 	err := c.Bind(request)
 	if err != nil {
@@ -244,7 +243,7 @@ func (h *Handler) ForgotPassword(c router.IContext) {
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/auth/reset-password [put]
-func (h *Handler) ResetPassword(c router.IContext) {
+func (h *handlerImpl) ResetPassword(c router.IContext) {
 	request := &dto.ResetPasswordRequest{}
 	err := c.Bind(request)
 	if err != nil {

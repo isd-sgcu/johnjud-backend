@@ -1,4 +1,4 @@
-package auth
+package test
 
 import (
 	"errors"
@@ -7,8 +7,9 @@ import (
 
 	"github.com/go-faker/faker/v4"
 	"github.com/isd-sgcu/johnjud-gateway/constant"
+	"github.com/isd-sgcu/johnjud-gateway/internal/auth"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	"github.com/isd-sgcu/johnjud-gateway/mocks/client/auth"
+	mockAuth "github.com/isd-sgcu/johnjud-gateway/mocks/client/auth"
 	authProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -82,11 +83,11 @@ func (t *AuthServiceTest) TestSignupSuccess() {
 		Lastname:  t.signupRequestDto.Lastname,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 
 	client.On("SignUp", protoReq).Return(protoResp, nil)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.Signup(t.signupRequestDto)
 
 	assert.Nil(t.T(), err)
@@ -111,10 +112,10 @@ func (t *AuthServiceTest) TestSignupConflict() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("SignUp", protoReq).Return(nil, clientErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.Signup(t.signupRequestDto)
 
 	assert.Nil(t.T(), actual)
@@ -136,10 +137,10 @@ func (t *AuthServiceTest) TestSignupInternalError() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("SignUp", protoReq).Return(nil, clientErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.Signup(t.signupRequestDto)
 
 	assert.Nil(t.T(), actual)
@@ -161,10 +162,10 @@ func (t *AuthServiceTest) TestSignupUnavailableService() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("SignUp", protoReq).Return(nil, clientErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.Signup(t.signupRequestDto)
 
 	assert.Nil(t.T(), actual)
@@ -186,10 +187,10 @@ func (t *AuthServiceTest) TestSignupUnknownError() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("SignUp", protoReq).Return(nil, clientErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.Signup(t.signupRequestDto)
 
 	assert.Nil(t.T(), actual)
@@ -215,11 +216,11 @@ func (t *AuthServiceTest) TestSignInSuccess() {
 		ExpiresIn:    int(protoResp.Credential.ExpiresIn),
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 
 	client.On("SignIn", protoReq).Return(protoResp, nil)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.SignIn(t.signInDto)
 
 	assert.Nil(t.T(), err)
@@ -239,11 +240,11 @@ func (t *AuthServiceTest) TestSignInForbidden() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 
 	client.On("SignIn", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.SignIn(t.signInDto)
 
 	assert.Nil(t.T(), actual)
@@ -263,11 +264,11 @@ func (t *AuthServiceTest) TestSignInInternalError() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 
 	client.On("SignIn", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.SignIn(t.signInDto)
 
 	assert.Nil(t.T(), actual)
@@ -287,10 +288,10 @@ func (t *AuthServiceTest) TestSignInUnavailableService() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("SignIn", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.SignIn(t.signInDto)
 
 	assert.Nil(t.T(), actual)
@@ -310,11 +311,11 @@ func (t *AuthServiceTest) TestSignInUnknownError() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 
 	client.On("SignIn", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.SignIn(t.signInDto)
 
 	assert.Nil(t.T(), actual)
@@ -331,10 +332,10 @@ func (t *AuthServiceTest) TestSignOutSuccess() {
 
 	expected := &dto.SignOutResponse{IsSuccess: true}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("SignOut", protoReq).Return(protoResp, nil)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.SignOut(t.token)
 
 	assert.Nil(t.T(), err)
@@ -353,10 +354,10 @@ func (t *AuthServiceTest) TestSignOutInternalError() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("SignOut", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.SignOut(t.token)
 
 	assert.Nil(t.T(), actual)
@@ -375,10 +376,10 @@ func (t *AuthServiceTest) TestSignOutUnavailableService() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("SignOut", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.SignOut(t.token)
 
 	assert.Nil(t.T(), actual)
@@ -397,10 +398,10 @@ func (t *AuthServiceTest) TestSignOutUnknownError() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("SignOut", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.SignOut(t.token)
 
 	assert.Nil(t.T(), actual)
@@ -421,10 +422,10 @@ func (t *AuthServiceTest) TestValidateSuccess() {
 		Role:   protoResp.Role,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("Validate", protoReq).Return(protoResp, nil)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.Validate(t.token)
 
 	assert.Nil(t.T(), err)
@@ -443,10 +444,10 @@ func (t *AuthServiceTest) TestValidateUnauthorized() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("Validate", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.Validate(t.token)
 
 	assert.Nil(t.T(), actual)
@@ -465,10 +466,10 @@ func (t *AuthServiceTest) TestValidateUnavailableService() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("Validate", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.Validate(t.token)
 
 	assert.Nil(t.T(), actual)
@@ -487,10 +488,10 @@ func (t *AuthServiceTest) TestValidateUnknownError() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("Validate", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.Validate(t.token)
 
 	assert.Nil(t.T(), actual)
@@ -515,10 +516,10 @@ func (t *AuthServiceTest) TestRefreshTokenSuccess() {
 		ExpiresIn:    int(protoResp.Credential.ExpiresIn),
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("RefreshToken", protoReq).Return(protoResp, nil)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.RefreshToken(t.refreshTokenRequest)
 
 	assert.Nil(t.T(), err)
@@ -537,10 +538,10 @@ func (t *AuthServiceTest) TestRefreshTokenInvalidToken() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("RefreshToken", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.RefreshToken(t.refreshTokenRequest)
 
 	assert.Nil(t.T(), actual)
@@ -559,10 +560,10 @@ func (t *AuthServiceTest) TestRefreshTokenInternalError() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("RefreshToken", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.RefreshToken(t.refreshTokenRequest)
 
 	assert.Nil(t.T(), actual)
@@ -581,10 +582,10 @@ func (t *AuthServiceTest) TestRefreshTokenUnavailableService() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("RefreshToken", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.RefreshToken(t.refreshTokenRequest)
 
 	assert.Nil(t.T(), actual)
@@ -603,10 +604,10 @@ func (t *AuthServiceTest) TestRefreshTokenUnknownError() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("RefreshToken", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.RefreshToken(t.refreshTokenRequest)
 
 	assert.Nil(t.T(), actual)
@@ -624,10 +625,10 @@ func (t *AuthServiceTest) TestForgotPasswordSuccess() {
 		IsSuccess: true,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("ForgotPassword", protoReq).Return(protoResp, nil)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.ForgotPassword(t.forgotPasswordRequest)
 
 	assert.Nil(t.T(), err)
@@ -646,10 +647,10 @@ func (t *AuthServiceTest) TestForgotPasswordNotFound() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("ForgotPassword", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.ForgotPassword(t.forgotPasswordRequest)
 
 	assert.Nil(t.T(), actual)
@@ -668,10 +669,10 @@ func (t *AuthServiceTest) TestForgotPasswordInternalErr() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("ForgotPassword", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.ForgotPassword(t.forgotPasswordRequest)
 
 	assert.Nil(t.T(), actual)
@@ -690,10 +691,10 @@ func (t *AuthServiceTest) TestForgotPasswordUnavailableService() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("ForgotPassword", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.ForgotPassword(t.forgotPasswordRequest)
 
 	assert.Nil(t.T(), actual)
@@ -712,10 +713,10 @@ func (t *AuthServiceTest) TestForgotPasswordUnknownErr() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("ForgotPassword", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.ForgotPassword(t.forgotPasswordRequest)
 
 	assert.Nil(t.T(), actual)
@@ -735,10 +736,10 @@ func (t *AuthServiceTest) TestResetPasswordSuccess() {
 		IsSuccess: true,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("ResetPassword", protoReq).Return(protoResp, nil)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.ResetPassword(t.resetPasswordRequest)
 
 	assert.Nil(t.T(), err)
@@ -758,10 +759,10 @@ func (t *AuthServiceTest) TestResetPasswordInvalid() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("ResetPassword", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.ResetPassword(t.resetPasswordRequest)
 
 	assert.Nil(t.T(), actual)
@@ -781,10 +782,10 @@ func (t *AuthServiceTest) TestResetPasswordInternalErr() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("ResetPassword", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.ResetPassword(t.resetPasswordRequest)
 
 	assert.Nil(t.T(), actual)
@@ -804,10 +805,10 @@ func (t *AuthServiceTest) TestResetPasswordUnavailableService() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("ResetPassword", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.ResetPassword(t.resetPasswordRequest)
 
 	assert.Nil(t.T(), actual)
@@ -827,10 +828,10 @@ func (t *AuthServiceTest) TestResetPasswordUnknownErr() {
 		Data:       nil,
 	}
 
-	client := auth.AuthClientMock{}
+	client := mockAuth.AuthClientMock{}
 	client.On("ResetPassword", protoReq).Return(nil, protoErr)
 
-	svc := NewService(&client)
+	svc := auth.NewService(&client)
 	actual, err := svc.ResetPassword(t.resetPasswordRequest)
 
 	assert.Nil(t.T(), actual)

@@ -13,17 +13,27 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type Service struct {
+type Service interface {
+	Signup(*dto.SignupRequest) (*dto.SignupResponse, *dto.ResponseErr)
+	SignIn(*dto.SignInRequest) (*dto.Credential, *dto.ResponseErr)
+	SignOut(string) (*dto.SignOutResponse, *dto.ResponseErr)
+	Validate(string) (*dto.TokenPayloadAuth, *dto.ResponseErr)
+	RefreshToken(*dto.RefreshTokenRequest) (*dto.Credential, *dto.ResponseErr)
+	ForgotPassword(*dto.ForgotPasswordRequest) (*dto.ForgotPasswordResponse, *dto.ResponseErr)
+	ResetPassword(*dto.ResetPasswordRequest) (*dto.ResetPasswordResponse, *dto.ResponseErr)
+}
+
+type serviceImpl struct {
 	client authProto.AuthServiceClient
 }
 
-func NewService(client authProto.AuthServiceClient) *Service {
-	return &Service{
+func NewService(client authProto.AuthServiceClient) Service {
+	return &serviceImpl{
 		client: client,
 	}
 }
 
-func (s *Service) Signup(request *dto.SignupRequest) (*dto.SignupResponse, *dto.ResponseErr) {
+func (s *serviceImpl) Signup(request *dto.SignupRequest) (*dto.SignupResponse, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -82,7 +92,7 @@ func (s *Service) Signup(request *dto.SignupRequest) (*dto.SignupResponse, *dto.
 	}, nil
 }
 
-func (s *Service) SignIn(request *dto.SignInRequest) (*dto.Credential, *dto.ResponseErr) {
+func (s *serviceImpl) SignIn(request *dto.SignInRequest) (*dto.Credential, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -138,7 +148,7 @@ func (s *Service) SignIn(request *dto.SignInRequest) (*dto.Credential, *dto.Resp
 	}, nil
 }
 
-func (s *Service) SignOut(token string) (*dto.SignOutResponse, *dto.ResponseErr) {
+func (s *serviceImpl) SignOut(token string) (*dto.SignOutResponse, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -185,7 +195,7 @@ func (s *Service) SignOut(token string) (*dto.SignOutResponse, *dto.ResponseErr)
 	}, nil
 }
 
-func (s *Service) Validate(token string) (*dto.TokenPayloadAuth, *dto.ResponseErr) {
+func (s *serviceImpl) Validate(token string) (*dto.TokenPayloadAuth, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -233,7 +243,7 @@ func (s *Service) Validate(token string) (*dto.TokenPayloadAuth, *dto.ResponseEr
 	}, nil
 }
 
-func (s *Service) RefreshToken(request *dto.RefreshTokenRequest) (*dto.Credential, *dto.ResponseErr) {
+func (s *serviceImpl) RefreshToken(request *dto.RefreshTokenRequest) (*dto.Credential, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -289,7 +299,7 @@ func (s *Service) RefreshToken(request *dto.RefreshTokenRequest) (*dto.Credentia
 	}, nil
 }
 
-func (s *Service) ForgotPassword(request *dto.ForgotPasswordRequest) (*dto.ForgotPasswordResponse, *dto.ResponseErr) {
+func (s *serviceImpl) ForgotPassword(request *dto.ForgotPasswordRequest) (*dto.ForgotPasswordResponse, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -342,7 +352,7 @@ func (s *Service) ForgotPassword(request *dto.ForgotPasswordRequest) (*dto.Forgo
 	}, nil
 }
 
-func (s *Service) ResetPassword(request *dto.ResetPasswordRequest) (*dto.ResetPasswordResponse, *dto.ResponseErr) {
+func (s *serviceImpl) ResetPassword(request *dto.ResetPasswordRequest) (*dto.ResetPasswordResponse, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
