@@ -55,3 +55,5 @@ coverage.out
 coverage.html
 
 token.txt
+
+docker-compose.qa.yaml
