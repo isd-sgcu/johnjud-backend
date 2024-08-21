@@ -12,16 +12,20 @@ import (
 
 	"github.com/isd-sgcu/johnjud-gateway/config"
 	"github.com/isd-sgcu/johnjud-gateway/constant"
+	"github.com/isd-sgcu/johnjud-gateway/database"
 	"github.com/isd-sgcu/johnjud-gateway/internal/auth"
+	"github.com/isd-sgcu/johnjud-gateway/internal/auth/email"
+	"github.com/isd-sgcu/johnjud-gateway/internal/auth/jwt"
+	"github.com/isd-sgcu/johnjud-gateway/internal/auth/token"
+	"github.com/isd-sgcu/johnjud-gateway/internal/cache"
 	"github.com/isd-sgcu/johnjud-gateway/internal/healthcheck"
 	"github.com/isd-sgcu/johnjud-gateway/internal/image"
 	guard "github.com/isd-sgcu/johnjud-gateway/internal/middleware/auth"
 	"github.com/isd-sgcu/johnjud-gateway/internal/pet"
 	"github.com/isd-sgcu/johnjud-gateway/internal/router"
 	"github.com/isd-sgcu/johnjud-gateway/internal/user"
+	"github.com/isd-sgcu/johnjud-gateway/internal/utils"
 	"github.com/isd-sgcu/johnjud-gateway/internal/validator"
-	authProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
-	userProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/user/v1"
 	petProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	imageProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 	"github.com/rs/zerolog/log"
@@ -64,6 +68,22 @@ func main() {
 			Msg("Failed to start service")
 	}
 
+	db, err := database.InitPostgresDatabase(&conf.Database, conf.App.IsDevelopment())
+	if err != nil {
+		log.Fatal().
+			Err(err).
+			Str("service", "auth").
+			Msg("Failed to init postgres connection")
+	}
+
+	cacheDb, err := database.InitRedisConnection(&conf.Redis)
+	if err != nil {
+		log.Fatal().
+			Err(err).
+			Str("service", "auth").
+			Msg("Failed to init redis connection")
+	}
+
 	v, err := validator.NewIValidator()
 	if err != nil {
 		log.Fatal().
@@ -80,14 +100,6 @@ func main() {
 			Msg("Cannot connect to service")
 	}
 
-	authConn, err := grpc.Dial(conf.Service.Auth, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Fatal().
-			Err(err).
-			Str("service", "johnjud-auth").
-			Msg("Cannot connect to service")
-	}
-
 	fileConn, err := grpc.Dial(conf.Service.File, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal().
@@ -98,15 +110,28 @@ func main() {
 
 	hc := healthcheck.NewHandler()
 
-	userClient := userProto.NewUserServiceClient(authConn)
-	userService := user.NewService(userClient)
-	userHandler := user.NewHandler(userService, v)
+	uuidUtil := utils.NewUuidUtil()
+	bcryptUtil := utils.NewBcryptUtil()
 
-	authClient := authProto.NewAuthServiceClient(authConn)
-	authService := auth.NewService(authClient)
-	authHandler := auth.NewHandler(authService, userService, v)
+	accessTokenCache := cache.NewRepository(cacheDb)
+	refreshTokenCache := cache.NewRepository(cacheDb)
+	resetPasswordCache := cache.NewRepository(cacheDb)
 
-	authGuard := guard.NewAuthGuard(authService, constant.ExcludePath, constant.AdminPath, conf.App, constant.VersionList)
+	bcryptUtils := utils.NewBcryptUtil()
+	userRepo := user.NewRepository(db)
+	userSvc := user.NewService(userRepo, bcryptUtils)
+	userHandler := user.NewHandler(userSvc, v)
+
+	jwtStrat := jwt.NewJwtStrategy(conf.Jwt.Secret)
+	jwtUtils := jwt.NewJwtUtil()
+	jwtSvc := jwt.NewService(conf.Jwt, jwtStrat, jwtUtils)
+	tokenSvc := token.NewService(jwtSvc, accessTokenCache, refreshTokenCache, resetPasswordCache, uuidUtil)
+	emailSvc := email.NewService(conf.Sendgrid)
+	authRepo := auth.NewRepository(db)
+	authSvc := auth.NewService(authRepo, userRepo, tokenSvc, emailSvc, bcryptUtil, conf.Auth)
+	authHandler := auth.NewHandler(authSvc, userSvc, v)
+
+	authGuard := guard.NewAuthGuard(authSvc, constant.ExcludePath, constant.AdminPath, conf.App, constant.VersionList)
 
 	imageClient := imageProto.NewImageServiceClient(fileConn)
 	imageService := image.NewService(imageClient)

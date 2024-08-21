@@ -1,5 +1,7 @@
 package dto
 
+import "net/http"
+
 type ResponseErr struct {
 	StatusCode int         `json:"status_code"`
 	Message    string      `json:"message"`
@@ -66,4 +68,32 @@ type ResponseGatewayTimeoutErr struct {
 	StatusCode int         `json:"status_code" example:"504"`
 	Message    string      `json:"message" example:"Connection timeout"`
 	Data       interface{} `json:"data"`
+}
+
+func BadRequestError(message string) *ResponseErr {
+	return &ResponseErr{http.StatusBadRequest, message, nil}
+}
+
+func UnauthorizedError(message string) *ResponseErr {
+	return &ResponseErr{http.StatusUnauthorized, message, nil}
+}
+
+func ForbiddenError(message string) *ResponseErr {
+	return &ResponseErr{http.StatusForbidden, message, nil}
+}
+
+func NotFoundError(message string) *ResponseErr {
+	return &ResponseErr{http.StatusNotFound, message, nil}
+}
+
+func ConflictError(message string) *ResponseErr {
+	return &ResponseErr{http.StatusConflict, message, nil}
+}
+
+func InternalServerError(message string) *ResponseErr {
+	return &ResponseErr{http.StatusInternalServerError, message, nil}
+}
+
+func ServiceUnavailableError(message string) *ResponseErr {
+	return &ResponseErr{http.StatusServiceUnavailable, message, nil}
 }

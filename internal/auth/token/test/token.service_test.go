@@ -15,7 +15,6 @@ import (
 	mock_cache "github.com/isd-sgcu/johnjud-gateway/mocks/repository/cache"
 	"github.com/isd-sgcu/johnjud-gateway/mocks/service/jwt"
 	"github.com/isd-sgcu/johnjud-gateway/mocks/utils"
-	authProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
@@ -75,10 +74,10 @@ func (t *TokenServiceTest) TestCreateCredentialSuccess() {
 		Role:          t.role,
 	}
 
-	expected := authProto.Credential{
+	expected := dto.Credential{
 		AccessToken:  t.accessToken,
 		RefreshToken: t.refreshToken.String(),
-		ExpiresIn:    int32(t.jwtConfig.ExpiresIn),
+		ExpiresIn:    int(t.jwtConfig.ExpiresIn),
 	}
 
 	controller := gomock.NewController(t.T())

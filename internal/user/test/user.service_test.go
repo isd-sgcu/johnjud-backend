@@ -1,32 +1,32 @@
 package user
 
 import (
+	"errors"
 	"net/http"
 	"testing"
+	"time"
+
+	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
+	"github.com/isd-sgcu/johnjud-gateway/internal/model"
+	"github.com/isd-sgcu/johnjud-gateway/internal/user"
+	mock "github.com/isd-sgcu/johnjud-gateway/mocks/repository/user"
+	"github.com/isd-sgcu/johnjud-gateway/mocks/utils"
 
 	"github.com/go-faker/faker/v4"
-	"github.com/isd-sgcu/johnjud-gateway/constant"
-	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	"github.com/isd-sgcu/johnjud-gateway/internal/user"
-	mockUser "github.com/isd-sgcu/johnjud-gateway/mocks/client/user"
-	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/user/v1"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"gorm.io/gorm"
 )
 
 type UserServiceTest struct {
 	suite.Suite
-	User                  *proto.User
-	FindOneUserReq        *proto.FindOneUserRequest
-	UpdateUserReq         *proto.UpdateUserRequest
-	UpdateUserDto         *dto.UpdateUserRequest
-	DeleteUserReq         *proto.DeleteUserRequest
-	NotFoundErr           *dto.ResponseErr
-	UnavailableServiceErr *dto.ResponseErr
-	ConflictErr           *dto.ResponseErr
-	InternalErr           *dto.ResponseErr
+	User              *model.User
+	UpdateUser        *model.User
+	UserDto           *dto.User
+	UserDtoNoPassword *dto.User
+	HashedPassword    string
+	UpdateUserReqMock *dto.UpdateUserRequest
 }
 
 func TestUserService(t *testing.T) {
@@ -34,246 +34,141 @@ func TestUserService(t *testing.T) {
 }
 
 func (t *UserServiceTest) SetupTest() {
-	t.User = &proto.User{
-		Id:        faker.UUIDDigit(),
+	t.User = &model.User{
+		Base: model.Base{
+			ID:        uuid.New(),
+			CreatedAt: time.Time{},
+			UpdatedAt: time.Time{},
+			DeletedAt: gorm.DeletedAt{},
+		},
 		Email:     faker.Email(),
 		Password:  faker.Password(),
-		Firstname: faker.FirstName(),
-		Lastname:  faker.LastName(),
+		Firstname: faker.Username(),
+		Lastname:  faker.Username(),
 		Role:      "user",
 	}
 
-	t.FindOneUserReq = &proto.FindOneUserRequest{
-		Id: t.User.Id,
+	t.UserDto = &dto.User{
+		Id:        t.User.ID.String(),
+		Email:     t.User.Email,
+		Firstname: t.User.Firstname,
+		Lastname:  t.User.Lastname,
 	}
 
-	t.UpdateUserDto = &dto.UpdateUserRequest{
-		Email:     faker.Email(),
-		Password:  faker.Password(),
-		Firstname: faker.FirstName(),
-		Lastname:  faker.LastName(),
+	t.UserDtoNoPassword = &dto.User{
+		Id:        t.User.ID.String(),
+		Email:     t.User.Email,
+		Firstname: t.User.Firstname,
+		Lastname:  t.User.Lastname,
 	}
 
-	t.UpdateUserReq = &proto.UpdateUserRequest{
-		Id:        t.User.Id,
-		Email:     t.UpdateUserDto.Email,
-		Password:  t.UpdateUserDto.Password,
-		Firstname: t.UpdateUserDto.Firstname,
-		Lastname:  t.UpdateUserDto.Lastname,
+	t.UpdateUserReqMock = &dto.UpdateUserRequest{
+		Email:     t.User.Email,
+		Password:  t.User.Password,
+		Firstname: t.User.Firstname,
+		Lastname:  t.User.Lastname,
 	}
 
-	t.DeleteUserReq = &proto.DeleteUserRequest{
-		Id: t.User.Id,
-	}
+	t.HashedPassword = faker.Password()
 
-	t.UnavailableServiceErr = &dto.ResponseErr{
-		StatusCode: http.StatusServiceUnavailable,
-		Message:    constant.UnavailableServiceMessage,
-		Data:       nil,
-	}
-
-	t.NotFoundErr = &dto.ResponseErr{
-		StatusCode: http.StatusNotFound,
-		Message:    constant.UserNotFoundMessage,
-		Data:       nil,
-	}
-
-	t.ConflictErr = &dto.ResponseErr{
-		StatusCode: http.StatusConflict,
-		Message:    constant.DuplicateEmailMessage,
-		Data:       nil,
-	}
-
-	t.InternalErr = &dto.ResponseErr{
-		StatusCode: http.StatusInternalServerError,
-		Message:    constant.InternalErrorMessage,
-		Data:       nil,
+	t.UpdateUser = &model.User{
+		Email:     t.User.Email,
+		Password:  t.HashedPassword,
+		Firstname: t.User.Firstname,
+		Lastname:  t.User.Lastname,
 	}
 }
 
 func (t *UserServiceTest) TestFindOneSuccess() {
-	protoResp := &proto.FindOneUserResponse{
-		User: &proto.User{
-			Id:        t.User.Id,
-			Email:     t.User.Email,
-			Firstname: t.User.Firstname,
-			Lastname:  t.User.Lastname,
-			Role:      t.User.Role,
-		},
-	}
+	want := t.UserDtoNoPassword
 
-	expected := &dto.User{
-		Id:        t.User.Id,
-		Email:     t.User.Email,
-		Firstname: t.User.Firstname,
-		Lastname:  t.User.Lastname,
-	}
+	repo := &mock.UserRepositoryMock{}
+	repo.On("FindById", t.User.ID.String(), &model.User{}).Return(t.User, nil)
 
-	client := mockUser.UserClientMock{}
-	client.On("FindOne", t.FindOneUserReq).Return(protoResp, nil)
-
-	svc := user.NewService(&client)
-	actual, err := svc.FindOne(t.User.Id)
+	brcyptUtil := &utils.BcryptUtilMock{}
+	srv := user.NewService(repo, brcyptUtil)
+	actual, err := srv.FindOne(t.User.ID.String())
 
 	assert.Nil(t.T(), err)
-	assert.Equal(t.T(), expected, actual)
+	assert.Equal(t.T(), want, actual)
 }
 
-func (t *UserServiceTest) TestFindOneNotFoundError() {
-	expected := t.NotFoundErr
+func (t *UserServiceTest) TestFindOneNotFoundErr() {
+	repo := &mock.UserRepositoryMock{}
+	repo.On("FindById", t.User.ID.String(), &model.User{}).Return(nil, gorm.ErrRecordNotFound)
 
-	client := mockUser.UserClientMock{}
-	clienErr := status.Error(codes.NotFound, constant.UserNotFoundMessage)
-	client.On("FindOne", t.FindOneUserReq).Return(nil, clienErr)
-
-	svc := user.NewService(&client)
-	actual, err := svc.FindOne(t.User.Id)
+	brcyptUtil := &utils.BcryptUtilMock{}
+	srv := user.NewService(repo, brcyptUtil)
+	actual, err := srv.FindOne(t.User.ID.String())
 
 	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
+	assert.Equal(t.T(), http.StatusNotFound, err.StatusCode)
 }
 
-func (t *UserServiceTest) TestFindOneUnavailableServiceError() {
-	expected := t.UnavailableServiceErr
+func (t *UserServiceTest) TestFindOneInternalErr() {
+	repo := &mock.UserRepositoryMock{}
+	repo.On("FindById", t.User.ID.String(), &model.User{}).Return(nil, errors.New("Not found user"))
 
-	client := mockUser.UserClientMock{}
-	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
-	client.On("FindOne", t.FindOneUserReq).Return(nil, clientErr)
-
-	svc := user.NewService(&client)
-	actual, err := svc.FindOne(t.User.Id)
+	brcyptUtil := &utils.BcryptUtilMock{}
+	srv := user.NewService(repo, brcyptUtil)
+	actual, err := srv.FindOne(t.User.ID.String())
 
 	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
-}
-
-func (t *UserServiceTest) TestFindOneInternalError() {
-	expected := t.InternalErr
-
-	client := mockUser.UserClientMock{}
-	clientErr := status.Error(codes.Internal, constant.InternalErrorMessage)
-	client.On("FindOne", t.FindOneUserReq).Return(nil, clientErr)
-
-	svc := user.NewService(&client)
-	actual, err := svc.FindOne(t.User.Id)
-
-	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
+	assert.Equal(t.T(), http.StatusInternalServerError, err.StatusCode)
 }
 
 func (t *UserServiceTest) TestUpdateSuccess() {
-	protoResp := &proto.UpdateUserResponse{
-		User: &proto.User{
-			Id:        t.User.Id,
-			Email:     t.User.Email,
-			Firstname: t.User.Firstname,
-			Lastname:  t.User.Lastname,
-			Role:      t.User.Role,
-		},
-	}
+	want := t.UserDtoNoPassword
 
-	expected := &dto.User{
-		Id:        t.User.Id,
-		Email:     t.User.Email,
-		Firstname: t.User.Firstname,
-		Lastname:  t.User.Lastname,
-	}
+	repo := &mock.UserRepositoryMock{}
+	repo.On("Update", t.User.ID.String(), t.UpdateUser).Return(t.User, nil)
 
-	client := mockUser.UserClientMock{}
-	client.On("Update", t.UpdateUserReq).Return(protoResp, nil)
+	brcyptUtil := &utils.BcryptUtilMock{}
+	brcyptUtil.On("GenerateHashedPassword", t.User.Password).Return(t.HashedPassword, nil)
 
-	svc := user.NewService(&client)
-	actual, err := svc.Update(t.User.Id, t.UpdateUserDto)
+	srv := user.NewService(repo, brcyptUtil)
+	actual, err := srv.Update(t.User.ID.String(), t.UpdateUserReqMock)
 
 	assert.Nil(t.T(), err)
-	assert.Equal(t.T(), expected, actual)
+	assert.Equal(t.T(), want, actual)
 }
 
-func (t *UserServiceTest) TestUpdateDuplicateEmail() {
-	expected := t.ConflictErr
+func (t *UserServiceTest) TestUpdateInternalErr() {
+	repo := &mock.UserRepositoryMock{}
+	repo.On("Update", t.User.ID.String(), t.UpdateUser).Return(nil, errors.New("Not found user"))
 
-	client := mockUser.UserClientMock{}
-	clientErr := status.Error(codes.AlreadyExists, constant.DuplicateEmailMessage)
-	client.On("Update", t.UpdateUserReq).Return(nil, clientErr)
+	brcyptUtil := &utils.BcryptUtilMock{}
+	brcyptUtil.On("GenerateHashedPassword", t.User.Password).Return(t.HashedPassword, nil)
 
-	svc := user.NewService(&client)
-	actual, err := svc.Update(t.User.Id, t.UpdateUserDto)
-
-	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
-}
-
-func (t *UserServiceTest) TestUpdateUnavailableServiceError() {
-	expected := t.UnavailableServiceErr
-
-	client := mockUser.UserClientMock{}
-	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
-	client.On("Update", t.UpdateUserReq).Return(nil, clientErr)
-
-	svc := user.NewService(&client)
-	actual, err := svc.Update(t.User.Id, t.UpdateUserDto)
+	srv := user.NewService(repo, brcyptUtil)
+	actual, err := srv.Update(t.User.ID.String(), t.UpdateUserReqMock)
 
 	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
-}
-
-func (t *UserServiceTest) TestUpdateInternalError() {
-	expected := t.InternalErr
-
-	client := mockUser.UserClientMock{}
-	clientErr := status.Error(codes.Internal, constant.InternalErrorMessage)
-	client.On("Update", t.UpdateUserReq).Return(nil, clientErr)
-
-	svc := user.NewService(&client)
-	actual, err := svc.Update(t.User.Id, t.UpdateUserDto)
-
-	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
+	assert.Equal(t.T(), http.StatusInternalServerError, err.StatusCode)
 }
 
 func (t *UserServiceTest) TestDeleteSuccess() {
-	protoResp := &proto.DeleteUserResponse{
-		Success: true,
-	}
+	want := &dto.DeleteUserResponse{Success: true}
 
-	expected := &dto.DeleteUserResponse{
-		Success: true,
-	}
+	repo := &mock.UserRepositoryMock{}
+	repo.On("Delete", t.User.ID.String()).Return(nil)
 
-	client := mockUser.UserClientMock{}
-	client.On("Delete", t.DeleteUserReq).Return(protoResp, nil)
-
-	svc := user.NewService(&client)
-	actual, err := svc.Delete(t.User.Id)
+	brcyptUtil := &utils.BcryptUtilMock{}
+	srv := user.NewService(repo, brcyptUtil)
+	actual, err := srv.Delete(t.UserDto.Id)
 
 	assert.Nil(t.T(), err)
-	assert.Equal(t.T(), expected, actual)
+	assert.Equal(t.T(), want, actual)
 }
 
-func (t *UserServiceTest) TestDeleteUnavailableServiceError() {
-	expected := t.UnavailableServiceErr
+func (t *UserServiceTest) TestDeleteInternalErr() {
+	repo := &mock.UserRepositoryMock{}
+	repo.On("Delete", t.User.ID.String()).Return(errors.New("Not found user"))
 
-	client := mockUser.UserClientMock{}
-	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
-	client.On("Delete", t.DeleteUserReq).Return(nil, clientErr)
-
-	svc := user.NewService(&client)
-	actual, err := svc.Delete(t.User.Id)
+	brcyptUtil := &utils.BcryptUtilMock{}
+	srv := user.NewService(repo, brcyptUtil)
+	actual, err := srv.Delete(t.UserDto.Id)
 
 	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
-}
-
-func (t *UserServiceTest) TestDeleteInternalError() {
-	expected := t.InternalErr
-
-	client := mockUser.UserClientMock{}
-	clientErr := status.Error(codes.Internal, constant.InternalErrorMessage)
-	client.On("Delete", t.DeleteUserReq).Return(nil, clientErr)
-
-	svc := user.NewService(&client)
-	actual, err := svc.Delete(t.User.Id)
-
-	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
+	assert.Equal(t.T(), http.StatusInternalServerError, err.StatusCode)
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/internal/cache"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
 	"github.com/isd-sgcu/johnjud-gateway/internal/utils"
-	authProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
@@ -18,7 +17,7 @@ import (
 )
 
 type Service interface {
-	CreateCredential(userId string, role constant.Role, authSessionId string) (*authProto.Credential, error)
+	CreateCredential(userId string, role constant.Role, authSessionId string) (*dto.Credential, error)
 	Validate(token string) (*dto.UserCredential, error)
 	CreateRefreshToken() string
 	RemoveAccessTokenCache(authSessionId string) error
@@ -47,7 +46,7 @@ func NewService(jwtService jwt.Service, accessTokenCache cache.Repository, refre
 	}
 }
 
-func (s *serviceImpl) CreateCredential(userId string, role constant.Role, authSessionId string) (*authProto.Credential, error) {
+func (s *serviceImpl) CreateCredential(userId string, role constant.Role, authSessionId string) (*dto.Credential, error) {
 	accessToken, err := s.jwtService.SignAuth(userId, role, authSessionId)
 	if err != nil {
 		log.Error().
@@ -91,10 +90,10 @@ func (s *serviceImpl) CreateCredential(userId string, role constant.Role, authSe
 		return nil, err
 	}
 
-	credential := &authProto.Credential{
+	credential := &dto.Credential{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		ExpiresIn:    int32(jwtConf.ExpiresIn),
+		ExpiresIn:    jwtConf.ExpiresIn,
 	}
 
 	return credential, nil

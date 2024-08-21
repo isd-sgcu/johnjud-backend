@@ -1,407 +1,243 @@
 package auth
 
 import (
-	"context"
+	"fmt"
 	"net/http"
-	"time"
 
+	"github.com/isd-sgcu/johnjud-gateway/config"
 	"github.com/isd-sgcu/johnjud-gateway/constant"
+	"github.com/isd-sgcu/johnjud-gateway/internal/auth/email"
+	"github.com/isd-sgcu/johnjud-gateway/internal/auth/token"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	authProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
+	"github.com/isd-sgcu/johnjud-gateway/internal/model"
+	"github.com/isd-sgcu/johnjud-gateway/internal/user"
+	"github.com/isd-sgcu/johnjud-gateway/internal/utils"
 	"github.com/rs/zerolog/log"
+
+	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"gorm.io/gorm"
 )
 
 type Service interface {
-	Signup(*dto.SignupRequest) (*dto.SignupResponse, *dto.ResponseErr)
-	SignIn(*dto.SignInRequest) (*dto.Credential, *dto.ResponseErr)
-	SignOut(string) (*dto.SignOutResponse, *dto.ResponseErr)
-	Validate(string) (*dto.TokenPayloadAuth, *dto.ResponseErr)
-	RefreshToken(*dto.RefreshTokenRequest) (*dto.Credential, *dto.ResponseErr)
-	ForgotPassword(*dto.ForgotPasswordRequest) (*dto.ForgotPasswordResponse, *dto.ResponseErr)
-	ResetPassword(*dto.ResetPasswordRequest) (*dto.ResetPasswordResponse, *dto.ResponseErr)
+	Validate(refreshToken string) (*dto.TokenPayloadAuth, *dto.ResponseErr)
+	RefreshToken(request *dto.RefreshTokenRequest) (*dto.Credential, *dto.ResponseErr)
+	Signup(request *dto.SignupRequest) (*dto.SignupResponse, *dto.ResponseErr)
+	SignIn(request *dto.SignInRequest) (*dto.Credential, *dto.ResponseErr)
+	SignOut(accessToken string) (*dto.SignOutResponse, *dto.ResponseErr)
+	ForgotPassword(request *dto.ForgotPasswordRequest) (*dto.ForgotPasswordResponse, *dto.ResponseErr)
+	ResetPassword(request *dto.ResetPasswordRequest) (*dto.ResetPasswordResponse, *dto.ResponseErr)
 }
 
 type serviceImpl struct {
-	client authProto.AuthServiceClient
+	authRepo     Repository
+	userRepo     user.Repository
+	tokenService token.Service
+	emailService email.Service
+	bcryptUtil   utils.IBcryptUtil
+	config       config.Auth
 }
 
-func NewService(client authProto.AuthServiceClient) Service {
+func NewService(authRepo Repository, userRepo user.Repository, tokenService token.Service, emailService email.Service, bcryptUtil utils.IBcryptUtil, config config.Auth) Service {
 	return &serviceImpl{
-		client: client,
+		authRepo:     authRepo,
+		userRepo:     userRepo,
+		tokenService: tokenService,
+		emailService: emailService,
+		bcryptUtil:   bcryptUtil,
+		config:       config,
 	}
 }
 
-func (s *serviceImpl) Signup(request *dto.SignupRequest) (*dto.SignupResponse, *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	resp, err := s.client.SignUp(ctx, &authProto.SignUpRequest{
-		FirstName: request.Firstname,
-		LastName:  request.Lastname,
-		Email:     request.Email,
-		Password:  request.Password,
-	})
+func (s *serviceImpl) Validate(refreshToken string) (*dto.TokenPayloadAuth, *dto.ResponseErr) {
+	userCredential, err := s.tokenService.Validate(refreshToken)
 	if err != nil {
-		st, ok := status.FromError(err)
-		log.Error().
-			Str("service", "auth").
-			Str("action", "SignUp").
-			Str("email", request.Email).
-			Msg(st.Message())
-		if !ok {
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
-		}
-		switch st.Code() {
-		case codes.AlreadyExists:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusConflict,
-				Message:    constant.DuplicateEmailMessage,
-				Data:       nil,
-			}
-		case codes.Internal:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
-		default:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusServiceUnavailable,
-				Message:    constant.UnavailableServiceMessage,
-				Data:       nil,
-			}
+		return nil, &dto.ResponseErr{
+			StatusCode: http.StatusUnauthorized,
+			Message:    constant.InvalidTokenErrorMessage,
 		}
 	}
 
-	log.Info().
-		Str("service", "auth").
-		Str("action", "SignUp").
-		Str("email", request.Email).
-		Msg("sign up successfully")
-	return &dto.SignupResponse{
-		Id:        resp.Id,
-		Email:     resp.Email,
-		Firstname: resp.FirstName,
-		Lastname:  resp.LastName,
-	}, nil
-}
-
-func (s *serviceImpl) SignIn(request *dto.SignInRequest) (*dto.Credential, *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	resp, err := s.client.SignIn(ctx, &authProto.SignInRequest{
-		Email:    request.Email,
-		Password: request.Password,
-	})
-	if err != nil {
-		st, ok := status.FromError(err)
-		log.Error().
-			Str("service", "auth").
-			Str("action", "SignIn").
-			Str("email", request.Email).
-			Msg(st.Message())
-		if !ok {
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
-		}
-		switch st.Code() {
-		case codes.PermissionDenied:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusForbidden,
-				Message:    constant.IncorrectEmailPasswordMessage,
-				Data:       nil,
-			}
-		case codes.Internal:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
-		default:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusServiceUnavailable,
-				Message:    constant.UnavailableServiceMessage,
-				Data:       nil,
-			}
-		}
-	}
-
-	log.Info().
-		Str("service", "auth").
-		Str("action", "SignIn").
-		Str("email", request.Email).
-		Msg("sign in successfully")
-	return &dto.Credential{
-		AccessToken:  resp.Credential.AccessToken,
-		RefreshToken: resp.Credential.RefreshToken,
-		ExpiresIn:    int(resp.Credential.ExpiresIn),
-	}, nil
-}
-
-func (s *serviceImpl) SignOut(token string) (*dto.SignOutResponse, *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	response, err := s.client.SignOut(ctx, &authProto.SignOutRequest{
-		Token: token,
-	})
-	if err != nil {
-		st, ok := status.FromError(err)
-		log.Error().
-			Str("service", "auth").
-			Str("action", "SignOut").
-			Str("token", token).
-			Msg(st.Message())
-		if !ok {
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
-		}
-		switch st.Code() {
-		case codes.Internal:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
-		default:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusServiceUnavailable,
-				Message:    constant.UnavailableServiceMessage,
-				Data:       nil,
-			}
-		}
-	}
-
-	log.Info().
-		Str("service", "auth").
-		Str("action", "SignOut").
-		Str("token", token).
-		Msg("sign out successfully")
-	return &dto.SignOutResponse{
-		IsSuccess: response.IsSuccess,
-	}, nil
-}
-
-func (s *serviceImpl) Validate(token string) (*dto.TokenPayloadAuth, *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	response, err := s.client.Validate(ctx, &authProto.ValidateRequest{
-		Token: token,
-	})
-	if err != nil {
-		st, ok := status.FromError(err)
-		log.Error().
-			Str("service", "auth").
-			Str("action", "Validate").
-			Str("token", token).
-			Msg(st.Message())
-		if !ok {
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
-		}
-		switch st.Code() {
-		case codes.Unauthenticated:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusUnauthorized,
-				Message:    constant.UnauthorizedMessage,
-				Data:       nil,
-			}
-		default:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusServiceUnavailable,
-				Message:    constant.UnavailableServiceMessage,
-				Data:       nil,
-			}
-		}
-	}
-
-	log.Info().
-		Str("service", "auth").
-		Str("action", "Validate").
-		Str("token", token).
-		Msg("validate successfully")
 	return &dto.TokenPayloadAuth{
-		UserId: response.UserId,
-		Role:   response.Role,
+		UserId: userCredential.UserID,
+		Role:   string(userCredential.Role),
 	}, nil
 }
 
 func (s *serviceImpl) RefreshToken(request *dto.RefreshTokenRequest) (*dto.Credential, *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	response, err := s.client.RefreshToken(ctx, &authProto.RefreshTokenRequest{
-		RefreshToken: request.RefreshToken,
-	})
+	refreshTokenCache, err := s.tokenService.FindRefreshTokenCache(request.RefreshToken)
 	if err != nil {
-		st, ok := status.FromError(err)
-		log.Error().
-			Str("service", "auth").
-			Str("action", "RefreshToken").
-			Str("token", request.RefreshToken).
-			Msg(st.Message())
-		if !ok {
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
-		}
+		st, _ := status.FromError(err)
 		switch st.Code() {
 		case codes.InvalidArgument:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusBadRequest,
-				Message:    constant.InvalidTokenMessage,
-				Data:       nil,
-			}
-		case codes.Internal:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
+			return nil, dto.BadRequestError(constant.InvalidTokenErrorMessage)
 		default:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusServiceUnavailable,
-				Message:    constant.UnavailableServiceMessage,
-				Data:       nil,
-			}
+			return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
 		}
-
+	}
+	credential, err := s.tokenService.CreateCredential(refreshTokenCache.UserID, refreshTokenCache.Role, refreshTokenCache.AuthSessionID)
+	if err != nil {
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
 	}
 
-	log.Info().
-		Str("service", "auth").
-		Str("action", "RefreshToken").
-		Str("token", request.RefreshToken).
-		Msg("Refresh token successfully")
-	return &dto.Credential{
-		AccessToken:  response.Credential.AccessToken,
-		RefreshToken: response.Credential.RefreshToken,
-		ExpiresIn:    int(response.Credential.ExpiresIn),
+	err = s.tokenService.RemoveRefreshTokenCache(request.RefreshToken)
+	if err != nil {
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
+	}
+
+	return credential, nil
+}
+
+func (s *serviceImpl) Signup(request *dto.SignupRequest) (*dto.SignupResponse, *dto.ResponseErr) {
+	hashPassword, err := s.bcryptUtil.GenerateHashedPassword(request.Password)
+	if err != nil {
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
+	}
+
+	createUser := &model.User{
+		Email:     request.Email,
+		Password:  hashPassword,
+		Firstname: request.Firstname,
+		Lastname:  request.Lastname,
+		Role:      constant.USER,
+	}
+	err = s.userRepo.Create(createUser)
+	if err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return nil, dto.ConflictError(constant.DuplicateEmailErrorMessage)
+		}
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
+	}
+
+	return &dto.SignupResponse{
+		Id:        createUser.ID.String(),
+		Firstname: createUser.Firstname,
+		Lastname:  createUser.Lastname,
+		Email:     createUser.Email,
 	}, nil
 }
 
-func (s *serviceImpl) ForgotPassword(request *dto.ForgotPasswordRequest) (*dto.ForgotPasswordResponse, *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	_, err := s.client.ForgotPassword(ctx, &authProto.ForgotPasswordRequest{
-		Email: request.Email,
-	})
+func (s *serviceImpl) SignIn(request *dto.SignInRequest) (*dto.Credential, *dto.ResponseErr) {
+	user := &model.User{}
+	err := s.userRepo.FindByEmail(request.Email, user)
 	if err != nil {
-		st, ok := status.FromError(err)
-		log.Error().
-			Str("service", "auth").
-			Str("action", "ForgotPassword").
-			Str("email", request.Email).
-			Msg(st.Message())
-		if !ok {
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
-		}
-		switch st.Code() {
-		case codes.NotFound:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusNotFound,
-				Message:    constant.UserNotFoundMessage,
-				Data:       nil,
-			}
-		case codes.Internal:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
-		default:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusServiceUnavailable,
-				Message:    constant.UnavailableServiceMessage,
-				Data:       nil,
-			}
-		}
+		return nil, dto.UnauthorizedError(constant.IncorrectEmailPasswordErrorMessage)
 	}
 
-	log.Info().
-		Str("service", "auth").
-		Str("action", "ForgotPassword").
-		Str("email", request.Email).
-		Msg("Forgot password successfully")
+	err = s.bcryptUtil.CompareHashedPassword(user.Password, request.Password)
+	if err != nil {
+		return nil, dto.UnauthorizedError(constant.IncorrectEmailPasswordErrorMessage)
+	}
+
+	createAuthSession := &model.AuthSession{
+		UserID: user.ID,
+	}
+	err = s.authRepo.Create(createAuthSession)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Str("service", "auth").
+			Str("module", "signin").
+			Msg("Error creating auth session")
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
+	}
+
+	credential, err := s.tokenService.CreateCredential(user.ID.String(), user.Role, createAuthSession.ID.String())
+	if err != nil {
+		log.Error().
+			Err(err).
+			Str("service", "auth").
+			Str("module", "signin").
+			Msg("Error creating credential")
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
+	}
+
+	return credential, nil
+}
+
+func (s *serviceImpl) SignOut(accessToken string) (*dto.SignOutResponse, *dto.ResponseErr) {
+	userCredential, err := s.tokenService.Validate(accessToken)
+	if err != nil {
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
+	}
+
+	err = s.tokenService.RemoveRefreshTokenCache(userCredential.RefreshToken)
+	if err != nil {
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
+	}
+
+	err = s.tokenService.RemoveAccessTokenCache(userCredential.AuthSessionID)
+	if err != nil {
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
+	}
+
+	err = s.authRepo.Delete(userCredential.AuthSessionID)
+	if err != nil {
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
+	}
+
+	return &dto.SignOutResponse{IsSuccess: true}, nil
+}
+
+func (s *serviceImpl) ForgotPassword(request *dto.ForgotPasswordRequest) (*dto.ForgotPasswordResponse, *dto.ResponseErr) {
+	user := &model.User{}
+	err := s.userRepo.FindByEmail(request.Email, user)
+	if err != nil {
+		return nil, dto.NotFoundError(constant.UserNotFoundErrorMessage)
+	}
+
+	resetPasswordToken, err := s.tokenService.CreateResetPasswordToken(user.ID.String())
+	if err != nil {
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
+	}
+
+	resetPasswordURL := fmt.Sprintf("%s/admin/reset-password/%s", s.config.ClientURL, resetPasswordToken)
+	emailSubject := constant.ResetPasswordSubject
+	emailContent := fmt.Sprintf("Please click the following url to reset password %s", resetPasswordURL)
+	if err := s.emailService.SendEmail(emailSubject, user.Firstname, user.Email, emailContent); err != nil {
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
+	}
+
 	return &dto.ForgotPasswordResponse{
 		IsSuccess: true,
 	}, nil
 }
 
 func (s *serviceImpl) ResetPassword(request *dto.ResetPasswordRequest) (*dto.ResetPasswordResponse, *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	response, err := s.client.ResetPassword(ctx, &authProto.ResetPasswordRequest{
-		Token:    request.Token,
-		Password: request.Password,
-	})
+	resetTokenCache, err := s.tokenService.FindResetPasswordToken(request.Token)
 	if err != nil {
-		st, ok := status.FromError(err)
-		log.Error().
-			Str("service", "auth").
-			Str("action", "ResetPassword").
-			Str("token", request.Token).
-			Msg(st.Message())
-		if !ok {
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
-		}
-		switch st.Code() {
-		case codes.InvalidArgument:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusBadRequest,
-				Message:    constant.ForbiddenSamePasswordMessage,
-				Data:       nil,
-			}
-		case codes.Internal:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
-		default:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusServiceUnavailable,
-				Message:    constant.UnavailableServiceMessage,
-				Data:       nil,
-			}
-		}
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
 	}
 
-	log.Info().
-		Str("service", "auth").
-		Str("action", "ResetPassword").
-		Str("token", request.Token).
-		Msg("Reset password successfully")
+	userDb := &model.User{}
+	if err := s.userRepo.FindById(resetTokenCache.UserID, userDb); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, dto.NotFoundError(constant.UserNotFoundErrorMessage)
+		}
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
+	}
+
+	err = s.bcryptUtil.CompareHashedPassword(userDb.Password, request.Password)
+	if err == nil {
+		return nil, dto.BadRequestError(constant.IncorrectPasswordErrorMessage)
+	}
+
+	hashPassword, err := s.bcryptUtil.GenerateHashedPassword(request.Password)
+	if err != nil {
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
+	}
+
+	userDb.Password = hashPassword
+	if err := s.userRepo.Update(resetTokenCache.UserID, userDb); err != nil {
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
+	}
+
+	if err := s.tokenService.RemoveResetPasswordToken(request.Token); err != nil {
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
+	}
+
 	return &dto.ResetPasswordResponse{
-		IsSuccess: response.IsSuccess,
+		IsSuccess: true,
 	}, nil
 }
