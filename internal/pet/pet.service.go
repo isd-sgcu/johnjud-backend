@@ -16,19 +16,29 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type Service struct {
+type Service interface {
+	FindAll(*dto.FindAllPetRequest, bool) (*dto.FindAllPetResponse, *dto.ResponseErr)
+	FindOne(string) (*dto.PetResponse, *dto.ResponseErr)
+	Create(*dto.CreatePetRequest) (*dto.PetResponse, *dto.ResponseErr)
+	Update(string, *dto.UpdatePetRequest) (*dto.PetResponse, *dto.ResponseErr)
+	Delete(string) (*dto.DeleteResponse, *dto.ResponseErr)
+	ChangeView(string, *dto.ChangeViewPetRequest) (*dto.ChangeViewPetResponse, *dto.ResponseErr)
+	Adopt(string, *dto.AdoptByRequest) (*dto.AdoptByResponse, *dto.ResponseErr)
+}
+
+type serviceImpl struct {
 	petClient    petproto.PetServiceClient
 	imageService image.Service
 }
 
-func NewService(petClient petproto.PetServiceClient, imageService image.Service) *Service {
-	return &Service{
+func NewService(petClient petproto.PetServiceClient, imageService image.Service) Service {
+	return &serviceImpl{
 		petClient:    petClient,
 		imageService: imageService,
 	}
 }
 
-func (s *Service) FindAll(in *dto.FindAllPetRequest, isAdmin bool) (result *dto.FindAllPetResponse, err *dto.ResponseErr) {
+func (s *serviceImpl) FindAll(in *dto.FindAllPetRequest, isAdmin bool) (result *dto.FindAllPetResponse, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -70,7 +80,7 @@ func (s *Service) FindAll(in *dto.FindAllPetRequest, isAdmin bool) (result *dto.
 	}, nil
 }
 
-func (s *Service) FindOne(id string) (result *dto.PetResponse, err *dto.ResponseErr) {
+func (s *serviceImpl) FindOne(id string) (result *dto.PetResponse, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -114,7 +124,7 @@ func (s *Service) FindOne(id string) (result *dto.PetResponse, err *dto.Response
 	return findOneResponse, nil
 }
 
-func (s *Service) Create(in *dto.CreatePetRequest) (result *dto.PetResponse, err *dto.ResponseErr) {
+func (s *serviceImpl) Create(in *dto.CreatePetRequest) (result *dto.PetResponse, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -167,7 +177,7 @@ func (s *Service) Create(in *dto.CreatePetRequest) (result *dto.PetResponse, err
 	return createPetResponse, nil
 }
 
-func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *dto.PetResponse, err *dto.ResponseErr) {
+func (s *serviceImpl) Update(id string, in *dto.UpdatePetRequest) (result *dto.PetResponse, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -218,7 +228,7 @@ func (s *Service) Update(id string, in *dto.UpdatePetRequest) (result *dto.PetRe
 	return updatePetResponse, nil
 }
 
-func (s *Service) Delete(id string) (result *dto.DeleteResponse, err *dto.ResponseErr) {
+func (s *serviceImpl) Delete(id string) (result *dto.DeleteResponse, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -264,7 +274,7 @@ func (s *Service) Delete(id string) (result *dto.DeleteResponse, err *dto.Respon
 	}, nil
 }
 
-func (s *Service) ChangeView(id string, in *dto.ChangeViewPetRequest) (result *dto.ChangeViewPetResponse, err *dto.ResponseErr) {
+func (s *serviceImpl) ChangeView(id string, in *dto.ChangeViewPetRequest) (result *dto.ChangeViewPetResponse, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -311,7 +321,7 @@ func (s *Service) ChangeView(id string, in *dto.ChangeViewPetRequest) (result *d
 	}, nil
 }
 
-func (s *Service) Adopt(petId string, in *dto.AdoptByRequest) (result *dto.AdoptByResponse, err *dto.ResponseErr) {
+func (s *serviceImpl) Adopt(petId string, in *dto.AdoptByRequest) (result *dto.AdoptByResponse, err *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

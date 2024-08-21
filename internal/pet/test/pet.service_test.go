@@ -9,6 +9,7 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
 	imageSvc "github.com/isd-sgcu/johnjud-gateway/internal/image"
+	"github.com/isd-sgcu/johnjud-gateway/internal/pet"
 	utils "github.com/isd-sgcu/johnjud-gateway/internal/utils/pet"
 	imagemock "github.com/isd-sgcu/johnjud-gateway/mocks/client/image"
 	petmock "github.com/isd-sgcu/johnjud-gateway/mocks/client/pet"
@@ -285,7 +286,7 @@ func (t *PetServiceTest) TestFindAllSuccess() {
 	imageClient.On("FindAll", t.FindAllImageReq).Return(findAllImageResp, nil)
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(&client, imageSvc)
+	svc := pet.NewService(&client, imageSvc)
 	actual, err := svc.FindAll(t.FindAllPetDto, true)
 
 	assert.Nil(t.T(), err)
@@ -303,7 +304,7 @@ func (t *PetServiceTest) TestFindAllUnavailableServiceError() {
 	imageClient := imagemock.ImageClientMock{}
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(&client, imageSvc)
+	svc := pet.NewService(&client, imageSvc)
 	actual, err := svc.FindAll(t.FindAllPetDto, true)
 
 	assert.Nil(t.T(), actual)
@@ -332,7 +333,7 @@ func (t *PetServiceTest) TestFindOneSuccess() {
 	imageClient.On("FindByPetId", findByPetIdReq).Return(findByPetIdResp, nil)
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(&client, imageSvc)
+	svc := pet.NewService(&client, imageSvc)
 	actual, err := svc.FindOne(t.Pet.Id)
 
 	assert.Nil(t.T(), err)
@@ -354,7 +355,7 @@ func (t *PetServiceTest) TestFindOneNotFoundError() {
 	imageClient := imagemock.ImageClientMock{}
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(&client, imageSvc)
+	svc := pet.NewService(&client, imageSvc)
 	actual, err := svc.FindOne(t.Pet.Id)
 
 	assert.Nil(t.T(), actual)
@@ -377,7 +378,7 @@ func (t *PetServiceTest) TestFindOneUnavailableServiceError() {
 
 	imageSvc := imageSvc.NewService(&imageClient)
 
-	svc := NewService(&client, imageSvc)
+	svc := pet.NewService(&client, imageSvc)
 	actual, err := svc.FindOne(t.Pet.Id)
 
 	assert.Nil(t.T(), actual)
@@ -410,7 +411,7 @@ func (t *PetServiceTest) TestCreateSuccess() {
 	imageClient.On("FindByPetId", findByPetIdReq).Return(findByPetIdResp, nil)
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(client, imageSvc)
+	svc := pet.NewService(client, imageSvc)
 	actual, err := svc.Create(t.CreatePetDto)
 
 	assert.Nil(t.T(), err)
@@ -430,7 +431,7 @@ func (t *PetServiceTest) TestCreateInvalidArgumentError() {
 	imageClient := imagemock.ImageClientMock{}
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(client, imageSvc)
+	svc := pet.NewService(client, imageSvc)
 	actual, err := svc.Create(t.CreatePetDto)
 
 	assert.Nil(t.T(), actual)
@@ -450,7 +451,7 @@ func (t *PetServiceTest) TestCreateInternalError() {
 	imageClient := imagemock.ImageClientMock{}
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(client, imageSvc)
+	svc := pet.NewService(client, imageSvc)
 	actual, err := svc.Create(t.CreatePetDto)
 
 	assert.Nil(t.T(), actual)
@@ -470,7 +471,7 @@ func (t *PetServiceTest) TestCreateUnavailableServiceError() {
 	imageClient := imagemock.ImageClientMock{}
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(client, imageSvc)
+	svc := pet.NewService(client, imageSvc)
 	actual, err := svc.Create(t.CreatePetDto)
 
 	assert.Nil(t.T(), actual)
@@ -495,7 +496,7 @@ func (t *PetServiceTest) TestUpdateSuccess() {
 	imageClient.On("FindByPetId", t.FindByPetIdReq).Return(findByPetIdResp, nil)
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(client, imageSvc)
+	svc := pet.NewService(client, imageSvc)
 	actual, err := svc.Update(t.Pet.Id, t.UpdatePetDto)
 
 	assert.Nil(t.T(), err)
@@ -514,7 +515,7 @@ func (t *PetServiceTest) TestUpdateNotFound() {
 	imageClient := imagemock.ImageClientMock{}
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(client, imageSvc)
+	svc := pet.NewService(client, imageSvc)
 	actual, err := svc.Update(t.Pet.Id, t.UpdatePetDto)
 
 	assert.Nil(t.T(), actual)
@@ -533,7 +534,7 @@ func (t *PetServiceTest) TestUpdateUnavailableServiceError() {
 	imageClient := imagemock.ImageClientMock{}
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(client, imageSvc)
+	svc := pet.NewService(client, imageSvc)
 	actual, err := svc.Update(t.Pet.Id, t.UpdatePetDto)
 
 	assert.Nil(t.T(), actual)
@@ -563,7 +564,7 @@ func (t *PetServiceTest) TestDeleteSuccess() {
 	imageClient.On("DeleteByPetId", imageProtoReq).Return(imageProtoResp, nil)
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(client, imageSvc)
+	svc := pet.NewService(client, imageSvc)
 	actual, err := svc.Delete(t.Pet.Id)
 
 	assert.Nil(t.T(), err)
@@ -595,7 +596,7 @@ func (t *PetServiceTest) TestDeleteNotFound() {
 	imageClient.On("DeleteByPetId", imageProtoReq).Return(imageProtoResp, nil)
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(client, imageSvc)
+	svc := pet.NewService(client, imageSvc)
 	actual, err := svc.Delete(t.Pet.Id)
 
 	assert.Nil(t.T(), actual)
@@ -627,7 +628,7 @@ func (t *PetServiceTest) TestDeleteServiceUnavailableError() {
 	imageClient.On("DeleteByPetId", imageProtoReq).Return(imageProtoResp, nil)
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(client, imageSvc)
+	svc := pet.NewService(client, imageSvc)
 	actual, err := svc.Delete(t.Pet.Id)
 
 	assert.Nil(t.T(), actual)
@@ -646,7 +647,7 @@ func (t *PetServiceTest) TestChangeViewSuccess() {
 	imageClient := imagemock.ImageClientMock{}
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(client, imageSvc)
+	svc := pet.NewService(client, imageSvc)
 	actual, err := svc.ChangeView(t.Pet.Id, t.ChangeViewedPetDto)
 
 	assert.Nil(t.T(), err)
@@ -669,7 +670,7 @@ func (t *PetServiceTest) TestChangeViewNotFoundError() {
 	imageClient := imagemock.ImageClientMock{}
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(client, imageSvc)
+	svc := pet.NewService(client, imageSvc)
 	actual, err := svc.ChangeView(t.Pet.Id, t.ChangeViewedPetDto)
 
 	assert.Equal(t.T(), &dto.ChangeViewPetResponse{Success: false}, actual)
@@ -692,7 +693,7 @@ func (t *PetServiceTest) TestChangeViewUnavailableServiceError() {
 	imageClient := imagemock.ImageClientMock{}
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(client, imageSvc)
+	svc := pet.NewService(client, imageSvc)
 	actual, err := svc.ChangeView(t.Pet.Id, t.ChangeViewedPetDto)
 
 	assert.Equal(t.T(), &dto.ChangeViewPetResponse{Success: false}, actual)
@@ -711,7 +712,7 @@ func (t *PetServiceTest) TestAdoptSuccess() {
 	imageClient := imagemock.ImageClientMock{}
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(client, imageSvc)
+	svc := pet.NewService(client, imageSvc)
 	actual, err := svc.Adopt(t.Pet.Id, t.AdoptDto)
 
 	assert.Nil(t.T(), err)
@@ -731,7 +732,7 @@ func (t *PetServiceTest) TestAdoptNotFoundError() {
 	imageClient := imagemock.ImageClientMock{}
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(client, imageSvc)
+	svc := pet.NewService(client, imageSvc)
 	actual, err := svc.Adopt(t.Pet.Id, t.AdoptDto)
 
 	assert.Nil(t.T(), actual)
@@ -751,7 +752,7 @@ func (t *PetServiceTest) TestAdoptUnavailableServiceError() {
 	imageClient := imagemock.ImageClientMock{}
 
 	imageSvc := imageSvc.NewService(&imageClient)
-	svc := NewService(client, imageSvc)
+	svc := pet.NewService(client, imageSvc)
 	actual, err := svc.Adopt(t.Pet.Id, t.AdoptDto)
 
 	assert.Nil(t.T(), actual)

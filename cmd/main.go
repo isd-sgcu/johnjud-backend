@@ -14,12 +14,11 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/auth"
 	"github.com/isd-sgcu/johnjud-gateway/internal/handler/healthcheck"
-	petHdr "github.com/isd-sgcu/johnjud-gateway/internal/handler/pet"
 	userHdr "github.com/isd-sgcu/johnjud-gateway/internal/handler/user"
 	"github.com/isd-sgcu/johnjud-gateway/internal/image"
 	guard "github.com/isd-sgcu/johnjud-gateway/internal/middleware/auth"
+	"github.com/isd-sgcu/johnjud-gateway/internal/pet"
 	"github.com/isd-sgcu/johnjud-gateway/internal/router"
-	petSvc "github.com/isd-sgcu/johnjud-gateway/internal/service/pet"
 	userSvc "github.com/isd-sgcu/johnjud-gateway/internal/service/user"
 	"github.com/isd-sgcu/johnjud-gateway/internal/validator"
 	authProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
@@ -115,8 +114,8 @@ func main() {
 	imageHandler := image.NewHandler(imageService, v, conf.App.MaxFileSize)
 
 	petClient := petProto.NewPetServiceClient(backendConn)
-	petService := petSvc.NewService(petClient, imageService)
-	petHandler := petHdr.NewHandler(petService, imageService, v)
+	petService := pet.NewService(petClient, imageService)
+	petHandler := pet.NewHandler(petService, imageService, v)
 
 	r := router.NewFiberRouter(&authGuard, conf.App)
 

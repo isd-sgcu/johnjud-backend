@@ -7,19 +7,18 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
 	"github.com/isd-sgcu/johnjud-gateway/internal/image"
-	petSvc "github.com/isd-sgcu/johnjud-gateway/internal/pkg/service/pet"
 	"github.com/isd-sgcu/johnjud-gateway/internal/router"
 	petUtils "github.com/isd-sgcu/johnjud-gateway/internal/utils/pet"
 	"github.com/isd-sgcu/johnjud-gateway/internal/validator"
 )
 
 type Handler struct {
-	service      petSvc.Service
+	service      Service
 	imageService image.Service
 	validate     validator.IDtoValidator
 }
 
-func NewHandler(service petSvc.Service, imageService image.Service, validate validator.IDtoValidator) *Handler {
+func NewHandler(service Service, imageService image.Service, validate validator.IDtoValidator) *Handler {
 	return &Handler{service, imageService, validate}
 }
 

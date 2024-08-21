@@ -9,6 +9,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
+	"github.com/isd-sgcu/johnjud-gateway/internal/pet"
 	routerMock "github.com/isd-sgcu/johnjud-gateway/mocks/router"
 	imageMock "github.com/isd-sgcu/johnjud-gateway/mocks/service/image"
 	petMock "github.com/isd-sgcu/johnjud-gateway/mocks/service/pet"
@@ -185,7 +186,7 @@ func (t *PetHandlerTest) TestFindAllSuccess() {
 	petSvc.EXPECT().FindAll(t.FindAllPetRequest, false).Return(expectedResponse, nil)
 	context.EXPECT().JSON(http.StatusOK, expectedResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := pet.NewHandler(petSvc, imageSvc, validator)
 	handler.FindAll(context)
 }
 
@@ -204,7 +205,7 @@ func (t *PetHandlerTest) TestFindOneSuccess() {
 	petSvc.EXPECT().FindOne(t.Pet.Id).Return(findOneResponse, nil)
 	context.EXPECT().JSON(http.StatusOK, expectedResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := pet.NewHandler(petSvc, imageSvc, validator)
 	handler.FindOne(context)
 }
 
@@ -222,7 +223,7 @@ func (t *PetHandlerTest) TestFindOneNotFoundErr() {
 	petSvc.EXPECT().FindOne(t.Pet.Id).Return(nil, findOneResponse)
 	context.EXPECT().JSON(http.StatusNotFound, findOneResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := pet.NewHandler(petSvc, imageSvc, validator)
 	handler.FindOne(context)
 }
 
@@ -240,7 +241,7 @@ func (t *PetHandlerTest) TestFindOneGrpcErr() {
 	petSvc.EXPECT().FindOne(t.Pet.Id).Return(nil, findOneResponse)
 	context.EXPECT().JSON(http.StatusServiceUnavailable, findOneResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := pet.NewHandler(petSvc, imageSvc, validator)
 	handler.FindOne(context)
 }
 
@@ -260,7 +261,7 @@ func (t *PetHandlerTest) TestCreateSuccess() {
 	petSvc.EXPECT().Create(t.CreatePetRequest).Return(createResponse, nil)
 	context.EXPECT().JSON(http.StatusCreated, expectedResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := pet.NewHandler(petSvc, imageSvc, validator)
 	handler.Create(context)
 }
 
@@ -279,7 +280,7 @@ func (t *PetHandlerTest) TestCreateGrpcErr() {
 	petSvc.EXPECT().Create(t.CreatePetRequest).Return(nil, createErrorResponse)
 	context.EXPECT().JSON(http.StatusServiceUnavailable, createErrorResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := pet.NewHandler(petSvc, imageSvc, validator)
 	handler.Create(context)
 }
 
@@ -300,7 +301,7 @@ func (t *PetHandlerTest) TestUpdateSuccess() {
 	petSvc.EXPECT().Update(t.Pet.Id, t.UpdatePetRequest).Return(updateResponse, nil)
 	context.EXPECT().JSON(http.StatusOK, expectedResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := pet.NewHandler(petSvc, imageSvc, validator)
 	handler.Update(context)
 }
 
@@ -320,7 +321,7 @@ func (t *PetHandlerTest) TestUpdateNotFound() {
 	petSvc.EXPECT().Update(t.Pet.Id, t.UpdatePetRequest).Return(nil, updateResponse)
 	context.EXPECT().JSON(http.StatusNotFound, updateResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := pet.NewHandler(petSvc, imageSvc, validator)
 	handler.Update(context)
 }
 
@@ -340,7 +341,7 @@ func (t *PetHandlerTest) TestUpdateGrpcErr() {
 	petSvc.EXPECT().Update(t.Pet.Id, t.UpdatePetRequest).Return(nil, updateResponse)
 	context.EXPECT().JSON(http.StatusServiceUnavailable, updateResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := pet.NewHandler(petSvc, imageSvc, validator)
 	handler.Update(context)
 }
 
@@ -361,7 +362,7 @@ func (t *PetHandlerTest) TestDeleteSuccess() {
 	petSvc.EXPECT().Delete(t.Pet.Id).Return(deleteResponse, nil)
 	context.EXPECT().JSON(http.StatusOK, expectedResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := pet.NewHandler(petSvc, imageSvc, validator)
 	handler.Delete(context)
 }
 func (t *PetHandlerTest) TestDeleteNotFound() {
@@ -380,7 +381,7 @@ func (t *PetHandlerTest) TestDeleteNotFound() {
 	petSvc.EXPECT().Delete(t.Pet.Id).Return(deleteResponse, t.NotFoundErr)
 	context.EXPECT().JSON(http.StatusNotFound, t.NotFoundErr)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := pet.NewHandler(petSvc, imageSvc, validator)
 	handler.Delete(context)
 }
 
@@ -400,7 +401,7 @@ func (t *PetHandlerTest) TestDeleteGrpcErr() {
 	petSvc.EXPECT().Delete(t.Pet.Id).Return(deleteResponse, t.ServiceDownErr)
 	context.EXPECT().JSON(http.StatusServiceUnavailable, t.ServiceDownErr)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := pet.NewHandler(petSvc, imageSvc, validator)
 	handler.Delete(context)
 }
 
@@ -423,7 +424,7 @@ func (t *PetHandlerTest) TestChangeViewSuccess() {
 	petSvc.EXPECT().ChangeView(t.Pet.Id, t.ChangeViewPetRequest).Return(changeViewResponse, nil)
 	context.EXPECT().JSON(http.StatusOK, expectedResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := pet.NewHandler(petSvc, imageSvc, validator)
 	handler.ChangeView(context)
 }
 
@@ -445,7 +446,7 @@ func (t *PetHandlerTest) TestChangeViewNotFound() {
 	petSvc.EXPECT().ChangeView(t.Pet.Id, t.ChangeViewPetRequest).Return(changeViewResponse, t.NotFoundErr)
 	context.EXPECT().JSON(http.StatusNotFound, t.NotFoundErr)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := pet.NewHandler(petSvc, imageSvc, validator)
 	handler.ChangeView(context)
 }
 
@@ -467,7 +468,7 @@ func (t *PetHandlerTest) TestChangeViewGrpcErr() {
 	petSvc.EXPECT().ChangeView(t.Pet.Id, t.ChangeViewPetRequest).Return(changeViewResponse, t.ServiceDownErr)
 	context.EXPECT().JSON(http.StatusServiceUnavailable, t.ServiceDownErr)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := pet.NewHandler(petSvc, imageSvc, validator)
 	handler.ChangeView(context)
 }
 
@@ -490,7 +491,7 @@ func (t *PetHandlerTest) TestAdoptSuccess() {
 	petSvc.EXPECT().Adopt(t.Pet.Id, t.AdoptByRequest).Return(adoptByResponse, nil)
 	context.EXPECT().JSON(http.StatusOK, expectedResponse)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := pet.NewHandler(petSvc, imageSvc, validator)
 	handler.Adopt(context)
 }
 
@@ -512,7 +513,7 @@ func (t *PetHandlerTest) TestAdoptNotFound() {
 	petSvc.EXPECT().Adopt(t.Pet.Id, t.AdoptByRequest).Return(adoptByResponse, t.NotFoundErr)
 	context.EXPECT().JSON(http.StatusNotFound, t.NotFoundErr)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := pet.NewHandler(petSvc, imageSvc, validator)
 	handler.Adopt(context)
 }
 
@@ -534,6 +535,6 @@ func (t *PetHandlerTest) TestAdoptGrpcErr() {
 	petSvc.EXPECT().Adopt(t.Pet.Id, t.AdoptByRequest).Return(adoptByResponse, t.ServiceDownErr)
 	context.EXPECT().JSON(http.StatusServiceUnavailable, t.ServiceDownErr)
 
-	handler := NewHandler(petSvc, imageSvc, validator)
+	handler := pet.NewHandler(petSvc, imageSvc, validator)
 	handler.Adopt(context)
 }
