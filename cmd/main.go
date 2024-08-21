@@ -14,12 +14,11 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/auth"
 	"github.com/isd-sgcu/johnjud-gateway/internal/handler/healthcheck"
-	imageHdr "github.com/isd-sgcu/johnjud-gateway/internal/handler/image"
 	petHdr "github.com/isd-sgcu/johnjud-gateway/internal/handler/pet"
 	userHdr "github.com/isd-sgcu/johnjud-gateway/internal/handler/user"
+	"github.com/isd-sgcu/johnjud-gateway/internal/image"
 	guard "github.com/isd-sgcu/johnjud-gateway/internal/middleware/auth"
 	"github.com/isd-sgcu/johnjud-gateway/internal/router"
-	imageSvc "github.com/isd-sgcu/johnjud-gateway/internal/service/image"
 	petSvc "github.com/isd-sgcu/johnjud-gateway/internal/service/pet"
 	userSvc "github.com/isd-sgcu/johnjud-gateway/internal/service/user"
 	"github.com/isd-sgcu/johnjud-gateway/internal/validator"
@@ -112,8 +111,8 @@ func main() {
 	authGuard := guard.NewAuthGuard(authService, constant.ExcludePath, constant.AdminPath, conf.App, constant.VersionList)
 
 	imageClient := imageProto.NewImageServiceClient(fileConn)
-	imageService := imageSvc.NewService(imageClient)
-	imageHandler := imageHdr.NewHandler(imageService, v, conf.App.MaxFileSize)
+	imageService := image.NewService(imageClient)
+	imageHandler := image.NewHandler(imageService, v, conf.App.MaxFileSize)
 
 	petClient := petProto.NewPetServiceClient(backendConn)
 	petService := petSvc.NewService(petClient, imageService)

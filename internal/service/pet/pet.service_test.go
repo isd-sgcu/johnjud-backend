@@ -8,7 +8,7 @@ import (
 	"github.com/go-faker/faker/v4"
 	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	imageSvc "github.com/isd-sgcu/johnjud-gateway/internal/service/image"
+	imageSvc "github.com/isd-sgcu/johnjud-gateway/internal/image"
 	utils "github.com/isd-sgcu/johnjud-gateway/internal/utils/pet"
 	imagemock "github.com/isd-sgcu/johnjud-gateway/mocks/client/image"
 	petmock "github.com/isd-sgcu/johnjud-gateway/mocks/client/pet"

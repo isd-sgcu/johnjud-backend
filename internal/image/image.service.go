@@ -14,17 +14,26 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type Service struct {
+type Service interface {
+	FindAll() ([]*dto.ImageResponse, *dto.ResponseErr)
+	FindByPetId(string) ([]*dto.ImageResponse, *dto.ResponseErr)
+	Upload(*dto.UploadImageRequest) (*dto.ImageResponse, *dto.ResponseErr)
+	Delete(string) (*dto.DeleteImageResponse, *dto.ResponseErr)
+	DeleteByPetId(string) (*dto.DeleteImageResponse, *dto.ResponseErr)
+	AssignPet(*dto.AssignPetRequest) (*dto.AssignPetResponse, *dto.ResponseErr)
+}
+
+type serviceImpl struct {
 	client proto.ImageServiceClient
 }
 
-func NewService(client proto.ImageServiceClient) *Service {
-	return &Service{
+func NewService(client proto.ImageServiceClient) Service {
+	return &serviceImpl{
 		client: client,
 	}
 }
 
-func (s *Service) FindAll() ([]*dto.ImageResponse, *dto.ResponseErr) {
+func (s *serviceImpl) FindAll() ([]*dto.ImageResponse, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -53,7 +62,7 @@ func (s *Service) FindAll() ([]*dto.ImageResponse, *dto.ResponseErr) {
 	return utils.ProtoToDtoList(res.Images), nil
 }
 
-func (s *Service) FindByPetId(petId string) ([]*dto.ImageResponse, *dto.ResponseErr) {
+func (s *serviceImpl) FindByPetId(petId string) ([]*dto.ImageResponse, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -88,7 +97,7 @@ func (s *Service) FindByPetId(petId string) ([]*dto.ImageResponse, *dto.Response
 	return utils.ProtoToDtoList(res.Images), nil
 }
 
-func (s *Service) Upload(in *dto.UploadImageRequest) (*dto.ImageResponse, *dto.ResponseErr) {
+func (s *serviceImpl) Upload(in *dto.UploadImageRequest) (*dto.ImageResponse, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -125,7 +134,7 @@ func (s *Service) Upload(in *dto.UploadImageRequest) (*dto.ImageResponse, *dto.R
 	return utils.ProtoToDto(res.Image), nil
 }
 
-func (s *Service) Delete(id string) (*dto.DeleteImageResponse, *dto.ResponseErr) {
+func (s *serviceImpl) Delete(id string) (*dto.DeleteImageResponse, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -167,7 +176,7 @@ func (s *Service) Delete(id string) (*dto.DeleteImageResponse, *dto.ResponseErr)
 	}, nil
 }
 
-func (s *Service) DeleteByPetId(petId string) (*dto.DeleteImageResponse, *dto.ResponseErr) {
+func (s *serviceImpl) DeleteByPetId(petId string) (*dto.DeleteImageResponse, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -209,7 +218,7 @@ func (s *Service) DeleteByPetId(petId string) (*dto.DeleteImageResponse, *dto.Re
 	}, nil
 }
 
-func (s *Service) AssignPet(in *dto.AssignPetRequest) (*dto.AssignPetResponse, *dto.ResponseErr) {
+func (s *serviceImpl) AssignPet(in *dto.AssignPetRequest) (*dto.AssignPetResponse, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

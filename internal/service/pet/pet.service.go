@@ -7,8 +7,8 @@ import (
 
 	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
+	"github.com/isd-sgcu/johnjud-gateway/internal/image"
 
-	imageSvc "github.com/isd-sgcu/johnjud-gateway/internal/pkg/service/image"
 	utils "github.com/isd-sgcu/johnjud-gateway/internal/utils/pet"
 	petproto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	"github.com/rs/zerolog/log"
@@ -18,10 +18,10 @@ import (
 
 type Service struct {
 	petClient    petproto.PetServiceClient
-	imageService imageSvc.Service
+	imageService image.Service
 }
 
-func NewService(petClient petproto.PetServiceClient, imageService imageSvc.Service) *Service {
+func NewService(petClient petproto.PetServiceClient, imageService image.Service) *Service {
 	return &Service{
 		petClient:    petClient,
 		imageService: imageService,

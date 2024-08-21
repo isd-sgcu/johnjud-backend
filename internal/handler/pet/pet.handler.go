@@ -6,7 +6,7 @@ import (
 
 	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	imageSvc "github.com/isd-sgcu/johnjud-gateway/internal/pkg/service/image"
+	"github.com/isd-sgcu/johnjud-gateway/internal/image"
 	petSvc "github.com/isd-sgcu/johnjud-gateway/internal/pkg/service/pet"
 	"github.com/isd-sgcu/johnjud-gateway/internal/router"
 	petUtils "github.com/isd-sgcu/johnjud-gateway/internal/utils/pet"
@@ -15,11 +15,11 @@ import (
 
 type Handler struct {
 	service      petSvc.Service
-	imageService imageSvc.Service
+	imageService image.Service
 	validate     validator.IDtoValidator
 }
 
-func NewHandler(service petSvc.Service, imageService imageSvc.Service, validate validator.IDtoValidator) *Handler {
+func NewHandler(service petSvc.Service, imageService image.Service, validate validator.IDtoValidator) *Handler {
 	return &Handler{service, imageService, validate}
 }
 
@@ -47,7 +47,6 @@ func (h *Handler) FindAll(c router.IContext) {
 	}
 
 	c.JSON(http.StatusOK, response)
-	return
 }
 
 // FindAllAdmin is a function that returns ALL pets in database
@@ -74,7 +73,6 @@ func (h *Handler) FindAllAdmin(c router.IContext) {
 	}
 
 	c.JSON(http.StatusOK, response)
-	return
 }
 
 // FindOne is a function that returns a pet by id in database
@@ -107,7 +105,6 @@ func (h *Handler) FindOne(c router.IContext) {
 	}
 
 	c.JSON(http.StatusOK, response)
-	return
 }
 
 // Create is a function that creates pet in database
@@ -154,7 +151,6 @@ func (h *Handler) Create(c router.IContext) {
 	}
 
 	c.JSON(http.StatusCreated, response)
-	return
 }
 
 // Update is a function that updates pet in database
@@ -213,7 +209,6 @@ func (h *Handler) Update(c router.IContext) {
 	}
 
 	c.JSON(http.StatusOK, pet)
-	return
 }
 
 // ChangeView is a function that changes visibility of pet in database
@@ -272,7 +267,6 @@ func (h *Handler) ChangeView(c router.IContext) {
 	}
 
 	c.JSON(http.StatusOK, res)
-	return
 }
 
 // Delete is a function that deletes pet in database
@@ -305,7 +299,6 @@ func (h *Handler) Delete(c router.IContext) {
 	}
 
 	c.JSON(http.StatusOK, res)
-	return
 }
 
 // Adopt is a function that handles the adoption of a pet in the database
@@ -363,5 +356,4 @@ func (h *Handler) Adopt(c router.IContext) {
 	}
 
 	c.JSON(http.StatusOK, res)
-	return
 }

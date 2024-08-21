@@ -14,7 +14,6 @@ import (
 	petMock "github.com/isd-sgcu/johnjud-gateway/mocks/service/pet"
 	validatorMock "github.com/isd-sgcu/johnjud-gateway/mocks/validator"
 
-	errConst "github.com/isd-sgcu/johnjud-gateway/constant"
 	utils "github.com/isd-sgcu/johnjud-gateway/internal/utils/pet"
 	petProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	imgProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
@@ -151,18 +150,18 @@ func (t *PetHandlerTest) SetupTest() {
 
 	t.NotFoundErr = &dto.ResponseErr{
 		StatusCode: http.StatusNotFound,
-		Message:    errConst.PetNotFoundMessage,
+		Message:    constant.PetNotFoundMessage,
 		Data:       nil,
 	}
 
 	t.BindErr = &dto.ResponseErr{
 		StatusCode: http.StatusBadRequest,
-		Message:    errConst.InvalidIDMessage,
+		Message:    constant.InvalidIDMessage,
 	}
 
 	t.InternalErr = &dto.ResponseErr{
 		StatusCode: http.StatusInternalServerError,
-		Message:    errConst.InternalErrorMessage,
+		Message:    constant.InternalErrorMessage,
 		Data:       nil,
 	}
 }
