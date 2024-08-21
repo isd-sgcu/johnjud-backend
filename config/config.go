@@ -86,7 +86,7 @@ func LoadConfig() (*Config, error) {
 	}
 
 	database := Database{
-		Url: os.Getenv("DATABASE_URL"),
+		Url: os.Getenv("DB_URL"),
 	}
 
 	redisPort, err := strconv.Atoi(os.Getenv("REDIS_PORT"))
