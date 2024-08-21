@@ -8,7 +8,6 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
 	"github.com/isd-sgcu/johnjud-gateway/internal/image"
 	"github.com/isd-sgcu/johnjud-gateway/internal/router"
-	petUtils "github.com/isd-sgcu/johnjud-gateway/internal/utils/pet"
 	"github.com/isd-sgcu/johnjud-gateway/internal/validator"
 )
 
@@ -34,7 +33,7 @@ func NewHandler(service Service, imageService image.Service, validate validator.
 // @Router /v1/pets/ [get]
 func (h *handlerImpl) FindAll(c router.IContext) {
 	queries := c.Queries()
-	request, err := petUtils.QueriesToFindAllDto(queries)
+	request, err := QueriesToFindAllDto(queries)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, err)
 	}
@@ -60,7 +59,7 @@ func (h *handlerImpl) FindAll(c router.IContext) {
 // @Router /v1/pets/admin [get]
 func (h *handlerImpl) FindAllAdmin(c router.IContext) {
 	queries := c.Queries()
-	request, err := petUtils.QueriesToFindAllDto(queries)
+	request, err := QueriesToFindAllDto(queries)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, err)
 	}

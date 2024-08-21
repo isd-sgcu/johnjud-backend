@@ -10,7 +10,6 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
 	imageSvc "github.com/isd-sgcu/johnjud-gateway/internal/image"
 	"github.com/isd-sgcu/johnjud-gateway/internal/pet"
-	utils "github.com/isd-sgcu/johnjud-gateway/internal/utils/pet"
 	imagemock "github.com/isd-sgcu/johnjud-gateway/mocks/client/image"
 	petmock "github.com/isd-sgcu/johnjud-gateway/mocks/client/pet"
 	petproto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
@@ -145,7 +144,7 @@ func (t *PetServiceTest) SetupTest() {
 		Tel:          t.Pet.Tel,
 	}
 
-	t.PetDto = utils.ProtoToDto(t.Pet, utils.ImageProtoToDto(t.Pet.Images))
+	t.PetDto = pet.ProtoToDto(t.Pet, pet.ImageProtoToDto(t.Pet.Images))
 
 	t.FindAllPetDto = &dto.FindAllPetRequest{
 		Search:   "",
@@ -199,9 +198,9 @@ func (t *PetServiceTest) SetupTest() {
 		Tel:          t.Pet.Tel,
 	}
 
-	t.FindAllPetReq = utils.FindAllDtoToProto(t.FindAllPetDto, true)
-	t.CreatePetReq = utils.CreateDtoToProto(t.CreatePetDto)
-	t.UpdatePetReq = utils.UpdateDtoToProto(t.Pet.Id, t.UpdatePetDto)
+	t.FindAllPetReq = pet.FindAllDtoToProto(t.FindAllPetDto, true)
+	t.CreatePetReq = pet.CreateDtoToProto(t.CreatePetDto)
+	t.UpdatePetReq = pet.UpdateDtoToProto(t.Pet.Id, t.UpdatePetDto)
 
 	t.ChangeViewPetReq = &petproto.ChangeViewPetRequest{
 		Id:      t.Pet.Id,
@@ -268,7 +267,7 @@ func (t *PetServiceTest) TestFindAllSuccess() {
 		Metadata: t.MetadataProto,
 	}
 
-	findAllPPetsDto := utils.ProtoToDtoList(t.Pets, t.ImagesList, false)
+	findAllPPetsDto := pet.ProtoToDtoList(t.Pets, t.ImagesList, false)
 	metadataDto := t.MetadataDto
 
 	expected := &dto.FindAllPetResponse{
@@ -324,7 +323,7 @@ func (t *PetServiceTest) TestFindOneSuccess() {
 		Images: t.Images,
 	}
 
-	expected := utils.ProtoToDto(t.Pet, utils.ImageProtoToDto(t.Pet.Images))
+	expected := pet.ProtoToDto(t.Pet, pet.ImageProtoToDto(t.Pet.Images))
 
 	client := petmock.PetClientMock{}
 	client.On("FindOne", protoReq).Return(protoResp, nil)
@@ -401,7 +400,7 @@ func (t *PetServiceTest) TestCreateSuccess() {
 		Images: t.Images,
 	}
 
-	expected := utils.ProtoToDto(t.Pet, utils.ImageProtoToDto(t.Pet.Images))
+	expected := pet.ProtoToDto(t.Pet, pet.ImageProtoToDto(t.Pet.Images))
 
 	client := &petmock.PetClientMock{}
 	client.On("Create", protoReq).Return(protoResp, nil)
@@ -484,7 +483,7 @@ func (t *PetServiceTest) TestUpdateSuccess() {
 		Pet: t.Pet,
 	}
 
-	expected := utils.ProtoToDto(t.Pet, utils.ImageProtoToDto(t.Pet.Images))
+	expected := pet.ProtoToDto(t.Pet, pet.ImageProtoToDto(t.Pet.Images))
 
 	client := &petmock.PetClientMock{}
 	client.On("Update", protoReq).Return(protoResp, nil)

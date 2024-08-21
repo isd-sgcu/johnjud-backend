@@ -15,7 +15,6 @@ import (
 	petMock "github.com/isd-sgcu/johnjud-gateway/mocks/service/pet"
 	validatorMock "github.com/isd-sgcu/johnjud-gateway/mocks/validator"
 
-	utils "github.com/isd-sgcu/johnjud-gateway/internal/utils/pet"
 	petProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	imgProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 
@@ -168,7 +167,7 @@ func (t *PetHandlerTest) SetupTest() {
 }
 
 func (t *PetHandlerTest) TestFindAllSuccess() {
-	findAllResponse := utils.ProtoToDtoList(t.Pets, t.ImagesList, false)
+	findAllResponse := pet.ProtoToDtoList(t.Pets, t.ImagesList, false)
 	metadataResponse := t.Metadata
 	expectedResponse := &dto.FindAllPetResponse{
 		Pets:     findAllResponse,
@@ -191,7 +190,7 @@ func (t *PetHandlerTest) TestFindAllSuccess() {
 }
 
 func (t *PetHandlerTest) TestFindOneSuccess() {
-	findOneResponse := utils.ProtoToDto(t.Pet, utils.ImageProtoToDto(t.Images))
+	findOneResponse := pet.ProtoToDto(t.Pet, pet.ImageProtoToDto(t.Images))
 	expectedResponse := findOneResponse
 
 	controller := gomock.NewController(t.T())
@@ -246,7 +245,7 @@ func (t *PetHandlerTest) TestFindOneGrpcErr() {
 }
 
 func (t *PetHandlerTest) TestCreateSuccess() {
-	createResponse := utils.ProtoToDto(t.Pet, utils.ImageProtoToDto(t.Images))
+	createResponse := pet.ProtoToDto(t.Pet, pet.ImageProtoToDto(t.Images))
 	expectedResponse := createResponse
 
 	controller := gomock.NewController(t.T())
@@ -285,7 +284,7 @@ func (t *PetHandlerTest) TestCreateGrpcErr() {
 }
 
 func (t *PetHandlerTest) TestUpdateSuccess() {
-	updateResponse := utils.ProtoToDto(t.Pet, utils.ImageProtoToDto(t.Images))
+	updateResponse := pet.ProtoToDto(t.Pet, pet.ImageProtoToDto(t.Images))
 	expectedResponse := updateResponse
 
 	controller := gomock.NewController(t.T())

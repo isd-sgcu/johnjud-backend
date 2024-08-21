@@ -7,7 +7,6 @@ import (
 
 	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	utils "github.com/isd-sgcu/johnjud-gateway/internal/utils/image"
 	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
@@ -59,7 +58,7 @@ func (s *serviceImpl) FindAll() ([]*dto.ImageResponse, *dto.ResponseErr) {
 			}
 		}
 	}
-	return utils.ProtoToDtoList(res.Images), nil
+	return ProtoToDtoList(res.Images), nil
 }
 
 func (s *serviceImpl) FindByPetId(petId string) ([]*dto.ImageResponse, *dto.ResponseErr) {
@@ -94,14 +93,14 @@ func (s *serviceImpl) FindByPetId(petId string) ([]*dto.ImageResponse, *dto.Resp
 			}
 		}
 	}
-	return utils.ProtoToDtoList(res.Images), nil
+	return ProtoToDtoList(res.Images), nil
 }
 
 func (s *serviceImpl) Upload(in *dto.UploadImageRequest) (*dto.ImageResponse, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	request := utils.CreateDtoToProto(in)
+	request := CreateDtoToProto(in)
 	res, errRes := s.client.Upload(ctx, request)
 	if errRes != nil {
 		st, _ := status.FromError(errRes)
@@ -131,7 +130,7 @@ func (s *serviceImpl) Upload(in *dto.UploadImageRequest) (*dto.ImageResponse, *d
 			}
 		}
 	}
-	return utils.ProtoToDto(res.Image), nil
+	return ProtoToDto(res.Image), nil
 }
 
 func (s *serviceImpl) Delete(id string) (*dto.DeleteImageResponse, *dto.ResponseErr) {

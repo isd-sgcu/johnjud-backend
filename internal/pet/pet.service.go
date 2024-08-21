@@ -9,7 +9,6 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
 	"github.com/isd-sgcu/johnjud-gateway/internal/image"
 
-	utils "github.com/isd-sgcu/johnjud-gateway/internal/utils/pet"
 	petproto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
@@ -42,7 +41,7 @@ func (s *serviceImpl) FindAll(in *dto.FindAllPetRequest, isAdmin bool) (result *
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	res, errRes := s.petClient.FindAll(ctx, utils.FindAllDtoToProto(in, isAdmin))
+	res, errRes := s.petClient.FindAll(ctx, FindAllDtoToProto(in, isAdmin))
 	if errRes != nil {
 		st, _ := status.FromError(errRes)
 		log.Error().
@@ -70,9 +69,9 @@ func (s *serviceImpl) FindAll(in *dto.FindAllPetRequest, isAdmin bool) (result *
 		return nil, errSvc
 	}
 
-	imagesList := utils.ImageList(images)
-	findAllDto := utils.ProtoToDtoList(res.Pets, imagesList, isAdmin)
-	metaData := utils.MetadataProtoToDto(res.Metadata)
+	imagesList := ImageList(images)
+	findAllDto := ProtoToDtoList(res.Pets, imagesList, isAdmin)
+	metaData := MetadataProtoToDto(res.Metadata)
 
 	return &dto.FindAllPetResponse{
 		Pets:     findAllDto,
@@ -120,7 +119,7 @@ func (s *serviceImpl) FindOne(id string) (result *dto.PetResponse, err *dto.Resp
 		return nil, imgErrRes
 	}
 
-	findOneResponse := utils.ProtoToDto(res.Pet, imgRes)
+	findOneResponse := ProtoToDto(res.Pet, imgRes)
 	return findOneResponse, nil
 }
 
@@ -128,7 +127,7 @@ func (s *serviceImpl) Create(in *dto.CreatePetRequest) (result *dto.PetResponse,
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	request := utils.CreateDtoToProto(in)
+	request := CreateDtoToProto(in)
 
 	res, errRes := s.petClient.Create(ctx, request)
 	if errRes != nil {
@@ -173,7 +172,7 @@ func (s *serviceImpl) Create(in *dto.CreatePetRequest) (result *dto.PetResponse,
 		return nil, imgErrRes
 	}
 
-	createPetResponse := utils.ProtoToDto(res.Pet, imgRes)
+	createPetResponse := ProtoToDto(res.Pet, imgRes)
 	return createPetResponse, nil
 }
 
@@ -181,7 +180,7 @@ func (s *serviceImpl) Update(id string, in *dto.UpdatePetRequest) (result *dto.P
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	request := utils.UpdateDtoToProto(id, in)
+	request := UpdateDtoToProto(id, in)
 
 	res, errRes := s.petClient.Update(ctx, request)
 	if errRes != nil {
@@ -224,7 +223,7 @@ func (s *serviceImpl) Update(id string, in *dto.UpdatePetRequest) (result *dto.P
 		return nil, errSvc
 	}
 
-	updatePetResponse := utils.ProtoToDto(res.Pet, images)
+	updatePetResponse := ProtoToDto(res.Pet, images)
 	return updatePetResponse, nil
 }
 
