@@ -29,4 +29,4 @@ mock-gen:
 	mockgen -source ./internal/router/context.go -destination ./mocks/router/context.mock.go
 
 create-doc:
-	swag init -d ./src -o ./src/docs -md ./src/docs/markdown
+	swag init -d ./internal -g ../cmd/main.go -o ./docs -md ./docs/markdown --parseDependency --parseInternal

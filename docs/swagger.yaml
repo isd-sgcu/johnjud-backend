@@ -1,4 +1,20 @@
 definitions:
+  constant.Gender:
+    enum:
+    - male
+    - female
+    type: string
+    x-enum-varnames:
+    - MALE
+    - FEMALE
+  constant.Status:
+    enum:
+    - adopted
+    - findhome
+    type: string
+    x-enum-varnames:
+    - ADOPTED
+    - FINDHOME
   dto.AdoptByRequest:
     properties:
       user_id:
@@ -31,10 +47,6 @@ definitions:
     type: object
   dto.CreatePetRequest:
     properties:
-      address:
-        type: string
-      adopt_by:
-        type: string
       birthdate:
         type: string
       caption:
@@ -45,7 +57,7 @@ definitions:
         type: string
       gender:
         allOf:
-        - $ref: '#/definitions/pet.Gender'
+        - $ref: '#/definitions/constant.Gender'
         example: male
       habit:
         type: string
@@ -63,12 +75,16 @@ definitions:
         type: string
       origin:
         type: string
+      owner:
+        type: string
       pattern:
         type: string
       status:
         allOf:
-        - $ref: '#/definitions/pet.Status'
+        - $ref: '#/definitions/constant.Status'
         example: findhome
+      tel:
+        type: string
       type:
         type: string
     required:
@@ -132,10 +148,6 @@ definitions:
     type: object
   dto.PetResponse:
     properties:
-      address:
-        type: string
-      adopt_by:
-        type: string
       birthdate:
         type: string
       caption:
@@ -145,7 +157,7 @@ definitions:
       contact:
         type: string
       gender:
-        $ref: '#/definitions/pet.Gender'
+        $ref: '#/definitions/constant.Gender'
       habit:
         type: string
       id:
@@ -164,10 +176,14 @@ definitions:
         type: string
       origin:
         type: string
+      owner:
+        type: string
       pattern:
         type: string
       status:
-        $ref: '#/definitions/pet.Status'
+        $ref: '#/definitions/constant.Status'
+      tel:
+        type: string
       type:
         type: string
     type: object
@@ -306,10 +322,6 @@ definitions:
     type: object
   dto.UpdatePetRequest:
     properties:
-      address:
-        type: string
-      adopt_by:
-        type: string
       birthdate:
         type: string
       caption:
@@ -319,7 +331,7 @@ definitions:
       contact:
         type: string
       gender:
-        $ref: '#/definitions/pet.Gender'
+        $ref: '#/definitions/constant.Gender'
       habit:
         type: string
       images:
@@ -336,10 +348,14 @@ definitions:
         type: string
       origin:
         type: string
+      owner:
+        type: string
       pattern:
         type: string
       status:
-        $ref: '#/definitions/pet.Status'
+        $ref: '#/definitions/constant.Status'
+      tel:
+        type: string
       type:
         type: string
     type: object
@@ -386,22 +402,6 @@ definitions:
       lastname:
         type: string
     type: object
-  pet.Gender:
-    enum:
-    - male
-    - female
-    type: string
-    x-enum-varnames:
-    - MALE
-    - FEMALE
-  pet.Status:
-    enum:
-    - adopted
-    - findhome
-    type: string
-    x-enum-varnames:
-    - ADOPTED
-    - FINDHOME
 info:
   contact:
     email: sd.team.sgcu@gmail.com
@@ -888,6 +888,31 @@ paths:
           schema:
             $ref: '#/definitions/dto.ResponseServiceDownErr'
       summary: changes pet's public visiblility
+      tags:
+      - pet
+  /v1/pets/admin:
+    get:
+      consumes:
+      - application/json
+      description: Returns the data of pets if successful
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.PetResponse'
+            type: array
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: finds all pets
       tags:
       - pet
   /v1/pets/create:

@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/isd-sgcu/johnjud-gateway/config"
-	_ "github.com/isd-sgcu/johnjud-gateway/internal/docs"
+	_ "github.com/isd-sgcu/johnjud-gateway/docs"
 )
 
 type FiberRouter struct {
@@ -15,7 +15,6 @@ type FiberRouter struct {
 	user  fiber.Router
 	pet   fiber.Router
 	image fiber.Router
-	like  fiber.Router
 }
 
 type IGuard interface {
@@ -55,9 +54,8 @@ func NewFiberRouter(authGuard IGuard, conf config.App) *FiberRouter {
 	pet := GroupWithAuthMiddleware(r, "/pets", authGuard.Use)
 
 	image := GroupWithAuthMiddleware(r, "/images", authGuard.Use)
-	like := GroupWithAuthMiddleware(r, "/likes", authGuard.Use)
 
-	return &FiberRouter{r, auth, user, pet, image, like}
+	return &FiberRouter{r, auth, user, pet, image}
 }
 
 func GroupWithAuthMiddleware(r *fiber.App, path string, middleware func(ctx IContext) error) fiber.Router {

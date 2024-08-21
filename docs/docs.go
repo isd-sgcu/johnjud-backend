@@ -471,6 +471,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/pets/admin": {
+            "get": {
+                "description": "Returns the data of pets if successful",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pet"
+                ],
+                "summary": "finds all pets",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.PetResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal service error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseInternalErr"
+                        }
+                    },
+                    "503": {
+                        "description": "Service is down",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResponseServiceDownErr"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/pets/create": {
             "post": {
                 "description": "Returns the data of pet if successful",
@@ -948,6 +986,28 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "constant.Gender": {
+            "type": "string",
+            "enum": [
+                "male",
+                "female"
+            ],
+            "x-enum-varnames": [
+                "MALE",
+                "FEMALE"
+            ]
+        },
+        "constant.Status": {
+            "type": "string",
+            "enum": [
+                "adopted",
+                "findhome"
+            ],
+            "x-enum-varnames": [
+                "ADOPTED",
+                "FINDHOME"
+            ]
+        },
         "dto.AdoptByRequest": {
             "type": "object",
             "required": [
@@ -1012,12 +1072,6 @@ const docTemplate = `{
                 "type"
             ],
             "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "adopt_by": {
-                    "type": "string"
-                },
                 "birthdate": {
                     "type": "string"
                 },
@@ -1033,7 +1087,7 @@ const docTemplate = `{
                 "gender": {
                     "allOf": [
                         {
-                            "$ref": "#/definitions/pet.Gender"
+                            "$ref": "#/definitions/constant.Gender"
                         }
                     ],
                     "example": "male"
@@ -1062,16 +1116,22 @@ const docTemplate = `{
                 "origin": {
                     "type": "string"
                 },
+                "owner": {
+                    "type": "string"
+                },
                 "pattern": {
                     "type": "string"
                 },
                 "status": {
                     "allOf": [
                         {
-                            "$ref": "#/definitions/pet.Status"
+                            "$ref": "#/definitions/constant.Status"
                         }
                     ],
                     "example": "findhome"
+                },
+                "tel": {
+                    "type": "string"
                 },
                 "type": {
                     "type": "string"
@@ -1150,12 +1210,6 @@ const docTemplate = `{
         "dto.PetResponse": {
             "type": "object",
             "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "adopt_by": {
-                    "type": "string"
-                },
                 "birthdate": {
                     "type": "string"
                 },
@@ -1169,7 +1223,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "$ref": "#/definitions/pet.Gender"
+                    "$ref": "#/definitions/constant.Gender"
                 },
                 "habit": {
                     "type": "string"
@@ -1198,11 +1252,17 @@ const docTemplate = `{
                 "origin": {
                     "type": "string"
                 },
+                "owner": {
+                    "type": "string"
+                },
                 "pattern": {
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/pet.Status"
+                    "$ref": "#/definitions/constant.Status"
+                },
+                "tel": {
+                    "type": "string"
                 },
                 "type": {
                     "type": "string"
@@ -1404,12 +1464,6 @@ const docTemplate = `{
         "dto.UpdatePetRequest": {
             "type": "object",
             "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "adopt_by": {
-                    "type": "string"
-                },
                 "birthdate": {
                     "type": "string"
                 },
@@ -1423,7 +1477,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "$ref": "#/definitions/pet.Gender"
+                    "$ref": "#/definitions/constant.Gender"
                 },
                 "habit": {
                     "type": "string"
@@ -1449,11 +1503,17 @@ const docTemplate = `{
                 "origin": {
                     "type": "string"
                 },
+                "owner": {
+                    "type": "string"
+                },
                 "pattern": {
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/pet.Status"
+                    "$ref": "#/definitions/constant.Status"
+                },
+                "tel": {
+                    "type": "string"
                 },
                 "type": {
                     "type": "string"
@@ -1522,28 +1582,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "pet.Gender": {
-            "type": "string",
-            "enum": [
-                "male",
-                "female"
-            ],
-            "x-enum-varnames": [
-                "MALE",
-                "FEMALE"
-            ]
-        },
-        "pet.Status": {
-            "type": "string",
-            "enum": [
-                "adopted",
-                "findhome"
-            ],
-            "x-enum-varnames": [
-                "ADOPTED",
-                "FINDHOME"
-            ]
         }
     },
     "securityDefinitions": {
