@@ -15,19 +15,16 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/internal/auth"
 	"github.com/isd-sgcu/johnjud-gateway/internal/handler/healthcheck"
 	imageHdr "github.com/isd-sgcu/johnjud-gateway/internal/handler/image"
-	likeHdr "github.com/isd-sgcu/johnjud-gateway/internal/handler/like"
 	petHdr "github.com/isd-sgcu/johnjud-gateway/internal/handler/pet"
 	userHdr "github.com/isd-sgcu/johnjud-gateway/internal/handler/user"
 	guard "github.com/isd-sgcu/johnjud-gateway/internal/middleware/auth"
 	"github.com/isd-sgcu/johnjud-gateway/internal/router"
 	imageSvc "github.com/isd-sgcu/johnjud-gateway/internal/service/image"
-	likeSvc "github.com/isd-sgcu/johnjud-gateway/internal/service/like"
 	petSvc "github.com/isd-sgcu/johnjud-gateway/internal/service/pet"
 	userSvc "github.com/isd-sgcu/johnjud-gateway/internal/service/user"
 	"github.com/isd-sgcu/johnjud-gateway/internal/validator"
 	authProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
 	userProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/user/v1"
-	likeProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/like/v1"
 	petProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 	imageProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 	"github.com/rs/zerolog/log"
@@ -122,10 +119,6 @@ func main() {
 	petService := petSvc.NewService(petClient, imageService)
 	petHandler := petHdr.NewHandler(petService, imageService, v)
 
-	likeClient := likeProto.NewLikeServiceClient(backendConn)
-	likeService := likeSvc.NewService(likeClient)
-	likeHandler := likeHdr.NewHandler(likeService, v)
-
 	r := router.NewFiberRouter(&authGuard, conf.App)
 
 	r.GetUser("/:id", userHandler.FindOne)
@@ -150,10 +143,6 @@ func main() {
 	r.PutPet("/:id/adopt", petHandler.Adopt)
 	r.PutPet("/:id/visible", petHandler.ChangeView)
 	r.DeletePet("/:id", petHandler.Delete)
-
-	r.GetLike("/:id", likeHandler.FindByUserId)
-	r.PostLike("", likeHandler.Create)
-	r.DeleteLike("/:id", likeHandler.Delete)
 
 	r.PostImage("", imageHandler.Upload)
 	r.DeleteImage("/:id", imageHandler.Delete)
