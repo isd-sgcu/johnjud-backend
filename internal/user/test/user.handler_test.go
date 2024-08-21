@@ -10,11 +10,11 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
+	"github.com/isd-sgcu/johnjud-gateway/internal/user"
 	routerMock "github.com/isd-sgcu/johnjud-gateway/mocks/router"
 	userMock "github.com/isd-sgcu/johnjud-gateway/mocks/service/user"
 	validatorMock "github.com/isd-sgcu/johnjud-gateway/mocks/validator"
 
-	errConst "github.com/isd-sgcu/johnjud-gateway/constant"
 	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/user/v1"
 
 	"github.com/stretchr/testify/suite"
@@ -63,30 +63,30 @@ func (t *UserHandlerTest) SetupTest() {
 
 	t.NotFoundErr = &dto.ResponseErr{
 		StatusCode: http.StatusNotFound,
-		Message:    errConst.UserNotFoundMessage,
+		Message:    constant.UserNotFoundMessage,
 		Data:       nil,
 	}
 
 	t.InvalidIDErr = &dto.ResponseErr{
 		StatusCode: http.StatusBadRequest,
-		Message:    errConst.InvalidIDMessage,
+		Message:    constant.InvalidIDMessage,
 		Data:       nil,
 	}
 
 	t.BindErr = &dto.ResponseErr{
 		StatusCode: http.StatusBadRequest,
-		Message:    errConst.InvalidIDMessage,
+		Message:    constant.InvalidIDMessage,
 	}
 
 	t.DuplicateEmailErr = &dto.ResponseErr{
 		StatusCode: http.StatusConflict,
-		Message:    errConst.DuplicateEmailMessage,
+		Message:    constant.DuplicateEmailMessage,
 		Data:       nil,
 	}
 
 	t.InternalErr = &dto.ResponseErr{
 		StatusCode: http.StatusInternalServerError,
-		Message:    errConst.InternalErrorMessage,
+		Message:    constant.InternalErrorMessage,
 		Data:       nil,
 	}
 }
@@ -105,7 +105,7 @@ func (t *UserHandlerTest) TestFindOneSuccess() {
 	userSvc.EXPECT().FindOne(t.User.Id).Return(svcResp, nil)
 	context.EXPECT().JSON(http.StatusOK, expectedResp)
 
-	handler := NewHandler(userSvc, validator)
+	handler := user.NewHandler(userSvc, validator)
 	handler.FindOne(context)
 }
 
@@ -120,7 +120,7 @@ func (t *UserHandlerTest) TestFindOneNotFoundErr() {
 	userSvc.EXPECT().FindOne(t.User.Id).Return(nil, t.NotFoundErr)
 	context.EXPECT().JSON(http.StatusNotFound, t.NotFoundErr)
 
-	handler := NewHandler(userSvc, validator)
+	handler := user.NewHandler(userSvc, validator)
 	handler.FindOne(context)
 }
 
@@ -134,7 +134,7 @@ func (t *UserHandlerTest) TestFindOneInvalidIDErr() {
 	context.EXPECT().ID().Return("", errors.New("Invalid ID"))
 	context.EXPECT().JSON(http.StatusBadRequest, t.InvalidIDErr)
 
-	handler := NewHandler(userSvc, validator)
+	handler := user.NewHandler(userSvc, validator)
 	handler.FindOne(context)
 }
 
@@ -149,7 +149,7 @@ func (t *UserHandlerTest) TestFindOneInternalErr() {
 	userSvc.EXPECT().FindOne(t.User.Id).Return(nil, t.InternalErr)
 	context.EXPECT().JSON(http.StatusInternalServerError, t.InternalErr)
 
-	handler := NewHandler(userSvc, validator)
+	handler := user.NewHandler(userSvc, validator)
 	handler.FindOne(context)
 }
 
@@ -164,7 +164,7 @@ func (t *UserHandlerTest) TestFindOneGrpcErr() {
 	userSvc.EXPECT().FindOne(t.User.Id).Return(nil, t.ServiceDownErr)
 	context.EXPECT().JSON(http.StatusServiceUnavailable, t.ServiceDownErr)
 
-	handler := NewHandler(userSvc, validator)
+	handler := user.NewHandler(userSvc, validator)
 	handler.FindOne(context)
 }
 
@@ -184,7 +184,7 @@ func (t *UserHandlerTest) TestUpdateSuccess() {
 	userSvc.EXPECT().Update(t.User.Id, t.UpdateUserRequest).Return(svcResp, nil)
 	context.EXPECT().JSON(http.StatusOK, expectedResp)
 
-	handler := NewHandler(userSvc, validator)
+	handler := user.NewHandler(userSvc, validator)
 	handler.Update(context)
 }
 
@@ -206,7 +206,7 @@ func (t *UserHandlerTest) TestUpdateBindErr() {
 	context.EXPECT().Bind(t.UpdateUserRequest).Return(bindErr)
 	context.EXPECT().JSON(http.StatusBadRequest, expectedResp)
 
-	handler := NewHandler(userSvc, validator)
+	handler := user.NewHandler(userSvc, validator)
 	handler.Update(context)
 }
 
@@ -239,7 +239,7 @@ func (t *UserHandlerTest) TestUpdateValidateErr() {
 	validator.EXPECT().Validate(t.UpdateUserRequest).Return(validateErr)
 	context.EXPECT().JSON(http.StatusBadRequest, expectedResp)
 
-	handler := NewHandler(userSvc, validator)
+	handler := user.NewHandler(userSvc, validator)
 	handler.Update(context)
 }
 
@@ -262,7 +262,7 @@ func (t *UserHandlerTest) TestUpdateDuplicateEmailErr() {
 	userSvc.EXPECT().Update(t.User.Id, t.UpdateUserRequest).Return(nil, t.DuplicateEmailErr)
 	context.EXPECT().JSON(http.StatusConflict, expectedResp)
 
-	handler := NewHandler(userSvc, validator)
+	handler := user.NewHandler(userSvc, validator)
 	handler.Update(context)
 }
 
@@ -279,7 +279,7 @@ func (t *UserHandlerTest) TestUpdateInternalErr() {
 	userSvc.EXPECT().Update(t.User.Id, t.UpdateUserRequest).Return(nil, t.InternalErr)
 	context.EXPECT().JSON(http.StatusInternalServerError, t.InternalErr)
 
-	handler := NewHandler(userSvc, validator)
+	handler := user.NewHandler(userSvc, validator)
 	handler.Update(context)
 }
 
@@ -296,7 +296,7 @@ func (t *UserHandlerTest) TestUpdateGrpcErr() {
 	userSvc.EXPECT().Update(t.User.Id, t.UpdateUserRequest).Return(nil, t.ServiceDownErr)
 	context.EXPECT().JSON(http.StatusServiceUnavailable, t.ServiceDownErr)
 
-	handler := NewHandler(userSvc, validator)
+	handler := user.NewHandler(userSvc, validator)
 	handler.Update(context)
 }
 
@@ -316,7 +316,7 @@ func (t *UserHandlerTest) TestDeleteSuccess() {
 	userSvc.EXPECT().Delete(t.User.Id).Return(deleteResp, nil)
 	context.EXPECT().JSON(http.StatusOK, expectedResp)
 
-	handler := NewHandler(userSvc, validator)
+	handler := user.NewHandler(userSvc, validator)
 	handler.Delete(context)
 }
 
@@ -330,7 +330,7 @@ func (t *UserHandlerTest) TestDeleteInvalidIDErr() {
 	context.EXPECT().ID().Return("", errors.New("Invalid ID"))
 	context.EXPECT().JSON(http.StatusBadRequest, t.InvalidIDErr)
 
-	handler := NewHandler(userSvc, validator)
+	handler := user.NewHandler(userSvc, validator)
 	handler.Delete(context)
 }
 
@@ -345,7 +345,7 @@ func (t *UserHandlerTest) TestDeleteInternalErr() {
 	userSvc.EXPECT().Delete(t.User.Id).Return(nil, t.InternalErr)
 	context.EXPECT().JSON(http.StatusInternalServerError, t.InternalErr)
 
-	handler := NewHandler(userSvc, validator)
+	handler := user.NewHandler(userSvc, validator)
 	handler.Delete(context)
 }
 
@@ -360,6 +360,6 @@ func (t *UserHandlerTest) TestDeleteGrpcErr() {
 	userSvc.EXPECT().Delete(t.User.Id).Return(nil, t.ServiceDownErr)
 	context.EXPECT().JSON(http.StatusServiceUnavailable, t.ServiceDownErr)
 
-	handler := NewHandler(userSvc, validator)
+	handler := user.NewHandler(userSvc, validator)
 	handler.Delete(context)
 }

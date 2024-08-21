@@ -13,17 +13,23 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type Service struct {
+type Service interface {
+	FindOne(string) (*dto.User, *dto.ResponseErr)
+	Update(string, *dto.UpdateUserRequest) (*dto.User, *dto.ResponseErr)
+	Delete(string) (*dto.DeleteUserResponse, *dto.ResponseErr)
+}
+
+type serviceImpl struct {
 	client proto.UserServiceClient
 }
 
-func NewService(client proto.UserServiceClient) *Service {
-	return &Service{
+func NewService(client proto.UserServiceClient) *serviceImpl {
+	return &serviceImpl{
 		client: client,
 	}
 }
 
-func (s *Service) FindOne(id string) (*dto.User, *dto.ResponseErr) {
+func (s *serviceImpl) FindOne(id string) (*dto.User, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -68,7 +74,7 @@ func (s *Service) FindOne(id string) (*dto.User, *dto.ResponseErr) {
 	}, nil
 }
 
-func (s *Service) Update(id string, in *dto.UpdateUserRequest) (*dto.User, *dto.ResponseErr) {
+func (s *serviceImpl) Update(id string, in *dto.UpdateUserRequest) (*dto.User, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -117,7 +123,7 @@ func (s *Service) Update(id string, in *dto.UpdateUserRequest) (*dto.User, *dto.
 	}, nil
 }
 
-func (s *Service) Delete(id string) (*dto.DeleteUserResponse, *dto.ResponseErr) {
+func (s *serviceImpl) Delete(id string) (*dto.DeleteUserResponse, *dto.ResponseErr) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

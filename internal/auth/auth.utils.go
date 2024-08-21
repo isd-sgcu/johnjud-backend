@@ -10,10 +10,7 @@ import (
 
 func IsExisted(e map[string]struct{}, key string) bool {
 	_, ok := e[key]
-	if ok {
-		return true
-	}
-	return false
+	return ok
 }
 
 func FormatPath(method string, path string, keys []string) string {

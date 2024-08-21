@@ -1,4 +1,4 @@
-package pet
+package test
 
 import (
 	"math/rand"

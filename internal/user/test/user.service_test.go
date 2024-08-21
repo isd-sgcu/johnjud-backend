@@ -7,7 +7,8 @@ import (
 	"github.com/go-faker/faker/v4"
 	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	"github.com/isd-sgcu/johnjud-gateway/mocks/client/user"
+	"github.com/isd-sgcu/johnjud-gateway/internal/user"
+	mockUser "github.com/isd-sgcu/johnjud-gateway/mocks/client/user"
 	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/user/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -108,10 +109,10 @@ func (t *UserServiceTest) TestFindOneSuccess() {
 		Lastname:  t.User.Lastname,
 	}
 
-	client := user.UserClientMock{}
+	client := mockUser.UserClientMock{}
 	client.On("FindOne", t.FindOneUserReq).Return(protoResp, nil)
 
-	svc := NewService(&client)
+	svc := user.NewService(&client)
 	actual, err := svc.FindOne(t.User.Id)
 
 	assert.Nil(t.T(), err)
@@ -121,11 +122,11 @@ func (t *UserServiceTest) TestFindOneSuccess() {
 func (t *UserServiceTest) TestFindOneNotFoundError() {
 	expected := t.NotFoundErr
 
-	client := user.UserClientMock{}
+	client := mockUser.UserClientMock{}
 	clienErr := status.Error(codes.NotFound, constant.UserNotFoundMessage)
 	client.On("FindOne", t.FindOneUserReq).Return(nil, clienErr)
 
-	svc := NewService(&client)
+	svc := user.NewService(&client)
 	actual, err := svc.FindOne(t.User.Id)
 
 	assert.Nil(t.T(), actual)
@@ -135,11 +136,11 @@ func (t *UserServiceTest) TestFindOneNotFoundError() {
 func (t *UserServiceTest) TestFindOneUnavailableServiceError() {
 	expected := t.UnavailableServiceErr
 
-	client := user.UserClientMock{}
+	client := mockUser.UserClientMock{}
 	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
 	client.On("FindOne", t.FindOneUserReq).Return(nil, clientErr)
 
-	svc := NewService(&client)
+	svc := user.NewService(&client)
 	actual, err := svc.FindOne(t.User.Id)
 
 	assert.Nil(t.T(), actual)
@@ -149,11 +150,11 @@ func (t *UserServiceTest) TestFindOneUnavailableServiceError() {
 func (t *UserServiceTest) TestFindOneInternalError() {
 	expected := t.InternalErr
 
-	client := user.UserClientMock{}
+	client := mockUser.UserClientMock{}
 	clientErr := status.Error(codes.Internal, constant.InternalErrorMessage)
 	client.On("FindOne", t.FindOneUserReq).Return(nil, clientErr)
 
-	svc := NewService(&client)
+	svc := user.NewService(&client)
 	actual, err := svc.FindOne(t.User.Id)
 
 	assert.Nil(t.T(), actual)
@@ -178,10 +179,10 @@ func (t *UserServiceTest) TestUpdateSuccess() {
 		Lastname:  t.User.Lastname,
 	}
 
-	client := user.UserClientMock{}
+	client := mockUser.UserClientMock{}
 	client.On("Update", t.UpdateUserReq).Return(protoResp, nil)
 
-	svc := NewService(&client)
+	svc := user.NewService(&client)
 	actual, err := svc.Update(t.User.Id, t.UpdateUserDto)
 
 	assert.Nil(t.T(), err)
@@ -191,11 +192,11 @@ func (t *UserServiceTest) TestUpdateSuccess() {
 func (t *UserServiceTest) TestUpdateDuplicateEmail() {
 	expected := t.ConflictErr
 
-	client := user.UserClientMock{}
+	client := mockUser.UserClientMock{}
 	clientErr := status.Error(codes.AlreadyExists, constant.DuplicateEmailMessage)
 	client.On("Update", t.UpdateUserReq).Return(nil, clientErr)
 
-	svc := NewService(&client)
+	svc := user.NewService(&client)
 	actual, err := svc.Update(t.User.Id, t.UpdateUserDto)
 
 	assert.Nil(t.T(), actual)
@@ -205,11 +206,11 @@ func (t *UserServiceTest) TestUpdateDuplicateEmail() {
 func (t *UserServiceTest) TestUpdateUnavailableServiceError() {
 	expected := t.UnavailableServiceErr
 
-	client := user.UserClientMock{}
+	client := mockUser.UserClientMock{}
 	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
 	client.On("Update", t.UpdateUserReq).Return(nil, clientErr)
 
-	svc := NewService(&client)
+	svc := user.NewService(&client)
 	actual, err := svc.Update(t.User.Id, t.UpdateUserDto)
 
 	assert.Nil(t.T(), actual)
@@ -219,11 +220,11 @@ func (t *UserServiceTest) TestUpdateUnavailableServiceError() {
 func (t *UserServiceTest) TestUpdateInternalError() {
 	expected := t.InternalErr
 
-	client := user.UserClientMock{}
+	client := mockUser.UserClientMock{}
 	clientErr := status.Error(codes.Internal, constant.InternalErrorMessage)
 	client.On("Update", t.UpdateUserReq).Return(nil, clientErr)
 
-	svc := NewService(&client)
+	svc := user.NewService(&client)
 	actual, err := svc.Update(t.User.Id, t.UpdateUserDto)
 
 	assert.Nil(t.T(), actual)
@@ -239,10 +240,10 @@ func (t *UserServiceTest) TestDeleteSuccess() {
 		Success: true,
 	}
 
-	client := user.UserClientMock{}
+	client := mockUser.UserClientMock{}
 	client.On("Delete", t.DeleteUserReq).Return(protoResp, nil)
 
-	svc := NewService(&client)
+	svc := user.NewService(&client)
 	actual, err := svc.Delete(t.User.Id)
 
 	assert.Nil(t.T(), err)
@@ -252,11 +253,11 @@ func (t *UserServiceTest) TestDeleteSuccess() {
 func (t *UserServiceTest) TestDeleteUnavailableServiceError() {
 	expected := t.UnavailableServiceErr
 
-	client := user.UserClientMock{}
+	client := mockUser.UserClientMock{}
 	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
 	client.On("Delete", t.DeleteUserReq).Return(nil, clientErr)
 
-	svc := NewService(&client)
+	svc := user.NewService(&client)
 	actual, err := svc.Delete(t.User.Id)
 
 	assert.Nil(t.T(), actual)
@@ -266,11 +267,11 @@ func (t *UserServiceTest) TestDeleteUnavailableServiceError() {
 func (t *UserServiceTest) TestDeleteInternalError() {
 	expected := t.InternalErr
 
-	client := user.UserClientMock{}
+	client := mockUser.UserClientMock{}
 	clientErr := status.Error(codes.Internal, constant.InternalErrorMessage)
 	client.On("Delete", t.DeleteUserReq).Return(nil, clientErr)
 
-	svc := NewService(&client)
+	svc := user.NewService(&client)
 	actual, err := svc.Delete(t.User.Id)
 
 	assert.Nil(t.T(), actual)

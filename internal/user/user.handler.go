@@ -6,17 +6,16 @@ import (
 
 	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	"github.com/isd-sgcu/johnjud-gateway/internal/pkg/service/user"
 	"github.com/isd-sgcu/johnjud-gateway/internal/router"
 	"github.com/isd-sgcu/johnjud-gateway/internal/validator"
 )
 
 type Handler struct {
-	service  user.Service
+	service  Service
 	validate validator.IDtoValidator
 }
 
-func NewHandler(service user.Service, validate validator.IDtoValidator) *Handler {
+func NewHandler(service Service, validate validator.IDtoValidator) *Handler {
 	return &Handler{service, validate}
 }
 
@@ -50,7 +49,6 @@ func (h *Handler) FindOne(c router.IContext) {
 	}
 
 	c.JSON(http.StatusOK, user)
-	return
 }
 
 // Update is a function that updates user in database
@@ -100,7 +98,6 @@ func (h *Handler) Update(c router.IContext) {
 	}
 
 	c.JSON(http.StatusOK, user)
-	return
 }
 
 // Delete is a function that deletes user in database
@@ -134,5 +131,4 @@ func (h *Handler) Delete(c router.IContext) {
 	}
 
 	c.JSON(http.StatusOK, res)
-	return
 }

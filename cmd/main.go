@@ -13,13 +13,12 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/config"
 	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/auth"
-	"github.com/isd-sgcu/johnjud-gateway/internal/handler/healthcheck"
-	userHdr "github.com/isd-sgcu/johnjud-gateway/internal/handler/user"
+	"github.com/isd-sgcu/johnjud-gateway/internal/healthcheck"
 	"github.com/isd-sgcu/johnjud-gateway/internal/image"
 	guard "github.com/isd-sgcu/johnjud-gateway/internal/middleware/auth"
 	"github.com/isd-sgcu/johnjud-gateway/internal/pet"
 	"github.com/isd-sgcu/johnjud-gateway/internal/router"
-	userSvc "github.com/isd-sgcu/johnjud-gateway/internal/service/user"
+	"github.com/isd-sgcu/johnjud-gateway/internal/user"
 	"github.com/isd-sgcu/johnjud-gateway/internal/validator"
 	authProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
 	userProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/user/v1"
@@ -100,8 +99,8 @@ func main() {
 	hc := healthcheck.NewHandler()
 
 	userClient := userProto.NewUserServiceClient(authConn)
-	userService := userSvc.NewService(userClient)
-	userHandler := userHdr.NewHandler(userService, v)
+	userService := user.NewService(userClient)
+	userHandler := user.NewHandler(userService, v)
 
 	authClient := authProto.NewAuthServiceClient(authConn)
 	authService := auth.NewService(authClient)

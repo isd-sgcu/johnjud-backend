@@ -12,14 +12,14 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/internal/validator"
 )
 
-type Handler struct {
+type handlerImpl struct {
 	service      Service
 	imageService image.Service
 	validate     validator.IDtoValidator
 }
 
-func NewHandler(service Service, imageService image.Service, validate validator.IDtoValidator) *Handler {
-	return &Handler{service, imageService, validate}
+func NewHandler(service Service, imageService image.Service, validate validator.IDtoValidator) *handlerImpl {
+	return &handlerImpl{service, imageService, validate}
 }
 
 // FindAll is a function that returns all VISIBLE pets in database
@@ -32,7 +32,7 @@ func NewHandler(service Service, imageService image.Service, validate validator.
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/pets/ [get]
-func (h *Handler) FindAll(c router.IContext) {
+func (h *handlerImpl) FindAll(c router.IContext) {
 	queries := c.Queries()
 	request, err := petUtils.QueriesToFindAllDto(queries)
 	if err != nil {
@@ -58,7 +58,7 @@ func (h *Handler) FindAll(c router.IContext) {
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/pets/admin [get]
-func (h *Handler) FindAllAdmin(c router.IContext) {
+func (h *handlerImpl) FindAllAdmin(c router.IContext) {
 	queries := c.Queries()
 	request, err := petUtils.QueriesToFindAllDto(queries)
 	if err != nil {
@@ -86,7 +86,7 @@ func (h *Handler) FindAllAdmin(c router.IContext) {
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/pets/{id} [get]
-func (h *Handler) FindOne(c router.IContext) {
+func (h *handlerImpl) FindOne(c router.IContext) {
 	id, err := c.Param("id")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ResponseErr{
@@ -118,7 +118,7 @@ func (h *Handler) FindOne(c router.IContext) {
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/pets/create [post]
-func (h *Handler) Create(c router.IContext) {
+func (h *handlerImpl) Create(c router.IContext) {
 	request := &dto.CreatePetRequest{}
 	err := c.Bind(request)
 	if err != nil {
@@ -165,7 +165,7 @@ func (h *Handler) Create(c router.IContext) {
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/pets/{id} [put]
-func (h *Handler) Update(c router.IContext) {
+func (h *handlerImpl) Update(c router.IContext) {
 	petId, err := c.Param("id")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, &dto.ResponseErr{
@@ -223,7 +223,7 @@ func (h *Handler) Update(c router.IContext) {
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/pets/{id}/visible [put]
-func (h *Handler) ChangeView(c router.IContext) {
+func (h *handlerImpl) ChangeView(c router.IContext) {
 	id, err := c.Param("id")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ResponseErr{
@@ -280,7 +280,7 @@ func (h *Handler) ChangeView(c router.IContext) {
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/pets/{id} [delete]
-func (h *Handler) Delete(c router.IContext) {
+func (h *handlerImpl) Delete(c router.IContext) {
 	id, err := c.Param("id")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ResponseErr{
@@ -313,7 +313,7 @@ func (h *Handler) Delete(c router.IContext) {
 // @Failure 500 {object} dto.ResponseInternalErr "Internal service error"
 // @Failure 503 {object} dto.ResponseServiceDownErr "Service is down"
 // @Router /v1/pets/{id}/adopt [put]
-func (h *Handler) Adopt(c router.IContext) {
+func (h *handlerImpl) Adopt(c router.IContext) {
 	petId, err := c.Param("id")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, &dto.ResponseErr{

@@ -6,8 +6,8 @@ import (
 
 	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	"github.com/isd-sgcu/johnjud-gateway/internal/pkg/service/user"
 	"github.com/isd-sgcu/johnjud-gateway/internal/router"
+	"github.com/isd-sgcu/johnjud-gateway/internal/user"
 	"github.com/isd-sgcu/johnjud-gateway/internal/validator"
 )
 
