@@ -19,6 +19,8 @@ docker-qa:
 	docker-compose -f docker-compose.qa.yaml up
 
 mock-gen:
+	mockgen -source ./internal/cache/cache.repository.go -destination ./mocks/repository/cache/cache.mock.go
+	mockgen -source ./internal/auth/token/token.service.go -destination ./mocks/service/token/token.mock.go
 	mockgen -source ./internal/auth/auth.service.go -destination ./mocks/service/auth/auth.mock.go
 	mockgen -source ./internal/user/user.service.go -destination ./mocks/service/user/user.mock.go
 	mockgen -source ./internal/pet/pet.service.go -destination ./mocks/service/pet/pet.mock.go

@@ -15,11 +15,11 @@ type Guard struct {
 	service     auth.Service
 	excludes    map[string]struct{}
 	adminpath   map[string]struct{}
-	conf        config.AppConfig
+	conf        config.App
 	versionList map[string]struct{}
 }
 
-func NewAuthGuard(s auth.Service, e map[string]struct{}, a map[string]struct{}, conf config.AppConfig, versionList map[string]struct{}) Guard {
+func NewAuthGuard(s auth.Service, e map[string]struct{}, a map[string]struct{}, conf config.App, versionList map[string]struct{}) Guard {
 	return Guard{
 		service:     s,
 		excludes:    e,
