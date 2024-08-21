@@ -13,7 +13,10 @@ test:
 	go tool cover -html=coverage.out -o coverage.html
 
 server:
-	. ./tools/export-env.sh ; go run ./cmd/.
+	go run ./cmd/.
+
+docker-qa:
+	docker-compose -f docker-compose.qa.yaml up
 
 mock-gen:
 	mockgen -source ./internal/auth/auth.service.go -destination ./mocks/service/auth/auth.mock.go

@@ -22,7 +22,7 @@ type IGuard interface {
 	Use(IContext) error
 }
 
-func NewAPIv1(r *FiberRouter, conf config.App) *fiber.App {
+func NewAPIv1(r *FiberRouter, conf config.AppConfig) *fiber.App {
 	if conf.IsDevelopment() {
 		r.Use(logger.New(logger.Config{Next: func(c *fiber.Ctx) bool {
 			return c.Path() == "/v1/"
@@ -41,7 +41,7 @@ func NewAPIv1(r *FiberRouter, conf config.App) *fiber.App {
 	return app
 }
 
-func NewFiberRouter(authGuard IGuard, conf config.App) *FiberRouter {
+func NewFiberRouter(authGuard IGuard, conf config.AppConfig) *FiberRouter {
 	r := fiber.New(fiber.Config{
 		BodyLimit: int(conf.MaxFileSize * 1024 * 1024),
 	})

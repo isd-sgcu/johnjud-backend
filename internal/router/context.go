@@ -111,15 +111,15 @@ func (c *FiberCtx) File(key string, allowContent map[string]struct{}, maxSize in
 	}
 
 	if !utils.IsExisted(allowContent, file.Header["Content-Type"][0]) {
-		return nil, errors.New("Not allow content")
+		return nil, errors.New("not allow content")
 	}
 
 	if file.Size > maxSize {
-		return nil, errors.New(fmt.Sprintf("Max file size is %v", maxSize))
+		return nil, fmt.Errorf("max file size is %v", maxSize)
 	}
 	content, err := file.Open()
 	if err != nil {
-		return nil, errors.New("Cannot read file")
+		return nil, errors.New("cannot read file")
 	}
 
 	defer content.Close()

@@ -1,53 +1,65 @@
 package config
 
 import (
-	"github.com/spf13/viper"
+	"os"
+	"strconv"
+
+	"github.com/joho/godotenv"
 )
 
-type App struct {
-	Port        int    `mapstructure:"PORT"`
-	Env         string `mapstructure:"ENV"`
-	MaxFileSize int64  `mapstructure:"MAX_FILE_SIZE"`
+type AppConfig struct {
+	Port        int
+	Env         string
+	MaxFileSize int64
 }
 
-type Service struct {
-	Auth    string `mapstructure:"AUTH"`
-	Backend string `mapstructure:"BACKEND"`
-	File    string `mapstructure:"FILE"`
+type ServiceConfig struct {
+	Auth    string
+	Backend string
+	File    string
 }
 
 type Config struct {
-	App     App
-	Service Service
+	App     AppConfig
+	Service ServiceConfig
 }
 
 func LoadConfig() (*Config, error) {
-	appCfgLdr := viper.New()
-	appCfgLdr.SetEnvPrefix("APP")
-	appCfgLdr.AutomaticEnv()
-	appCfgLdr.AllowEmptyEnv(false)
-	appConfig := App{}
-	if err := appCfgLdr.Unmarshal(&appConfig); err != nil {
+	if os.Getenv("APP_ENV") == "" {
+		err := godotenv.Load(".env")
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	port, err := strconv.ParseInt(os.Getenv("APP_PORT"), 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	maxFileSize, err := strconv.ParseInt(os.Getenv("APP_MAX_FILE_SIZE"), 10, 64)
+	if err != nil {
 		return nil, err
 	}
 
-	serviceCfgLdr := viper.New()
-	serviceCfgLdr.SetEnvPrefix("SERVICE")
-	serviceCfgLdr.AutomaticEnv()
-	serviceCfgLdr.AllowEmptyEnv(false)
-	serviceConfig := Service{}
-	if err := serviceCfgLdr.Unmarshal(&serviceConfig); err != nil {
-		return nil, err
+	appConfig := AppConfig{
+		Port:        int(port),
+		Env:         os.Getenv("APP_ENV"),
+		MaxFileSize: maxFileSize,
 	}
 
-	config := &Config{
+	serviceConfig := ServiceConfig{
+		Auth:    os.Getenv("SERVICE_AUTH"),
+		Backend: os.Getenv("SERVICE_BACKEND"),
+		File:    os.Getenv("SERVICE_FILE"),
+	}
+
+	return &Config{
 		App:     appConfig,
 		Service: serviceConfig,
-	}
+	}, nil
 
-	return config, nil
 }
 
-func (ac *App) IsDevelopment() bool {
+func (ac *AppConfig) IsDevelopment() bool {
 	return ac.Env == "development"
 }
