@@ -1,267 +1,338 @@
 package image
 
 import (
-	"context"
-	"net/http"
+	"strings"
 	"time"
 
+	"github.com/google/uuid"
+	"github.com/isd-sgcu/johnjud-gateway/client/bucket"
 	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	proto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
+	"github.com/isd-sgcu/johnjud-gateway/internal/model"
+	"github.com/isd-sgcu/johnjud-gateway/internal/utils"
 	"github.com/rs/zerolog/log"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"gorm.io/gorm"
 )
 
 type Service interface {
 	FindAll() ([]*dto.ImageResponse, *dto.ResponseErr)
-	FindByPetId(string) ([]*dto.ImageResponse, *dto.ResponseErr)
-	Upload(*dto.UploadImageRequest) (*dto.ImageResponse, *dto.ResponseErr)
-	Delete(string) (*dto.DeleteImageResponse, *dto.ResponseErr)
-	DeleteByPetId(string) (*dto.DeleteImageResponse, *dto.ResponseErr)
-	AssignPet(*dto.AssignPetRequest) (*dto.AssignPetResponse, *dto.ResponseErr)
+	FindByPetId(petID string) ([]*dto.ImageResponse, *dto.ResponseErr)
+	Upload(request *dto.UploadImageRequest) (*dto.ImageResponse, *dto.ResponseErr)
+	Delete(id string) (*dto.DeleteImageResponse, *dto.ResponseErr)
+	DeleteByPetId(petID string) (*dto.DeleteImageResponse, *dto.ResponseErr)
+	AssignPet(request *dto.AssignPetRequest) (*dto.AssignPetResponse, *dto.ResponseErr)
 }
 
 type serviceImpl struct {
-	client proto.ImageServiceClient
+	client     bucket.Client
+	repository Repository
+	random     utils.RandomUtil
 }
 
-func NewService(client proto.ImageServiceClient) Service {
+func NewService(client bucket.Client, repository Repository, random utils.RandomUtil) Service {
 	return &serviceImpl{
-		client: client,
+		client:     client,
+		repository: repository,
+		random:     random,
 	}
 }
 
 func (s *serviceImpl) FindAll() ([]*dto.ImageResponse, *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	var images []*model.Image
 
-	res, errRes := s.client.FindAll(ctx, &proto.FindAllImageRequest{})
-	if errRes != nil {
-		st, _ := status.FromError(errRes)
-		log.Error().
+	err := s.repository.FindAll(&images)
+	if err != nil {
+		log.Error().Err(err).
 			Str("service", "image").
 			Str("module", "find all").
-			Msg(st.Message())
-		switch st.Code() {
-		case codes.Unavailable:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusServiceUnavailable,
-				Message:    constant.UnavailableServiceMessage,
-				Data:       nil,
-			}
-		default:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
-		}
+			Msg("Error finding all images")
+
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
 	}
-	return ProtoToDtoList(res.Images), nil
+
+	return RawToDtoList(&images), nil
 }
 
-func (s *serviceImpl) FindByPetId(petId string) ([]*dto.ImageResponse, *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+func (s *serviceImpl) FindByPetId(petID string) ([]*dto.ImageResponse, *dto.ResponseErr) {
+	var images []*model.Image
 
-	res, errRes := s.client.FindByPetId(ctx, &proto.FindImageByPetIdRequest{PetId: petId})
-	if errRes != nil {
-		st, _ := status.FromError(errRes)
-		log.Error().
+	err := s.repository.FindByPetId(petID, &images)
+	if err != nil {
+		log.Error().Err(err).
 			Str("service", "image").
-			Str("module", "find by pet id").
-			Msg(st.Message())
-		switch st.Code() {
-		case codes.NotFound:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusNotFound,
-				Message:    constant.PetNotFoundMessage,
-				Data:       nil,
-			}
-		case codes.Unavailable:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusServiceUnavailable,
-				Message:    constant.UnavailableServiceMessage,
-				Data:       nil,
-			}
-		default:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
+			Str("module", "find by petId").
+			Str("petId", petID).
+			Msg("Error finding image by pet id from repo")
+		if err == gorm.ErrRecordNotFound {
+			return nil, dto.NotFoundError(constant.ImageNotFoundErrorMessage)
 		}
+
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
 	}
-	return ProtoToDtoList(res.Images), nil
+
+	return RawToDtoList(&images), nil
 }
 
-func (s *serviceImpl) Upload(in *dto.UploadImageRequest) (*dto.ImageResponse, *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+func (s *serviceImpl) Upload(req *dto.UploadImageRequest) (*dto.ImageResponse, *dto.ResponseErr) {
+	if req.PetId != "" {
+		_, err := uuid.Parse(req.PetId)
+		if err != nil {
+			log.Error().Err(err).
+				Str("service", "image").
+				Str("module", "upload").
+				Str("petId", req.PetId).
+				Msg(constant.PetIdNotUUIDErrorMessage)
 
-	request := CreateDtoToProto(in)
-	res, errRes := s.client.Upload(ctx, request)
-	if errRes != nil {
-		st, _ := status.FromError(errRes)
-		log.Error().
-			Err(errRes).
+			return nil, dto.BadRequestError(constant.PetIdNotUUIDErrorMessage)
+		}
+	}
+
+	randomString, err := s.random.GenerateRandomString(10)
+	if err != nil {
+		log.Error().Err(err).
 			Str("service", "image").
 			Str("module", "upload").
-			Msg(st.Message())
-		switch st.Code() {
-		case codes.InvalidArgument:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusBadRequest,
-				Message:    constant.InvalidArgumentMessage,
-				Data:       nil,
-			}
-		case codes.Unavailable:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusServiceUnavailable,
-				Message:    constant.UnavailableServiceMessage,
-				Data:       nil,
-			}
+			Str("petId", req.PetId).
+			Msg("Error while generating random string")
+		return nil, dto.InternalServerError("Error while generating random string")
+	}
+
+	imageUrl, objectKey, err := s.client.Upload(req.File, randomString+"_"+req.Filename)
+	if err != nil {
+		log.Error().Err(err).
+			Str("service", "image").
+			Str("module", "upload").
+			Str("petId", req.PetId).
+			Msg(constant.UploadToBucketErrorMessage)
+
+		// return nil, status.Error(codes.Internal, constant.UploadToBucketErrorMessage)
+		return nil, dto.InternalServerError(constant.UploadToBucketErrorMessage)
+	}
+
+	raw, _ := DtoToRaw(&dto.ImageResponse{
+		PetId:     req.PetId,
+		Url:       imageUrl,
+		ObjectKey: objectKey,
+	})
+
+	err = s.repository.Create(raw)
+	if err != nil {
+		log.Error().Err(err).
+			Str("service", "image").
+			Str("module", "upload").
+			Str("petId", req.PetId).
+			Msg(constant.CreateImageErrorMessage)
+
+		return nil, dto.InternalServerError(constant.CreateImageErrorMessage)
+	}
+
+	return RawToDto(raw), nil
+}
+
+func (s *serviceImpl) AssignPet(req *dto.AssignPetRequest) (*dto.AssignPetResponse, *dto.ResponseErr) {
+	petId, err := uuid.Parse(req.PetId)
+	if err != nil {
+		log.Error().Err(err).
+			Str("service", "image").
+			Str("module", "assign pet").
+			Str("petId", req.PetId).
+			Msg(constant.PrimaryKeyRequiredErrorMessage)
+
+		return nil, dto.BadRequestError(constant.PrimaryKeyRequiredErrorMessage)
+	}
+
+	for _, id := range req.Ids {
+		err = s.repository.Update(id, &model.Image{
+			PetID: &petId,
+		})
+		if err == nil {
+			continue
+		}
+
+		log.Error().Err(err).
+			Str("service", "image").
+			Str("module", "assign pet").
+			Str("petId", req.PetId).
+			Msg("Error updating image in repo")
+
+		if strings.Contains(err.Error(), gorm.ErrForeignKeyViolated.Error()) {
+			return nil, dto.NotFoundError(constant.PetIdNotFoundErrorMessage)
+		}
+		switch err {
+		case gorm.ErrRecordNotFound:
+			return nil, dto.NotFoundError(constant.ImageNotFoundErrorMessage)
 		default:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
+			return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
 		}
 	}
-	return ProtoToDto(res.Image), nil
+
+	return &dto.AssignPetResponse{Success: true}, nil
 }
 
 func (s *serviceImpl) Delete(id string) (*dto.DeleteImageResponse, *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	var image model.Image
 
-	request := &proto.DeleteImageRequest{
-		Id: id,
-	}
-
-	res, errRes := s.client.Delete(ctx, request)
-	if errRes != nil {
-		st, _ := status.FromError(errRes)
-		log.Error().
-			Err(errRes).
+	err := s.repository.FindOne(id, &image)
+	if err != nil {
+		log.Error().Err(err).
 			Str("service", "image").
 			Str("module", "delete").
-			Msg(st.Message())
-		switch st.Code() {
-		case codes.NotFound:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusNotFound,
-				Message:    constant.ImageNotFoundMessage,
-				Data:       nil,
-			}
-		case codes.Unavailable:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusServiceUnavailable,
-				Message:    constant.UnavailableServiceMessage,
-				Data:       nil,
-			}
-		default:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
+			Str("id", id).
+			Msg("Error finding image from repo")
+		if err == gorm.ErrRecordNotFound {
+			return nil, dto.NotFoundError(constant.ImageNotFoundErrorMessage)
 		}
+
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
 	}
-	return &dto.DeleteImageResponse{
-		Success: res.Success,
-	}, nil
+
+	err = s.client.Delete(image.ObjectKey)
+	if err != nil {
+		log.Error().Err(err).
+			Str("service", "image").
+			Str("module", "delete").
+			Str("id", id).
+			Msg(constant.DeleteFromBucketErrorMessage)
+
+		return nil, dto.InternalServerError(constant.DeleteFromBucketErrorMessage)
+	}
+
+	err = s.repository.Delete(id)
+	if err != nil {
+		log.Error().Err(err).
+			Str("service", "image").
+			Str("module", "delete").
+			Str("id", id).
+			Msg(constant.DeleteImageErrorMessage)
+
+		return nil, dto.InternalServerError(constant.DeleteImageErrorMessage)
+	}
+
+	return &dto.DeleteImageResponse{Success: true}, nil
 }
 
-func (s *serviceImpl) DeleteByPetId(petId string) (*dto.DeleteImageResponse, *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+func (s *serviceImpl) DeleteByPetId(petID string) (*dto.DeleteImageResponse, *dto.ResponseErr) {
+	var images []*model.Image
 
-	request := &proto.DeleteByPetIdRequest{
-		PetId: petId,
-	}
-
-	res, errRes := s.client.DeleteByPetId(ctx, request)
-	if errRes != nil {
-		st, _ := status.FromError(errRes)
-		log.Error().
-			Err(errRes).
+	err := s.repository.FindByPetId(petID, &images)
+	if err != nil {
+		log.Error().Err(err).
 			Str("service", "image").
 			Str("module", "delete by pet id").
-			Msg(st.Message())
-		switch st.Code() {
-		case codes.NotFound:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusNotFound,
-				Message:    constant.ImageNotFoundMessage,
-				Data:       nil,
-			}
-		case codes.Unavailable:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusServiceUnavailable,
-				Message:    constant.UnavailableServiceMessage,
-				Data:       nil,
-			}
-		default:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
+			Str("pet id", petID).
+			Msg("Error finding image from repo")
+		if err == gorm.ErrRecordNotFound {
+			return nil, dto.NotFoundError(constant.ImageNotFoundErrorMessage)
+		}
+
+		return nil, dto.InternalServerError(constant.InternalServerErrorMessage)
+	}
+
+	imageObjectKeys := ExtractImageObjectKeys(images)
+	err = s.client.DeleteMany(imageObjectKeys)
+	if err != nil {
+		log.Error().Err(err).
+			Str("service", "image").
+			Str("module", "delete by pet id").
+			Interface("image object keys", imageObjectKeys).
+			Msg(constant.DeleteFromBucketErrorMessage)
+
+		return nil, dto.InternalServerError(constant.DeleteFromBucketErrorMessage)
+	}
+
+	imageIds := ExtractImageIds(images)
+	err = s.repository.DeleteMany(imageIds)
+	if err != nil {
+		log.Error().Err(err).
+			Str("service", "image").
+			Str("module", "delete by pet id").
+			Interface("image ids", imageIds).
+			Msg(constant.DeleteImageErrorMessage)
+
+		return nil, dto.InternalServerError(constant.DeleteImageErrorMessage)
+	}
+
+	return &dto.DeleteImageResponse{Success: true}, nil
+}
+
+func DtoToRaw(in *dto.ImageResponse) (result *model.Image, err error) {
+	var id uuid.UUID
+	if in.Id != "" {
+		id, err = uuid.Parse(in.Id)
+		if err != nil {
+			return nil, err
 		}
 	}
-	return &dto.DeleteImageResponse{
-		Success: res.Success,
+
+	petId, err := uuid.Parse(in.PetId)
+	if err != nil {
+		return &model.Image{
+			Base: model.Base{
+				ID:        id,
+				CreatedAt: time.Time{},
+				UpdatedAt: time.Time{},
+				DeletedAt: gorm.DeletedAt{},
+			},
+			PetID:     nil,
+			ImageUrl:  in.Url,
+			ObjectKey: in.ObjectKey,
+		}, nil
+	}
+
+	return &model.Image{
+		Base: model.Base{
+			ID:        id,
+			CreatedAt: time.Time{},
+			UpdatedAt: time.Time{},
+			DeletedAt: gorm.DeletedAt{},
+		},
+		PetID:     &petId,
+		ImageUrl:  in.Url,
+		ObjectKey: in.ObjectKey,
 	}, nil
 }
 
-func (s *serviceImpl) AssignPet(in *dto.AssignPetRequest) (*dto.AssignPetResponse, *dto.ResponseErr) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	request := &proto.AssignPetRequest{
-		Ids:   in.Ids,
-		PetId: in.PetId,
+func RawToDtoList(in *[]*model.Image) []*dto.ImageResponse {
+	var result []*dto.ImageResponse
+	for _, b := range *in {
+		result = append(result, RawToDto(b))
 	}
 
-	res, errRes := s.client.AssignPet(ctx, request)
-	if errRes != nil {
-		st, _ := status.FromError(errRes)
-		log.Error().
-			Err(errRes).
-			Str("service", "image").
-			Str("module", "assign pet").
-			Msg(st.Message())
-		switch st.Code() {
-		case codes.InvalidArgument:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusBadRequest,
-				Message:    constant.InvalidArgumentMessage,
-				Data:       nil,
-			}
-		case codes.NotFound:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusNotFound,
-				Message:    constant.PetNotFoundMessage,
-				Data:       nil,
-			}
-		case codes.Unavailable:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusServiceUnavailable,
-				Message:    constant.UnavailableServiceMessage,
-				Data:       nil,
-			}
-		default:
-			return nil, &dto.ResponseErr{
-				StatusCode: http.StatusInternalServerError,
-				Message:    constant.InternalErrorMessage,
-				Data:       nil,
-			}
-		}
+	return result
+}
+
+func RawToDto(in *model.Image) *dto.ImageResponse {
+	var id string
+	var petId string
+	if in.ID != uuid.Nil {
+		id = in.ID.String()
 	}
-	return &dto.AssignPetResponse{
-		Success: res.Success,
-	}, nil
+	if in.PetID != nil {
+		petId = in.PetID.String()
+	}
+
+	return &dto.ImageResponse{
+		Id:        id,
+		PetId:     petId,
+		Url:       in.ImageUrl,
+		ObjectKey: in.ObjectKey,
+	}
+}
+
+func ExtractImageIds(in []*model.Image) []string {
+	var imageIds []string
+	for _, image := range in {
+		imageIds = append(imageIds, image.ID.String())
+	}
+
+	return imageIds
+}
+
+func ExtractImageObjectKeys(in []*model.Image) []string {
+	var imageObjectKeys []string
+	for _, image := range in {
+		imageObjectKeys = append(imageObjectKeys, image.ObjectKey)
+	}
+
+	return imageObjectKeys
 }
