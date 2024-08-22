@@ -47,6 +47,14 @@ type Sendgrid struct {
 	Address string
 }
 
+type Bucket struct {
+	Endpoint        string
+	AccessKeyID     string
+	SecretAccessKey string
+	UseSSL          bool
+	BucketName      string
+}
+
 type Config struct {
 	App      App
 	Service  Service
@@ -55,6 +63,7 @@ type Config struct {
 	Jwt      Jwt
 	Auth     Auth
 	Sendgrid Sendgrid
+	Bucket   Bucket
 }
 
 func LoadConfig() (*Config, error) {
@@ -129,6 +138,14 @@ func LoadConfig() (*Config, error) {
 		Address: os.Getenv("SENDGRID_ADDRESS"),
 	}
 
+	bucket := Bucket{
+		Endpoint:        os.Getenv("BUCKET_ENDPOINT"),
+		AccessKeyID:     os.Getenv("BUCKET_ACCESS_KEY_ID"),
+		SecretAccessKey: os.Getenv("BUCKET_SECRET_ACCESS_KEY"),
+		UseSSL:          os.Getenv("BUCKET_USE_SSL") == "true",
+		BucketName:      os.Getenv("BUCKET_NAME"),
+	}
+
 	return &Config{
 		App:      app,
 		Service:  service,
@@ -137,6 +154,7 @@ func LoadConfig() (*Config, error) {
 		Jwt:      jwt,
 		Auth:     auth,
 		Sendgrid: sendgrid,
+		Bucket:   bucket,
 	}, nil
 
 }

@@ -24,6 +24,7 @@ mock-gen:
 	mockgen -source ./internal/auth/auth.service.go -destination ./mocks/service/auth/auth.mock.go
 	mockgen -source ./internal/user/user.service.go -destination ./mocks/service/user/user.mock.go
 	mockgen -source ./internal/pet/pet.service.go -destination ./mocks/service/pet/pet.mock.go
+	mockgen -source ./client/bucket/bucket.client.go -destination ./mocks/client/bucket/bucket.mock.go
 	mockgen -source ./internal/image/image.service.go -destination ./mocks/service/image/image.mock.go
 	mockgen -source ./internal/validator/validator.go -destination ./mocks/validator/validator.mock.go
 	mockgen -source ./internal/router/context.go -destination ./mocks/router/context.mock.go
