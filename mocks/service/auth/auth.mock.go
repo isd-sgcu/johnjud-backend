@@ -35,106 +35,106 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 }
 
 // ForgotPassword mocks base method.
-func (m *MockService) ForgotPassword(arg0 *dto.ForgotPasswordRequest) (*dto.ForgotPasswordResponse, *dto.ResponseErr) {
+func (m *MockService) ForgotPassword(request *dto.ForgotPasswordRequest) (*dto.ForgotPasswordResponse, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ForgotPassword", arg0)
+	ret := m.ctrl.Call(m, "ForgotPassword", request)
 	ret0, _ := ret[0].(*dto.ForgotPasswordResponse)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // ForgotPassword indicates an expected call of ForgotPassword.
-func (mr *MockServiceMockRecorder) ForgotPassword(arg0 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) ForgotPassword(request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ForgotPassword", reflect.TypeOf((*MockService)(nil).ForgotPassword), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ForgotPassword", reflect.TypeOf((*MockService)(nil).ForgotPassword), request)
 }
 
 // RefreshToken mocks base method.
-func (m *MockService) RefreshToken(arg0 *dto.RefreshTokenRequest) (*dto.Credential, *dto.ResponseErr) {
+func (m *MockService) RefreshToken(request *dto.RefreshTokenRequest) (*dto.Credential, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RefreshToken", arg0)
+	ret := m.ctrl.Call(m, "RefreshToken", request)
 	ret0, _ := ret[0].(*dto.Credential)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // RefreshToken indicates an expected call of RefreshToken.
-func (mr *MockServiceMockRecorder) RefreshToken(arg0 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) RefreshToken(request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshToken", reflect.TypeOf((*MockService)(nil).RefreshToken), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshToken", reflect.TypeOf((*MockService)(nil).RefreshToken), request)
 }
 
 // ResetPassword mocks base method.
-func (m *MockService) ResetPassword(arg0 *dto.ResetPasswordRequest) (*dto.ResetPasswordResponse, *dto.ResponseErr) {
+func (m *MockService) ResetPassword(request *dto.ResetPasswordRequest) (*dto.ResetPasswordResponse, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ResetPassword", arg0)
+	ret := m.ctrl.Call(m, "ResetPassword", request)
 	ret0, _ := ret[0].(*dto.ResetPasswordResponse)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // ResetPassword indicates an expected call of ResetPassword.
-func (mr *MockServiceMockRecorder) ResetPassword(arg0 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) ResetPassword(request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResetPassword", reflect.TypeOf((*MockService)(nil).ResetPassword), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResetPassword", reflect.TypeOf((*MockService)(nil).ResetPassword), request)
 }
 
 // SignIn mocks base method.
-func (m *MockService) SignIn(arg0 *dto.SignInRequest) (*dto.Credential, *dto.ResponseErr) {
+func (m *MockService) SignIn(request *dto.SignInRequest) (*dto.Credential, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SignIn", arg0)
+	ret := m.ctrl.Call(m, "SignIn", request)
 	ret0, _ := ret[0].(*dto.Credential)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // SignIn indicates an expected call of SignIn.
-func (mr *MockServiceMockRecorder) SignIn(arg0 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) SignIn(request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignIn", reflect.TypeOf((*MockService)(nil).SignIn), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignIn", reflect.TypeOf((*MockService)(nil).SignIn), request)
 }
 
 // SignOut mocks base method.
-func (m *MockService) SignOut(arg0 string) (*dto.SignOutResponse, *dto.ResponseErr) {
+func (m *MockService) SignOut(accessToken string) (*dto.SignOutResponse, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SignOut", arg0)
+	ret := m.ctrl.Call(m, "SignOut", accessToken)
 	ret0, _ := ret[0].(*dto.SignOutResponse)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // SignOut indicates an expected call of SignOut.
-func (mr *MockServiceMockRecorder) SignOut(arg0 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) SignOut(accessToken interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignOut", reflect.TypeOf((*MockService)(nil).SignOut), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignOut", reflect.TypeOf((*MockService)(nil).SignOut), accessToken)
 }
 
 // Signup mocks base method.
-func (m *MockService) Signup(arg0 *dto.SignupRequest) (*dto.SignupResponse, *dto.ResponseErr) {
+func (m *MockService) Signup(request *dto.SignupRequest) (*dto.SignupResponse, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Signup", arg0)
+	ret := m.ctrl.Call(m, "Signup", request)
 	ret0, _ := ret[0].(*dto.SignupResponse)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // Signup indicates an expected call of Signup.
-func (mr *MockServiceMockRecorder) Signup(arg0 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) Signup(request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Signup", reflect.TypeOf((*MockService)(nil).Signup), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Signup", reflect.TypeOf((*MockService)(nil).Signup), request)
 }
 
 // Validate mocks base method.
-func (m *MockService) Validate(arg0 string) (*dto.TokenPayloadAuth, *dto.ResponseErr) {
+func (m *MockService) Validate(refreshToken string) (*dto.TokenPayloadAuth, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Validate", arg0)
+	ret := m.ctrl.Call(m, "Validate", refreshToken)
 	ret0, _ := ret[0].(*dto.TokenPayloadAuth)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // Validate indicates an expected call of Validate.
-func (mr *MockServiceMockRecorder) Validate(arg0 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) Validate(refreshToken interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Validate", reflect.TypeOf((*MockService)(nil).Validate), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Validate", reflect.TypeOf((*MockService)(nil).Validate), refreshToken)
 }

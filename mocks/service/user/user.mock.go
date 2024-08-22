@@ -35,46 +35,46 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 }
 
 // Delete mocks base method.
-func (m *MockService) Delete(arg0 string) (*dto.DeleteUserResponse, *dto.ResponseErr) {
+func (m *MockService) Delete(id string) (*dto.DeleteUserResponse, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", arg0)
+	ret := m.ctrl.Call(m, "Delete", id)
 	ret0, _ := ret[0].(*dto.DeleteUserResponse)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockServiceMockRecorder) Delete(arg0 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) Delete(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockService)(nil).Delete), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockService)(nil).Delete), id)
 }
 
 // FindOne mocks base method.
-func (m *MockService) FindOne(arg0 string) (*dto.User, *dto.ResponseErr) {
+func (m *MockService) FindOne(id string) (*dto.User, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindOne", arg0)
+	ret := m.ctrl.Call(m, "FindOne", id)
 	ret0, _ := ret[0].(*dto.User)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // FindOne indicates an expected call of FindOne.
-func (mr *MockServiceMockRecorder) FindOne(arg0 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) FindOne(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*MockService)(nil).FindOne), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*MockService)(nil).FindOne), id)
 }
 
 // Update mocks base method.
-func (m *MockService) Update(arg0 string, arg1 *dto.UpdateUserRequest) (*dto.User, *dto.ResponseErr) {
+func (m *MockService) Update(id string, request *dto.UpdateUserRequest) (*dto.User, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", arg0, arg1)
+	ret := m.ctrl.Call(m, "Update", id, request)
 	ret0, _ := ret[0].(*dto.User)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockServiceMockRecorder) Update(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) Update(id, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockService)(nil).Update), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockService)(nil).Update), id, request)
 }
