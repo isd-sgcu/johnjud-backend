@@ -1,0 +1,1077 @@
+definitions:
+  constant.Gender:
+    enum:
+    - male
+    - female
+    type: string
+    x-enum-varnames:
+    - MALE
+    - FEMALE
+  constant.Status:
+    enum:
+    - adopted
+    - findhome
+    type: string
+    x-enum-varnames:
+    - ADOPTED
+    - FINDHOME
+  dto.AdoptByRequest:
+    properties:
+      user_id:
+        type: string
+    required:
+    - user_id
+    type: object
+  dto.AdoptByResponse:
+    properties:
+      success:
+        type: boolean
+    type: object
+  dto.BadReqErrResponse:
+    properties:
+      failed_field:
+        type: string
+      message:
+        type: string
+      value: {}
+    type: object
+  dto.ChangeViewPetRequest:
+    properties:
+      visible:
+        type: boolean
+    type: object
+  dto.ChangeViewPetResponse:
+    properties:
+      success:
+        type: boolean
+    type: object
+  dto.CreatePetRequest:
+    properties:
+      birthdate:
+        type: string
+      caption:
+        type: string
+      color:
+        type: string
+      contact:
+        type: string
+      gender:
+        allOf:
+        - $ref: '#/definitions/constant.Gender'
+        example: male
+      habit:
+        type: string
+      images:
+        items:
+          type: string
+        type: array
+      is_sterile:
+        type: boolean
+      is_vaccinated:
+        type: boolean
+      is_visible:
+        type: boolean
+      name:
+        type: string
+      origin:
+        type: string
+      owner:
+        type: string
+      pattern:
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/constant.Status'
+        example: findhome
+      tel:
+        type: string
+      type:
+        type: string
+    required:
+    - birthdate
+    - color
+    - gender
+    - habit
+    - is_sterile
+    - is_vaccinated
+    - is_visible
+    - name
+    - origin
+    - pattern
+    - status
+    - type
+    type: object
+  dto.Credential:
+    properties:
+      access_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3BiZX...
+        type: string
+      expires_in:
+        example: 3600
+        type: integer
+      refresh_token:
+        example: e7e84d54-7518-4...
+        type: string
+    type: object
+  dto.DeleteResponse:
+    properties:
+      success:
+        type: boolean
+    type: object
+  dto.DeleteUserResponse:
+    properties:
+      success:
+        type: boolean
+    type: object
+  dto.ForgotPasswordRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  dto.ForgotPasswordResponse:
+    properties:
+      is_success:
+        type: boolean
+    type: object
+  dto.ImageResponse:
+    properties:
+      id:
+        type: string
+      object_key:
+        type: string
+      pet_id:
+        type: string
+      url:
+        type: string
+    type: object
+  dto.PetResponse:
+    properties:
+      birthdate:
+        type: string
+      caption:
+        type: string
+      color:
+        type: string
+      contact:
+        type: string
+      gender:
+        $ref: '#/definitions/constant.Gender'
+      habit:
+        type: string
+      id:
+        type: string
+      images:
+        items:
+          $ref: '#/definitions/dto.ImageResponse'
+        type: array
+      is_sterile:
+        type: boolean
+      is_vaccinated:
+        type: boolean
+      is_visible:
+        type: boolean
+      name:
+        type: string
+      origin:
+        type: string
+      owner:
+        type: string
+      pattern:
+        type: string
+      status:
+        $ref: '#/definitions/constant.Status'
+      tel:
+        type: string
+      type:
+        type: string
+    type: object
+  dto.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  dto.ResetPasswordRequest:
+    properties:
+      password:
+        maxLength: 30
+        minLength: 6
+        type: string
+      token:
+        type: string
+    required:
+    - password
+    - token
+    type: object
+  dto.ResetPasswordResponse:
+    properties:
+      is_success:
+        type: boolean
+    type: object
+  dto.ResponseBadRequestErr:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.BadReqErrResponse'
+        type: array
+      message:
+        example: Invalid request body
+        type: string
+      status_code:
+        example: 400
+        type: integer
+    type: object
+  dto.ResponseConflictErr:
+    properties:
+      data: {}
+      message:
+        example: Conflict
+        type: string
+      status_code:
+        example: 409
+        type: integer
+    type: object
+  dto.ResponseForbiddenErr:
+    properties:
+      data: {}
+      message:
+        example: Insufficiency permission
+        type: string
+      status_code:
+        example: 403
+        type: integer
+    type: object
+  dto.ResponseInternalErr:
+    properties:
+      data: {}
+      message:
+        example: Internal service error
+        type: string
+      status_code:
+        example: 500
+        type: integer
+    type: object
+  dto.ResponseServiceDownErr:
+    properties:
+      data: {}
+      message:
+        example: Service is down
+        type: string
+      status_code:
+        example: 503
+        type: integer
+    type: object
+  dto.ResponseUnauthorizedErr:
+    properties:
+      data: {}
+      message:
+        example: Invalid token
+        type: string
+      status_code:
+        example: 401
+        type: integer
+    type: object
+  dto.SignInRequest:
+    properties:
+      email:
+        type: string
+      password:
+        maxLength: 30
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.SignOutResponse:
+    properties:
+      is_success:
+        type: boolean
+    type: object
+  dto.SignupRequest:
+    properties:
+      email:
+        type: string
+      firstname:
+        type: string
+      lastname:
+        type: string
+      password:
+        maxLength: 30
+        minLength: 6
+        type: string
+    required:
+    - email
+    - firstname
+    - lastname
+    - password
+    type: object
+  dto.SignupResponse:
+    properties:
+      email:
+        type: string
+      firstname:
+        type: string
+      id:
+        type: string
+      lastname:
+        type: string
+    type: object
+  dto.UpdatePetRequest:
+    properties:
+      birthdate:
+        type: string
+      caption:
+        type: string
+      color:
+        type: string
+      contact:
+        type: string
+      gender:
+        $ref: '#/definitions/constant.Gender'
+      habit:
+        type: string
+      images:
+        items:
+          type: string
+        type: array
+      is_sterile:
+        type: boolean
+      is_vaccinated:
+        type: boolean
+      is_visible:
+        type: boolean
+      name:
+        type: string
+      origin:
+        type: string
+      owner:
+        type: string
+      pattern:
+        type: string
+      status:
+        $ref: '#/definitions/constant.Status'
+      tel:
+        type: string
+      type:
+        type: string
+    type: object
+  dto.UpdateUserRequest:
+    properties:
+      email:
+        type: string
+      firstname:
+        type: string
+      lastname:
+        type: string
+      password:
+        maxLength: 30
+        minLength: 6
+        type: string
+    required:
+    - email
+    - firstname
+    - lastname
+    - password
+    type: object
+  dto.UploadImageRequest:
+    properties:
+      file:
+        items:
+          type: integer
+        type: array
+      filename:
+        type: string
+      pet_id:
+        type: string
+    required:
+    - file
+    - filename
+    type: object
+  dto.User:
+    properties:
+      email:
+        type: string
+      firstname:
+        type: string
+      id:
+        type: string
+      lastname:
+        type: string
+    type: object
+info:
+  contact:
+    email: sd.team.sgcu@gmail.com
+    name: ISD Team
+  description: '# Johnjud API'
+  title: JohnJud API
+  version: "1.0"
+paths:
+  /v1/auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Return isSuccess
+      parameters:
+      - description: forgotPassword request dto
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ForgotPasswordResponse'
+        "400":
+          description: Invalid email
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Forgot Password
+      tags:
+      - auth
+  /v1/auth/refreshToken:
+    post:
+      consumes:
+      - application/json
+      description: Return the credential
+      parameters:
+      - description: refreshToken request dto
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Credential'
+        "400":
+          description: Invalid token
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "401":
+          description: Invalid token
+          schema:
+            $ref: '#/definitions/dto.ResponseUnauthorizedErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Refresh token
+      tags:
+      - auth
+  /v1/auth/reset-password:
+    put:
+      consumes:
+      - application/json
+      description: Return isSuccess
+      parameters:
+      - description: resetPassword request dto
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ResetPasswordResponse'
+        "400":
+          description: Forbidden the same password
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Reset Password
+      tags:
+      - auth
+  /v1/auth/signin:
+    post:
+      consumes:
+      - application/json
+      description: Return the credential of user including access token and refresh
+        token
+      parameters:
+      - description: signIn request dto
+        in: body
+        name: signIn
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SignInRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.Credential'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "403":
+          description: Incorrect email or password
+          schema:
+            $ref: '#/definitions/dto.ResponseForbiddenErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Sign in user
+      tags:
+      - auth
+  /v1/auth/signout:
+    post:
+      consumes:
+      - application/json
+      description: Return the bool value of success
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SignOutResponse'
+        "401":
+          description: Invalid token
+          schema:
+            $ref: '#/definitions/dto.ResponseUnauthorizedErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Sign out user
+      tags:
+      - auth
+  /v1/auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Return the data of user if successfully
+      parameters:
+      - description: signup request dto
+        in: body
+        name: signup
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SignupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.SignupResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "409":
+          description: Duplicate email
+          schema:
+            $ref: '#/definitions/dto.ResponseConflictErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Signup user
+      tags:
+      - auth
+  /v1/images:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Returns the data of image. If updating pet, add petId. If creating
+        pet, petId is not specified, but keep the imageId.
+      parameters:
+      - description: upload image request dto
+        in: body
+        name: image
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UploadImageRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ImageResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Upload image
+      tags:
+      - image
+  /v1/images/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Returns status of deleting image
+      parameters:
+      - description: image id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.DeleteResponse'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Delete image
+      tags:
+      - image
+  /v1/pets/:
+    get:
+      consumes:
+      - application/json
+      description: Returns the data of pets if successful
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.PetResponse'
+            type: array
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: finds all pets
+      tags:
+      - pet
+  /v1/pets/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Returns successful status if pet is successfully deleted
+      parameters:
+      - description: pet id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.DeleteResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: deletes pet
+      tags:
+      - pet
+    get:
+      consumes:
+      - application/json
+      description: Returns the data of a pet if successful
+      parameters:
+      - description: pet id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PetResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: finds one pet
+      tags:
+      - pet
+    put:
+      consumes:
+      - application/json
+      description: Returns the data of pet if successfully
+      parameters:
+      - description: update pet dto
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdatePetRequest'
+      - description: pet id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.PetResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: updates pet
+      tags:
+      - pet
+  /v1/pets/{id}/adopt:
+    put:
+      consumes:
+      - application/json
+      description: Return true if the pet is successfully adopted
+      parameters:
+      - description: adopt pet dto
+        in: body
+        name: adoptDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AdoptByRequest'
+      - description: Pet ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.AdoptByResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: Change a pet's adoptBy status
+      tags:
+      - pet
+  /v1/pets/{id}/visible:
+    put:
+      consumes:
+      - application/json
+      description: Returns successful status if pet's IsVisible is successfully changed
+      parameters:
+      - description: changeView pet dto
+        in: body
+        name: changeViewDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ChangeViewPetRequest'
+      - description: pet id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ChangeViewPetResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: changes pet's public visiblility
+      tags:
+      - pet
+  /v1/pets/admin:
+    get:
+      consumes:
+      - application/json
+      description: Returns the data of pets if successful
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.PetResponse'
+            type: array
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: finds all pets
+      tags:
+      - pet
+  /v1/pets/create:
+    post:
+      consumes:
+      - application/json
+      description: Returns the data of pet if successful
+      parameters:
+      - description: pet dto
+        in: body
+        name: create
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreatePetRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.PetResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: creates pet
+      tags:
+      - pet
+  /v1/users:
+    put:
+      consumes:
+      - application/json
+      description: Returns the data of user if successfully
+      parameters:
+      - description: update user dto
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.User'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: updates user
+      tags:
+      - auth
+  /v1/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Returns successful status if user is successfully deleted
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.DeleteUserResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: deletes user
+      tags:
+      - user
+    get:
+      consumes:
+      - application/json
+      description: Returns the data of user if successful
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.User'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ResponseBadRequestErr'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/dto.ResponseInternalErr'
+        "503":
+          description: Service is down
+          schema:
+            $ref: '#/definitions/dto.ResponseServiceDownErr'
+      summary: finds one user
+      tags:
+      - user
+schemes:
+- https
+- http
+securityDefinitions:
+  AuthToken:
+    description: Description for what is this security definition being used
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
+tags:
+- description: |-
+    # Auth Tag API Documentation
+    **Auth** functions goes here
+  name: auth
+- description: |-
+    # Image Tag API Documentation
+    **Image** functions goes here
+  name: image
+- description: |-
+    # Pet Tag API Documentation
+    **Pet** functions goes here
+  name: pet
+- description: |-
+    # User Tag API Documentation
+    **User** functions goes here
+  name: user

@@ -8,21 +8,26 @@ publish:
 
 test:
 	go vet ./...
-	go test  -v -coverpkg ./src/app/... -coverprofile coverage.out -covermode count ./src/app/...
+	go test  -v -coverpkg ./internal/... -coverprofile coverage.out -covermode count ./internal/...
 	go tool cover -func=coverage.out
 	go tool cover -html=coverage.out -o coverage.html
 
 server:
-	go run ./src/.
+	go run ./cmd/.
+
+docker-qa:
+	docker-compose -f docker-compose.qa.yaml up
 
 mock-gen:
-	mockgen -source ./src/pkg/service/auth/auth.service.go -destination ./src/mocks/service/auth/auth.mock.go
-	mockgen -source ./src/pkg/service/user/user.service.go -destination ./src/mocks/service/user/user.mock.go
-	mockgen -source ./src/pkg/service/pet/pet.service.go -destination ./src/mocks/service/pet/pet.mock.go
-	mockgen -source ./src/pkg/service/like/like.service.go -destination ./src/mocks/service/like/like.mock.go
-	mockgen -source ./src/pkg/service/image/image.service.go -destination ./src/mocks/service/image/image.mock.go
-	mockgen -source ./src/app/validator/validator.go -destination ./src/mocks/validator/validator.mock.go
-	mockgen -source ./src/app/router/context.go -destination ./src/mocks/router/context.mock.go
+	mockgen -source ./internal/cache/cache.repository.go -destination ./mocks/repository/cache/cache.mock.go
+	mockgen -source ./internal/auth/auth.repository.go -destination ./mocks/repository/auth/auth.mock.go
+	mockgen -source ./internal/auth/auth.service.go -destination ./mocks/service/auth/auth.mock.go
+	mockgen -source ./internal/user/user.service.go -destination ./mocks/service/user/user.mock.go
+	mockgen -source ./internal/pet/pet.service.go -destination ./mocks/service/pet/pet.mock.go
+	mockgen -source ./client/bucket/bucket.client.go -destination ./mocks/client/bucket/bucket.mock.go
+	mockgen -source ./internal/image/image.service.go -destination ./mocks/service/image/image.mock.go
+	mockgen -source ./internal/validator/validator.go -destination ./mocks/validator/validator.mock.go
+	mockgen -source ./internal/router/context.go -destination ./mocks/router/context.mock.go
 
 create-doc:
-	swag init -d ./src -o ./src/docs -md ./src/docs/markdown
+	swag init -d ./internal -g ../cmd/main.go -o ./docs -md ./docs/markdown --parseDependency --parseInternal
