@@ -54,26 +54,26 @@ jobs:
           cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max
 
-  update-gitops:
-    name: Update gitops repository
-    runs-on: ubuntu-latest
+  # update-gitops:
+  #   name: Update gitops repository
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout gitops repository
-        uses: actions/checkout@v4
-        with:
-            repository: isd-sgcu/isd-gitops
-            token: ${{ secrets.GITOPS_TOKEN }}
+  #   steps:
+  #     - name: Checkout gitops repository
+  #       uses: actions/checkout@v4
+  #       with:
+  #           repository: isd-sgcu/isd-gitops
+  #           token: ${{ secrets.GITOPS_TOKEN }}
 
-      - name: Update image tag
-        uses: mikefarah/yq@master
-        env:
-          NEW_TAG: ${{ github.ref_type == 'tag' && github.ref_name ||  env.IMAGE_TAG }}
-        with:
-          cmd: yq -i '.gateway.imageTag = strenv(NEW_TAG)' projects/johnjud/values/gateway-dev.values.yaml
+  #     - name: Update image tag
+  #       uses: mikefarah/yq@master
+  #       env:
+  #         NEW_TAG: ${{ github.ref_type == 'tag' && github.ref_name ||  env.IMAGE_TAG }}
+  #       with:
+  #         cmd: yq -i '.gateway.imageTag = strenv(NEW_TAG)' projects/johnjud/values/gateway-dev.values.yaml
 
-      - name: Commit & Push changes
-        uses: actions-js/push@v1.4
-        with:
-          github_token: ${{ secrets.GITOPS_TOKEN }}
-          repository: isd-sgcu/isd-gitops
+  #     - name: Commit & Push changes
+  #       uses: actions-js/push@v1.4
+  #       with:
+  #         github_token: ${{ secrets.GITOPS_TOKEN }}
+  #         repository: isd-sgcu/isd-gitops
