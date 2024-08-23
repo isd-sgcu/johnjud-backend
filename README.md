@@ -25,7 +25,7 @@ Johnjud is a pet adoption web application of the [CUVET For Animal Welfare Club]
 3. Run `go mod download` to download all the dependencies.
 
 ### Running
-1. Run `docker-compose -f docker-compose.example.yaml up`
+1. Run `docker-compose up`
 2. Run `make server` or `go run ./cmd/.`
 
 ### Testing
