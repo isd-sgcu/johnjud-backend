@@ -15,8 +15,8 @@ test:
 server:
 	go run ./cmd/.
 
-docker-qa:
-	docker-compose -f docker-compose.qa.yaml up
+docker:
+	docker-compose up
 
 mock-gen:
 	mockgen -source ./internal/cache/cache.repository.go -destination ./mocks/repository/cache/cache.mock.go
