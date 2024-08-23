@@ -3,7 +3,7 @@ package healthcheck
 import (
 	"net/http"
 
-	"github.com/isd-sgcu/johnjud-gateway/internal/router"
+	"github.com/isd-sgcu/johnjud-backend/internal/router"
 )
 
 type Handler struct {

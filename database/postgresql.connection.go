@@ -1,8 +1,8 @@
 package database
 
 import (
-	"github.com/isd-sgcu/johnjud-gateway/config"
-	"github.com/isd-sgcu/johnjud-gateway/internal/model"
+	"github.com/isd-sgcu/johnjud-backend/config"
+	"github.com/isd-sgcu/johnjud-backend/internal/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	gormLogger "gorm.io/gorm/logger"

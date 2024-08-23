@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/isd-sgcu/johnjud-gateway/constant"
+	"github.com/isd-sgcu/johnjud-backend/constant"
 )
 
 type Pet struct {

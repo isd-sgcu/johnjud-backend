@@ -1,7 +1,7 @@
 package mock_image
 
 import (
-	dto "github.com/isd-sgcu/johnjud-gateway/internal/dto"
+	dto "github.com/isd-sgcu/johnjud-backend/internal/dto"
 	"github.com/stretchr/testify/mock"
 )
 

@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	"github.com/isd-sgcu/johnjud-gateway/internal/image"
-	"github.com/isd-sgcu/johnjud-gateway/internal/model"
+	"github.com/isd-sgcu/johnjud-backend/internal/dto"
+	"github.com/isd-sgcu/johnjud-backend/internal/image"
+	"github.com/isd-sgcu/johnjud-backend/internal/model"
 	"github.com/rs/zerolog/log"
 
 	"gorm.io/gorm"

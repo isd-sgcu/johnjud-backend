@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/isd-sgcu/johnjud-gateway/constant"
-	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	"github.com/isd-sgcu/johnjud-gateway/internal/router"
-	"github.com/isd-sgcu/johnjud-gateway/internal/user"
-	"github.com/isd-sgcu/johnjud-gateway/internal/validator"
+	"github.com/isd-sgcu/johnjud-backend/constant"
+	"github.com/isd-sgcu/johnjud-backend/internal/dto"
+	"github.com/isd-sgcu/johnjud-backend/internal/router"
+	"github.com/isd-sgcu/johnjud-backend/internal/user"
+	"github.com/isd-sgcu/johnjud-backend/internal/validator"
 )
 
 type handlerImpl struct {

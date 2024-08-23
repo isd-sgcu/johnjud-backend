@@ -1,7 +1,7 @@
 package image
 
 import (
-	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
+	"github.com/isd-sgcu/johnjud-backend/internal/dto"
 	imageProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
 )
 

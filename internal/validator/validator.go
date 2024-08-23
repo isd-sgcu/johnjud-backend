@@ -8,7 +8,7 @@ import (
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
-	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
+	"github.com/isd-sgcu/johnjud-backend/internal/dto"
 	"github.com/rs/zerolog/log"
 )
 

@@ -5,11 +5,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/isd-sgcu/johnjud-gateway/client/bucket"
-	"github.com/isd-sgcu/johnjud-gateway/constant"
-	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	"github.com/isd-sgcu/johnjud-gateway/internal/model"
-	"github.com/isd-sgcu/johnjud-gateway/internal/utils"
+	"github.com/isd-sgcu/johnjud-backend/client/bucket"
+	"github.com/isd-sgcu/johnjud-backend/constant"
+	"github.com/isd-sgcu/johnjud-backend/internal/dto"
+	"github.com/isd-sgcu/johnjud-backend/internal/model"
+	"github.com/isd-sgcu/johnjud-backend/internal/utils"
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 )

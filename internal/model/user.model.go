@@ -1,6 +1,6 @@
 package model
 
-import "github.com/isd-sgcu/johnjud-gateway/constant"
+import "github.com/isd-sgcu/johnjud-backend/constant"
 
 type User struct {
 	Base

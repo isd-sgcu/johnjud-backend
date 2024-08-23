@@ -9,8 +9,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	"github.com/isd-sgcu/johnjud-gateway/internal/utils"
+	"github.com/isd-sgcu/johnjud-backend/internal/dto"
+	"github.com/isd-sgcu/johnjud-backend/internal/utils"
 )
 
 type IContext interface {

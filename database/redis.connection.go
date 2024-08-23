@@ -3,7 +3,7 @@ package database
 import (
 	"fmt"
 
-	"github.com/isd-sgcu/johnjud-gateway/config"
+	"github.com/isd-sgcu/johnjud-backend/config"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
 )

@@ -9,12 +9,12 @@ import (
 
 	"github.com/bxcodec/faker/v3"
 	"github.com/google/uuid"
-	"github.com/isd-sgcu/johnjud-gateway/constant"
-	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	"github.com/isd-sgcu/johnjud-gateway/internal/model"
-	"github.com/isd-sgcu/johnjud-gateway/internal/pet"
-	mock "github.com/isd-sgcu/johnjud-gateway/mocks/repository/pet"
-	img_mock "github.com/isd-sgcu/johnjud-gateway/mocks/service/image"
+	"github.com/isd-sgcu/johnjud-backend/constant"
+	"github.com/isd-sgcu/johnjud-backend/internal/dto"
+	"github.com/isd-sgcu/johnjud-backend/internal/model"
+	"github.com/isd-sgcu/johnjud-backend/internal/pet"
+	mock "github.com/isd-sgcu/johnjud-backend/mocks/repository/pet"
+	img_mock "github.com/isd-sgcu/johnjud-backend/mocks/service/image"
 	"gorm.io/gorm"
 
 	"github.com/stretchr/testify/assert"

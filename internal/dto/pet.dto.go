@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"github.com/isd-sgcu/johnjud-gateway/constant"
+	"github.com/isd-sgcu/johnjud-backend/constant"
 )
 
 type PetResponse struct {

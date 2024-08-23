@@ -5,7 +5,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/isd-sgcu/johnjud-gateway/config"
+	"github.com/isd-sgcu/johnjud-backend/config"
 	"github.com/minio/minio-go/v7"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"

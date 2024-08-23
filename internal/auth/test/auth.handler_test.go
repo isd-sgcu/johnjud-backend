@@ -7,13 +7,13 @@ import (
 
 	"github.com/go-faker/faker/v4"
 	"github.com/golang/mock/gomock"
-	"github.com/isd-sgcu/johnjud-gateway/constant"
-	"github.com/isd-sgcu/johnjud-gateway/internal/auth"
-	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	routerMock "github.com/isd-sgcu/johnjud-gateway/mocks/router"
-	authMock "github.com/isd-sgcu/johnjud-gateway/mocks/service/auth"
-	userMock "github.com/isd-sgcu/johnjud-gateway/mocks/service/user"
-	validatorMock "github.com/isd-sgcu/johnjud-gateway/mocks/validator"
+	"github.com/isd-sgcu/johnjud-backend/constant"
+	"github.com/isd-sgcu/johnjud-backend/internal/auth"
+	"github.com/isd-sgcu/johnjud-backend/internal/dto"
+	routerMock "github.com/isd-sgcu/johnjud-backend/mocks/router"
+	authMock "github.com/isd-sgcu/johnjud-backend/mocks/service/auth"
+	userMock "github.com/isd-sgcu/johnjud-backend/mocks/service/user"
+	validatorMock "github.com/isd-sgcu/johnjud-backend/mocks/validator"
 	"github.com/stretchr/testify/suite"
 )
 

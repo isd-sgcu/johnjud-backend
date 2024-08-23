@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/isd-sgcu/johnjud-gateway/internal/auth/token/strategy"
+	"github.com/isd-sgcu/johnjud-backend/internal/auth/token/strategy"
 	"github.com/pkg/errors"
 )
 

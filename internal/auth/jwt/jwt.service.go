@@ -6,10 +6,10 @@ import (
 
 	_jwt "github.com/golang-jwt/jwt/v4"
 
-	"github.com/isd-sgcu/johnjud-gateway/config"
-	"github.com/isd-sgcu/johnjud-gateway/constant"
-	"github.com/isd-sgcu/johnjud-gateway/internal/auth/token/strategy"
-	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
+	"github.com/isd-sgcu/johnjud-backend/config"
+	"github.com/isd-sgcu/johnjud-backend/constant"
+	"github.com/isd-sgcu/johnjud-backend/internal/auth/token/strategy"
+	"github.com/isd-sgcu/johnjud-backend/internal/dto"
 	"github.com/pkg/errors"
 )
 

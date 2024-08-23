@@ -4,10 +4,10 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/isd-sgcu/johnjud-gateway/constant"
-	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	"github.com/isd-sgcu/johnjud-gateway/internal/model"
-	"github.com/isd-sgcu/johnjud-gateway/internal/utils"
+	"github.com/isd-sgcu/johnjud-backend/constant"
+	"github.com/isd-sgcu/johnjud-backend/internal/dto"
+	"github.com/isd-sgcu/johnjud-backend/internal/model"
+	"github.com/isd-sgcu/johnjud-backend/internal/utils"
 	"gorm.io/gorm"
 )
 

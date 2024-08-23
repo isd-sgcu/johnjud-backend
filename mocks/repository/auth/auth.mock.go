@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	model "github.com/isd-sgcu/johnjud-gateway/internal/model"
+	model "github.com/isd-sgcu/johnjud-backend/internal/model"
 )
 
 // MockRepository is a mock of Repository interface.

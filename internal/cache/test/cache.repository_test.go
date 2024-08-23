@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/go-faker/faker/v4"
-	"github.com/isd-sgcu/johnjud-gateway/internal/cache"
-	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
+	"github.com/isd-sgcu/johnjud-backend/internal/cache"
+	"github.com/isd-sgcu/johnjud-backend/internal/dto"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"

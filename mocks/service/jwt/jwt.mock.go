@@ -2,8 +2,8 @@ package jwt
 
 import (
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/isd-sgcu/johnjud-gateway/config"
-	"github.com/isd-sgcu/johnjud-gateway/constant"
+	"github.com/isd-sgcu/johnjud-backend/config"
+	"github.com/isd-sgcu/johnjud-backend/constant"
 	"github.com/stretchr/testify/mock"
 )
 

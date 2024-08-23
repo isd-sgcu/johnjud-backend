@@ -3,12 +3,12 @@ package auth
 import (
 	"net/http"
 
-	"github.com/isd-sgcu/johnjud-gateway/config"
-	"github.com/isd-sgcu/johnjud-gateway/constant"
-	"github.com/isd-sgcu/johnjud-gateway/internal/auth"
-	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	"github.com/isd-sgcu/johnjud-gateway/internal/router"
-	"github.com/isd-sgcu/johnjud-gateway/internal/utils"
+	"github.com/isd-sgcu/johnjud-backend/config"
+	"github.com/isd-sgcu/johnjud-backend/constant"
+	"github.com/isd-sgcu/johnjud-backend/internal/auth"
+	"github.com/isd-sgcu/johnjud-backend/internal/dto"
+	"github.com/isd-sgcu/johnjud-backend/internal/router"
+	"github.com/isd-sgcu/johnjud-backend/internal/utils"
 )
 
 type Guard struct {

@@ -5,9 +5,9 @@ package pet
 // 	"net/http"
 // 	"time"
 
-// 	"github.com/isd-sgcu/johnjud-gateway/constant"
-// 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-// 	"github.com/isd-sgcu/johnjud-gateway/internal/image"
+// 	"github.com/isd-sgcu/johnjud-backend/constant"
+// 	"github.com/isd-sgcu/johnjud-backend/internal/dto"
+// 	"github.com/isd-sgcu/johnjud-backend/internal/image"
 
 // 	petproto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
 // 	"github.com/rs/zerolog/log"

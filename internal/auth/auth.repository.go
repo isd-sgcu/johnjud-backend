@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"github.com/isd-sgcu/johnjud-gateway/internal/model"
+	"github.com/isd-sgcu/johnjud-backend/internal/model"
 	"gorm.io/gorm"
 )
 

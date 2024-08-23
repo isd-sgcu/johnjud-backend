@@ -8,8 +8,8 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	constant "github.com/isd-sgcu/johnjud-gateway/constant"
-	dto "github.com/isd-sgcu/johnjud-gateway/internal/dto"
+	constant "github.com/isd-sgcu/johnjud-backend/constant"
+	dto "github.com/isd-sgcu/johnjud-backend/internal/dto"
 	v1 "github.com/isd-sgcu/johnjud-go-proto/johnjud/auth/auth/v1"
 )
 

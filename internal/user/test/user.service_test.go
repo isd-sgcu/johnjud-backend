@@ -6,11 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	"github.com/isd-sgcu/johnjud-gateway/internal/model"
-	"github.com/isd-sgcu/johnjud-gateway/internal/user"
-	mock "github.com/isd-sgcu/johnjud-gateway/mocks/repository/user"
-	"github.com/isd-sgcu/johnjud-gateway/mocks/utils"
+	"github.com/isd-sgcu/johnjud-backend/internal/dto"
+	"github.com/isd-sgcu/johnjud-backend/internal/model"
+	"github.com/isd-sgcu/johnjud-backend/internal/user"
+	mock "github.com/isd-sgcu/johnjud-backend/mocks/repository/user"
+	"github.com/isd-sgcu/johnjud-backend/mocks/utils"
 
 	"github.com/go-faker/faker/v4"
 	"github.com/google/uuid"

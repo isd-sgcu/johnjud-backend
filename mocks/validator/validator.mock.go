@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	dto "github.com/isd-sgcu/johnjud-gateway/internal/dto"
+	dto "github.com/isd-sgcu/johnjud-backend/internal/dto"
 )
 
 // MockIDtoValidator is a mock of IDtoValidator interface.
