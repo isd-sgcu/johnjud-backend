@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  local-db:
+    image: postgres:15.1-alpine3.17
+    container_name: local-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: johnjud_db
+    networks:
+      - database
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  local-cache:
+    image: redis:7.2.3-alpine
+    container_name: local-cache
+    restart: unless-stopped
+    environment:
+      REDIS_HOST: localhost
+      REDIS_PASSWORD: 5678
+    networks:
+      - database
+    ports:
+      - "6379:6379"
+
+networks:
+  database:
+    name: database
+
+volumes:
+  postgres:
