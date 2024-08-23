@@ -1,19 +1,22 @@
 package test
 
 import (
+	"errors"
 	"math/rand"
 	"net/http"
 	"testing"
+	"time"
 
-	"github.com/go-faker/faker/v4"
+	"github.com/bxcodec/faker/v3"
+	"github.com/google/uuid"
 	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/internal/dto"
-	imageSvc "github.com/isd-sgcu/johnjud-gateway/internal/image"
+	"github.com/isd-sgcu/johnjud-gateway/internal/model"
 	"github.com/isd-sgcu/johnjud-gateway/internal/pet"
-	imagemock "github.com/isd-sgcu/johnjud-gateway/mocks/client/image"
-	petmock "github.com/isd-sgcu/johnjud-gateway/mocks/client/pet"
-	petproto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
-	imgproto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
+	mock "github.com/isd-sgcu/johnjud-gateway/mocks/repository/pet"
+	img_mock "github.com/isd-sgcu/johnjud-gateway/mocks/service/image"
+	"gorm.io/gorm"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc/codes"
@@ -22,37 +25,19 @@ import (
 
 type PetServiceTest struct {
 	suite.Suite
-	Pets                  []*petproto.Pet
-	Pet                   *petproto.Pet
-	MetadataDto           *dto.FindAllMetadata
-	MetadataProto         *petproto.FindAllPetMetaData
-	PetNotVisible         *petproto.Pet
-	FindAllPetReq         *petproto.FindAllPetRequest
-	FindAllImageReq       *imgproto.FindAllImageRequest
-	UpdatePetReq          *petproto.UpdatePetRequest
-	CreatePetReq          *petproto.CreatePetRequest
-	ChangeViewPetReq      *petproto.ChangeViewPetRequest
-	DeletePetReq          *petproto.DeletePetRequest
-	AdoptReq              *petproto.AdoptPetRequest
-	PetDto                *dto.PetResponse
-	FindAllPetDto         *dto.FindAllPetRequest
-	CreatePetDto          *dto.CreatePetRequest
-	UpdatePetDto          *dto.UpdatePetRequest
-	NotFoundErr           *dto.ResponseErr
-	UnavailableServiceErr *dto.ResponseErr
-	InvalidArgumentErr    *dto.ResponseErr
-	InternalErr           *dto.ResponseErr
-	ChangeViewedPetDto    *dto.ChangeViewPetRequest
-	AdoptDto              *dto.AdoptByRequest
-
-	Images     []*imgproto.Image
-	AllImages  []*imgproto.Image
-	ImagesList map[string][]*imgproto.Image
-
-	AssignPetReq *imgproto.AssignPetRequest
-	AssignPetDto *dto.AssignPetRequest
-
-	FindByPetIdReq *imgproto.FindImageByPetIdRequest
+	Pet                  *model.Pet
+	UpdatePet            *model.Pet
+	ChangeViewPet        *model.Pet
+	Pets                 []*model.Pet
+	PetDto               *dto.PetResponse
+	CreatePetReqMock     *dto.CreatePetRequest
+	UpdatePetReqMock     *dto.UpdatePetRequest
+	ChangeViewPetReqMock *dto.ChangeViewPetRequest
+	Images               []*dto.ImageResponse
+	ImageUrls            []string
+	ImagesList           [][]*dto.ImageResponse
+	ChangeAdoptBy        *model.Pet
+	AdoptByReq           *dto.AdoptByRequest
 }
 
 func TestPetService(t *testing.T) {
@@ -60,80 +45,110 @@ func TestPetService(t *testing.T) {
 }
 
 func (t *PetServiceTest) SetupTest() {
-	petIds := []string{faker.UUIDDigit(), faker.UUIDDigit(), faker.UUIDDigit(), faker.UUIDDigit()}
-	t.AllImages = []*imgproto.Image{}
-	imagesList := make(map[string][]*imgproto.Image)
-	for i := 0; i <= 3; i++ {
-		for j := 0; j <= 3; j++ {
-			img := &imgproto.Image{
-				Id:        faker.UUIDDigit(),
-				PetId:     petIds[i],
-				ImageUrl:  faker.URL(),
-				ObjectKey: faker.Word(),
-			}
-			imagesList[petIds[i]] = append(imagesList[petIds[i]], img)
-			t.AllImages = append(t.AllImages, img)
-		}
-	}
-	t.ImagesList = imagesList
-	t.Images = imagesList[petIds[0]]
+	var pets []*model.Pet
+	t.ImageUrls = []string{}
 	genders := []constant.Gender{constant.MALE, constant.FEMALE}
 	statuses := []constant.Status{constant.ADOPTED, constant.FINDHOME}
 
-	var pets []*petproto.Pet
 	for i := 0; i <= 3; i++ {
-		pet := &petproto.Pet{
-			Id:           petIds[i],
+		pet := &model.Pet{
+			Base: model.Base{
+				ID:        uuid.New(),
+				CreatedAt: time.Time{},
+				UpdatedAt: time.Time{},
+				DeletedAt: gorm.DeletedAt{},
+			},
 			Type:         faker.Word(),
 			Name:         faker.Name(),
 			Birthdate:    faker.Word(),
-			Gender:       string(genders[rand.Intn(2)]),
+			Gender:       genders[rand.Intn(2)],
 			Color:        faker.Word(),
-			Pattern:      faker.Word(),
 			Habit:        faker.Paragraph(),
 			Caption:      faker.Paragraph(),
-			Images:       imagesList[petIds[i]],
-			Status:       string(statuses[rand.Intn(2)]),
+			Status:       statuses[rand.Intn(2)],
 			IsSterile:    true,
 			IsVaccinated: true,
 			IsVisible:    true,
 			Origin:       faker.Paragraph(),
 			Owner:        faker.Paragraph(),
 			Contact:      faker.Paragraph(),
-			Tel:          faker.UUIDDigit(),
+			Tel:          "",
 		}
-
+		var images []*dto.ImageResponse
+		for i := 0; i < 3; i++ {
+			url := faker.URL()
+			images = append(images, &dto.ImageResponse{
+				Id:    faker.UUIDDigit(),
+				PetId: pet.ID.String(),
+				Url:   url,
+			})
+			t.ImageUrls = append(t.ImageUrls, url)
+		}
+		t.ImagesList = append(t.ImagesList, images)
 		pets = append(pets, pet)
 	}
 
-	t.MetadataDto = &dto.FindAllMetadata{
-		Page:       1,
-		TotalPages: 1,
-		PageSize:   len(t.Pets),
-		Total:      len(t.Pets),
-	}
-
-	t.MetadataProto = &petproto.FindAllPetMetaData{
-		Page:       1,
-		TotalPages: 1,
-		PageSize:   int32(len(t.Pets)),
-		Total:      int32(len(t.Pets)),
-	}
-
 	t.Pets = pets
-	t.Pet = t.Pets[0]
+	t.Pet = pets[0]
+	t.Images = t.ImagesList[0]
 
-	t.PetNotVisible = &petproto.Pet{
-		Id:           t.Pet.Id,
+	t.PetDto = &dto.PetResponse{
+		Id:           t.Pet.ID.String(),
 		Type:         t.Pet.Type,
 		Name:         t.Pet.Name,
 		Birthdate:    t.Pet.Birthdate,
 		Gender:       t.Pet.Gender,
 		Color:        t.Pet.Color,
-		Pattern:      t.Pet.Pattern,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
-		Images:       t.Pet.Images,
+		Status:       t.Pet.Status,
+		IsSterile:    &t.Pet.IsSterile,
+		IsVaccinated: &t.Pet.IsVaccinated,
+		IsVisible:    &t.Pet.IsVisible,
+		Origin:       t.Pet.Origin,
+		Owner:        t.Pet.Owner,
+		Contact:      t.Pet.Contact,
+		Images:       t.Images,
+	}
+
+	t.UpdatePet = &model.Pet{
+		Base: model.Base{
+			ID:        t.Pet.Base.ID,
+			CreatedAt: t.Pet.Base.CreatedAt,
+			UpdatedAt: t.Pet.Base.UpdatedAt,
+			DeletedAt: t.Pet.Base.DeletedAt,
+		},
+		Type:         t.Pet.Type,
+		Name:         t.Pet.Name,
+		Birthdate:    t.Pet.Birthdate,
+		Gender:       t.Pet.Gender,
+		Color:        t.Pet.Color,
+		Habit:        t.Pet.Habit,
+		Caption:      t.Pet.Caption,
+		Status:       t.Pet.Status,
+		IsSterile:    t.Pet.IsSterile,
+		IsVaccinated: t.Pet.IsVaccinated,
+		IsVisible:    t.Pet.IsVisible,
+		Origin:       t.Pet.Origin,
+		Owner:        t.Pet.Owner,
+		Contact:      t.Pet.Contact,
+	}
+
+	t.ChangeViewPet = &model.Pet{
+		Base: model.Base{
+			ID:        t.Pet.Base.ID,
+			CreatedAt: t.Pet.Base.CreatedAt,
+			UpdatedAt: t.Pet.Base.UpdatedAt,
+			DeletedAt: t.Pet.Base.DeletedAt,
+		},
+		Type:      t.Pet.Type,
+		Name:      t.Pet.Name,
+		Birthdate: t.Pet.Birthdate,
+		Gender:    t.Pet.Gender,
+		Color:     t.Pet.Color,
+
+		Habit:        t.Pet.Habit,
+		Caption:      t.Pet.Caption,
 		Status:       t.Pet.Status,
 		IsSterile:    t.Pet.IsSterile,
 		IsVaccinated: t.Pet.IsVaccinated,
@@ -141,619 +156,436 @@ func (t *PetServiceTest) SetupTest() {
 		Origin:       t.Pet.Origin,
 		Owner:        t.Pet.Owner,
 		Contact:      t.Pet.Contact,
-		Tel:          t.Pet.Tel,
 	}
 
-	t.PetDto = pet.ProtoToDto(t.Pet, pet.ImageProtoToDto(t.Pet.Images))
+	t.CreatePetReqMock = &dto.CreatePetRequest{
+		Type:      t.Pet.Type,
+		Name:      t.Pet.Name,
+		Birthdate: t.Pet.Birthdate,
+		Gender:    t.Pet.Gender,
+		Color:     t.Pet.Color,
 
-	t.FindAllPetDto = &dto.FindAllPetRequest{
-		Search:   "",
-		Type:     "",
-		Gender:   "",
-		Color:    "",
-		Pattern:  "",
-		Age:      "",
-		Origin:   "",
-		PageSize: len(t.Pets),
-		Page:     1,
-	}
-
-	t.CreatePetDto = &dto.CreatePetRequest{
-		Type:         t.Pet.Type,
-		Name:         t.Pet.Name,
-		Birthdate:    t.Pet.Birthdate,
-		Gender:       constant.Gender(t.Pet.Gender),
-		Color:        t.Pet.Color,
-		Pattern:      t.Pet.Pattern,
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
-		Images:       []string{},
-		Status:       constant.Status(t.Pet.Status),
+		Status:       t.Pet.Status,
+		Images:       t.ImageUrls,
+		IsSterile:    &t.Pet.IsSterile,
+		IsVaccinated: &t.Pet.IsVaccinated,
+		IsVisible:    &t.Pet.IsVaccinated,
+		Origin:       t.Pet.Origin,
+		Owner:        t.Pet.Owner,
+		Contact:      t.Pet.Contact,
+	}
+
+	t.UpdatePetReqMock = &dto.UpdatePetRequest{
+		Type:      t.Pet.Type,
+		Name:      t.Pet.Name,
+		Birthdate: t.Pet.Birthdate,
+		Gender:    t.Pet.Gender,
+		Color:     t.Pet.Color,
+
+		Habit:        t.Pet.Habit,
+		Caption:      t.Pet.Caption,
+		Status:       t.Pet.Status,
+		Images:       t.ImageUrls,
 		IsSterile:    &t.Pet.IsSterile,
 		IsVaccinated: &t.Pet.IsVaccinated,
 		IsVisible:    &t.Pet.IsVisible,
 		Origin:       t.Pet.Origin,
 		Owner:        t.Pet.Owner,
 		Contact:      t.Pet.Contact,
-		Tel:          t.Pet.Tel,
 	}
 
-	t.UpdatePetDto = &dto.UpdatePetRequest{
-		Type:         t.Pet.Type,
-		Name:         t.Pet.Name,
-		Birthdate:    t.Pet.Birthdate,
-		Gender:       constant.Gender(t.Pet.Gender),
-		Color:        t.Pet.Color,
-		Pattern:      t.Pet.Pattern,
+	t.ChangeViewPetReqMock = &dto.ChangeViewPetRequest{
+		Visible: false,
+	}
+
+	t.ChangeAdoptBy = &model.Pet{
+		Base: model.Base{
+			ID:        t.Pet.Base.ID,
+			CreatedAt: t.Pet.Base.CreatedAt,
+			UpdatedAt: t.Pet.Base.UpdatedAt,
+			DeletedAt: t.Pet.Base.DeletedAt,
+		},
+		Type:      t.Pet.Type,
+		Name:      t.Pet.Name,
+		Birthdate: t.Pet.Birthdate,
+		Gender:    t.Pet.Gender,
+		Color:     t.Pet.Color,
+
 		Habit:        t.Pet.Habit,
 		Caption:      t.Pet.Caption,
-		Images:       []string{},
-		Status:       constant.Status(t.Pet.Status),
-		IsSterile:    &t.Pet.IsSterile,
-		IsVaccinated: &t.Pet.IsVaccinated,
-		IsVisible:    &t.Pet.IsVisible,
+		Status:       t.Pet.Status,
+		IsSterile:    t.Pet.IsSterile,
+		IsVaccinated: t.Pet.IsVaccinated,
+		IsVisible:    t.Pet.IsVisible,
 		Origin:       t.Pet.Origin,
 		Owner:        t.Pet.Owner,
 		Contact:      t.Pet.Contact,
 		Tel:          t.Pet.Tel,
 	}
 
-	t.FindAllPetReq = pet.FindAllDtoToProto(t.FindAllPetDto, true)
-	t.CreatePetReq = pet.CreateDtoToProto(t.CreatePetDto)
-	t.UpdatePetReq = pet.UpdateDtoToProto(t.Pet.Id, t.UpdatePetDto)
-
-	t.ChangeViewPetReq = &petproto.ChangeViewPetRequest{
-		Id:      t.Pet.Id,
-		Visible: false,
+	t.AdoptByReq = &dto.AdoptByRequest{
+		UserID: t.ChangeAdoptBy.Owner,
 	}
 
-	t.ChangeViewedPetDto = &dto.ChangeViewPetRequest{
-		Visible: false,
-	}
-
-	t.AdoptReq = &petproto.AdoptPetRequest{
-		PetId:  t.Pet.Id,
-		UserId: t.Pet.Owner,
-	}
-
-	t.AdoptDto = &dto.AdoptByRequest{
-		UserID: t.Pet.Owner,
-	}
-
-	t.FindAllImageReq = &imgproto.FindAllImageRequest{}
-
-	t.AssignPetReq = &imgproto.AssignPetRequest{
-		Ids:   []string{},
-		PetId: t.Pet.Id,
-	}
-
-	t.AssignPetDto = &dto.AssignPetRequest{
-		Ids:   []string{},
-		PetId: t.Pet.Id,
-	}
-
-	t.FindByPetIdReq = &imgproto.FindImageByPetIdRequest{
-		PetId: t.Pet.Id,
-	}
-
-	t.UnavailableServiceErr = &dto.ResponseErr{
-		StatusCode: http.StatusServiceUnavailable,
-		Message:    constant.UnavailableServiceMessage,
-		Data:       nil,
-	}
-
-	t.NotFoundErr = &dto.ResponseErr{
-		StatusCode: http.StatusNotFound,
-		Message:    constant.PetNotFoundMessage,
-		Data:       nil,
-	}
-
-	t.InternalErr = &dto.ResponseErr{
-		StatusCode: http.StatusInternalServerError,
-		Message:    constant.InternalErrorMessage,
-		Data:       nil,
-	}
-
-	t.InvalidArgumentErr = &dto.ResponseErr{
-		StatusCode: http.StatusBadRequest,
-		Message:    constant.InvalidArgumentMessage,
-		Data:       nil,
-	}
 }
-
-func (t *PetServiceTest) TestFindAllSuccess() {
-	protoResp := &petproto.FindAllPetResponse{
-		Pets:     t.Pets,
-		Metadata: t.MetadataProto,
-	}
-
-	findAllPPetsDto := pet.ProtoToDtoList(t.Pets, t.ImagesList, false)
-	metadataDto := t.MetadataDto
-
-	expected := &dto.FindAllPetResponse{
-		Pets:     findAllPPetsDto,
-		Metadata: metadataDto,
-	}
-
-	client := petmock.PetClientMock{}
-	client.On("FindAll", t.FindAllPetReq).Return(protoResp, nil)
-
-	findAllImageResp := &imgproto.FindAllImageResponse{
-		Images: t.AllImages,
-	}
-	imageClient := imagemock.ImageClientMock{}
-	imageClient.On("FindAll", t.FindAllImageReq).Return(findAllImageResp, nil)
-
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(&client, imageSvc)
-	actual, err := svc.FindAll(t.FindAllPetDto, true)
-
-	assert.Nil(t.T(), err)
-	assert.Equal(t.T(), expected, actual)
-}
-
-func (t *PetServiceTest) TestFindAllUnavailableServiceError() {
-	expected := t.UnavailableServiceErr
-
-	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
-
-	client := petmock.PetClientMock{}
-	client.On("FindAll", t.FindAllPetReq).Return(nil, clientErr)
-
-	imageClient := imagemock.ImageClientMock{}
-
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(&client, imageSvc)
-	actual, err := svc.FindAll(t.FindAllPetDto, true)
-
-	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
-}
-
-func (t *PetServiceTest) TestFindOneSuccess() {
-	protoReq := &petproto.FindOnePetRequest{
-		Id: t.Pet.Id,
-	}
-	protoResp := &petproto.FindOnePetResponse{
-		Pet: t.Pet,
-	}
-
-	findByPetIdReq := t.FindByPetIdReq
-	findByPetIdResp := &imgproto.FindImageByPetIdResponse{
-		Images: t.Images,
-	}
-
-	expected := pet.ProtoToDto(t.Pet, pet.ImageProtoToDto(t.Pet.Images))
-
-	client := petmock.PetClientMock{}
-	client.On("FindOne", protoReq).Return(protoResp, nil)
-
-	imageClient := imagemock.ImageClientMock{}
-	imageClient.On("FindByPetId", findByPetIdReq).Return(findByPetIdResp, nil)
-
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(&client, imageSvc)
-	actual, err := svc.FindOne(t.Pet.Id)
-
-	assert.Nil(t.T(), err)
-	assert.Equal(t.T(), expected, actual)
-}
-
-func (t *PetServiceTest) TestFindOneNotFoundError() {
-	protoReq := &petproto.FindOnePetRequest{
-		Id: t.Pet.Id,
-	}
-
-	clientErr := status.Error(codes.NotFound, constant.PetNotFoundMessage)
-
-	expected := t.NotFoundErr
-
-	client := petmock.PetClientMock{}
-	client.On("FindOne", protoReq).Return(nil, clientErr)
-
-	imageClient := imagemock.ImageClientMock{}
-
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(&client, imageSvc)
-	actual, err := svc.FindOne(t.Pet.Id)
-
-	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
-}
-
-func (t *PetServiceTest) TestFindOneUnavailableServiceError() {
-	protoReq := &petproto.FindOnePetRequest{
-		Id: t.Pet.Id,
-	}
-
-	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
-
-	expected := t.UnavailableServiceErr
-
-	client := petmock.PetClientMock{}
-	client.On("FindOne", protoReq).Return(nil, clientErr)
-
-	imageClient := imagemock.ImageClientMock{}
-
-	imageSvc := imageSvc.NewService(&imageClient)
-
-	svc := pet.NewService(&client, imageSvc)
-	actual, err := svc.FindOne(t.Pet.Id)
-
-	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
-}
-
-func (t *PetServiceTest) TestCreateSuccess() {
-	protoReq := t.CreatePetReq
-	protoResp := &petproto.CreatePetResponse{
-		Pet: t.Pet,
-	}
-
-	assignPetReq := t.AssignPetReq
-	assignPetResp := &imgproto.AssignPetResponse{
-		Success: true,
-	}
-
-	findByPetIdReq := t.FindByPetIdReq
-	findByPetIdResp := &imgproto.FindImageByPetIdResponse{
-		Images: t.Images,
-	}
-
-	expected := pet.ProtoToDto(t.Pet, pet.ImageProtoToDto(t.Pet.Images))
-
-	client := &petmock.PetClientMock{}
-	client.On("Create", protoReq).Return(protoResp, nil)
-
-	imageClient := imagemock.ImageClientMock{}
-	imageClient.On("AssignPet", assignPetReq).Return(assignPetResp, nil)
-	imageClient.On("FindByPetId", findByPetIdReq).Return(findByPetIdResp, nil)
-
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(client, imageSvc)
-	actual, err := svc.Create(t.CreatePetDto)
-
-	assert.Nil(t.T(), err)
-	assert.Equal(t.T(), expected, actual)
-}
-
-func (t *PetServiceTest) TestCreateInvalidArgumentError() {
-	protoReq := t.CreatePetReq
-
-	expected := t.InvalidArgumentErr
-
-	clientErr := status.Error(codes.InvalidArgument, constant.InvalidArgumentMessage)
-
-	client := &petmock.PetClientMock{}
-	client.On("Create", protoReq).Return(nil, clientErr)
-
-	imageClient := imagemock.ImageClientMock{}
-
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(client, imageSvc)
-	actual, err := svc.Create(t.CreatePetDto)
-
-	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
-}
-
-func (t *PetServiceTest) TestCreateInternalError() {
-	protoReq := t.CreatePetReq
-
-	expected := t.InternalErr
-
-	clientErr := status.Error(codes.Internal, constant.InternalErrorMessage)
-
-	client := &petmock.PetClientMock{}
-	client.On("Create", protoReq).Return(nil, clientErr)
-
-	imageClient := imagemock.ImageClientMock{}
-
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(client, imageSvc)
-	actual, err := svc.Create(t.CreatePetDto)
-
-	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
-}
-
-func (t *PetServiceTest) TestCreateUnavailableServiceError() {
-	protoReq := t.CreatePetReq
-
-	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
-
-	expected := t.UnavailableServiceErr
-
-	client := &petmock.PetClientMock{}
-	client.On("Create", protoReq).Return(nil, clientErr)
-
-	imageClient := imagemock.ImageClientMock{}
-
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(client, imageSvc)
-	actual, err := svc.Create(t.CreatePetDto)
-
-	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
-}
-
-func (t *PetServiceTest) TestUpdateSuccess() {
-	protoReq := t.UpdatePetReq
-	protoResp := &petproto.UpdatePetResponse{
-		Pet: t.Pet,
-	}
-
-	expected := pet.ProtoToDto(t.Pet, pet.ImageProtoToDto(t.Pet.Images))
-
-	client := &petmock.PetClientMock{}
-	client.On("Update", protoReq).Return(protoResp, nil)
-
-	findByPetIdResp := &imgproto.FindImageByPetIdResponse{
-		Images: t.Images,
-	}
-	imageClient := imagemock.ImageClientMock{}
-	imageClient.On("FindByPetId", t.FindByPetIdReq).Return(findByPetIdResp, nil)
-
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(client, imageSvc)
-	actual, err := svc.Update(t.Pet.Id, t.UpdatePetDto)
-
-	assert.Nil(t.T(), err)
-	assert.Equal(t.T(), expected, actual)
-}
-
-func (t *PetServiceTest) TestUpdateNotFound() {
-	protoReq := t.UpdatePetReq
-	clientErr := status.Error(codes.NotFound, constant.PetNotFoundMessage)
-
-	expected := t.NotFoundErr
-
-	client := &petmock.PetClientMock{}
-	client.On("Update", protoReq).Return(nil, clientErr)
-
-	imageClient := imagemock.ImageClientMock{}
-
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(client, imageSvc)
-	actual, err := svc.Update(t.Pet.Id, t.UpdatePetDto)
-
-	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
-}
-
-func (t *PetServiceTest) TestUpdateUnavailableServiceError() {
-	protoReq := t.UpdatePetReq
-	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
-
-	expected := t.UnavailableServiceErr
-
-	client := &petmock.PetClientMock{}
-	client.On("Update", protoReq).Return(nil, clientErr)
-
-	imageClient := imagemock.ImageClientMock{}
-
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(client, imageSvc)
-	actual, err := svc.Update(t.Pet.Id, t.UpdatePetDto)
-
-	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
-}
-
 func (t *PetServiceTest) TestDeleteSuccess() {
-	petProtoReq := &petproto.DeletePetRequest{
-		Id: t.Pet.Id,
-	}
-	petProtoResp := &petproto.DeletePetResponse{
-		Success: true,
-	}
-	imageProtoReq := &imgproto.DeleteByPetIdRequest{
-		PetId: t.Pet.Id,
-	}
-	imageProtoResp := &imgproto.DeleteByPetIdResponse{
-		Success: true,
-	}
+	want := &dto.DeleteResponse{Success: true}
 
-	expected := &dto.DeleteResponse{Success: true}
+	repo := new(mock.RepositoryMock)
+	repo.On("Delete", t.Pet.ID.String()).Return(nil)
+	imgSrv := new(img_mock.ServiceMock)
 
-	client := &petmock.PetClientMock{}
-	client.On("Delete", petProtoReq).Return(petProtoResp, nil)
-
-	imageClient := imagemock.ImageClientMock{}
-	imageClient.On("DeleteByPetId", imageProtoReq).Return(imageProtoResp, nil)
-
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(client, imageSvc)
-	actual, err := svc.Delete(t.Pet.Id)
+	srv := pet.NewService(repo, imgSrv)
+	actual, err := srv.Delete(t.Pet.ID.String())
 
 	assert.Nil(t.T(), err)
-	assert.Equal(t.T(), expected, actual)
+	assert.Equal(t.T(), want, actual)
+	repo.AssertExpectations(t.T())
 }
 
 func (t *PetServiceTest) TestDeleteNotFound() {
-	protoReq := &petproto.DeletePetRequest{
-		Id: t.Pet.Id,
-	}
-	protoResp := &petproto.DeletePetResponse{
-		Success: false,
-	}
-	imageProtoReq := &imgproto.DeleteByPetIdRequest{
-		PetId: t.Pet.Id,
-	}
-	imageProtoResp := &imgproto.DeleteByPetIdResponse{
-		Success: true,
-	}
+	repo := new(mock.RepositoryMock)
+	repo.On("Delete", t.Pet.ID.String()).Return(gorm.ErrRecordNotFound)
+	imgSrv := new(img_mock.ServiceMock)
 
-	clientErr := status.Error(codes.NotFound, constant.PetNotFoundMessage)
+	srv := pet.NewService(repo, imgSrv)
+	_, err := srv.Delete(t.Pet.ID.String())
 
-	expected := t.NotFoundErr
-
-	client := &petmock.PetClientMock{}
-	client.On("Delete", protoReq).Return(protoResp, clientErr)
-
-	imageClient := imagemock.ImageClientMock{}
-	imageClient.On("DeleteByPetId", imageProtoReq).Return(imageProtoResp, nil)
-
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(client, imageSvc)
-	actual, err := svc.Delete(t.Pet.Id)
-
-	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
+	assert.Equal(t.T(), http.StatusNotFound, err.StatusCode)
+	repo.AssertExpectations(t.T())
 }
 
-func (t *PetServiceTest) TestDeleteServiceUnavailableError() {
-	protoReq := &petproto.DeletePetRequest{
-		Id: t.Pet.Id,
-	}
-	protoResp := &petproto.DeletePetResponse{
-		Success: false,
-	}
-	imageProtoReq := &imgproto.DeleteByPetIdRequest{
-		PetId: t.Pet.Id,
-	}
-	imageProtoResp := &imgproto.DeleteByPetIdResponse{
-		Success: true,
-	}
+func (t *PetServiceTest) TestDeleteWithDatabaseError() {
+	repo := new(mock.RepositoryMock)
+	repo.On("Delete", t.Pet.ID.String()).Return(errors.New("internal server error"))
+	imgSrv := new(img_mock.ServiceMock)
 
-	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
+	srv := pet.NewService(repo, imgSrv)
+	_, err := srv.Delete(t.Pet.ID.String())
 
-	expected := t.UnavailableServiceErr
+	assert.Equal(t.T(), http.StatusInternalServerError, err.StatusCode)
+	repo.AssertExpectations(t.T())
+}
 
-	client := &petmock.PetClientMock{}
-	client.On("Delete", protoReq).Return(protoResp, clientErr)
+func (t *PetServiceTest) TestDeleteWithUnexpectedError() {
+	repo := new(mock.RepositoryMock)
+	repo.On("Delete", t.Pet.ID.String()).Return(errors.New("unexpected error"))
+	imgSrv := new(img_mock.ServiceMock)
 
-	imageClient := imagemock.ImageClientMock{}
-	imageClient.On("DeleteByPetId", imageProtoReq).Return(imageProtoResp, nil)
+	srv := pet.NewService(repo, imgSrv)
+	_, err := srv.Delete(t.Pet.ID.String())
 
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(client, imageSvc)
-	actual, err := svc.Delete(t.Pet.Id)
+	assert.NotNil(t.T(), err)
+	repo.AssertExpectations(t.T())
+}
 
+func (t *PetServiceTest) TestFindOneSuccess() {
+	want := t.PetDto
+
+	repo := &mock.RepositoryMock{}
+	repo.On("FindOne", t.Pet.ID.String(), &model.Pet{}).Return(t.Pet, nil)
+	imgSrv := new(img_mock.ServiceMock)
+	imgSrv.On("FindByPetId", t.Pet.ID.String()).Return(t.Images, nil)
+
+	srv := pet.NewService(repo, imgSrv)
+	actual, err := srv.FindOne(t.Pet.ID.String())
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), want, actual)
+}
+
+// func (t *PetServiceTest) TestFindAllSuccess() {
+
+// 	want := &proto.FindAllPetResponse{
+// 		Pets: t.createPetsDto(t.Pets, t.ImagesList),
+// 		Metadata: &proto.FindAllPetMetaData{
+// 			Page:       1,
+// 			TotalPages: 1,
+// 			PageSize:   int32(len(t.Pets)),
+// 			Total:      int32(len(t.Pets)),
+// 		},
+// 	}
+
+// 	var petsIn []*model.Pet
+
+// 	repo := &mock.RepositoryMock{}
+// 	repo.On("FindAll", petsIn).Return(&t.Pets, nil)
+
+// 	imgSrv := new(img_mock.ServiceMock)
+// 	for i, pet := range t.Pets {
+// 		imgSrv.On("FindByPetId", pet.ID.String()).Return(t.ImagesList[i], nil)
+// 	}
+
+// 	srv := pet.NewService(repo, imgSrv)
+
+// 	actual, err := srv.FindAll()
+// 	assert.Nil(t.T(), err)
+// 	assert.Equal(t.T(), want, actual)
+// }
+
+func (t *PetServiceTest) TestFindOneNotFound() {
+	repo := &mock.RepositoryMock{}
+	repo.On("FindOne", t.Pet.ID.String(), &model.Pet{}).Return(nil, errors.New("Not found pet"))
+	imgSrv := new(img_mock.ServiceMock)
+	imgSrv.On("FindByPetId", t.Pet.ID.String()).Return(nil, nil)
+
+	srv := pet.NewService(repo, imgSrv)
+	actual, err := srv.FindOne(t.Pet.ID.String())
+
+	assert.Equal(t.T(), http.StatusNotFound, err.StatusCode)
 	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
+}
+
+func createPets() []*model.Pet {
+	var result []*model.Pet
+	genders := []constant.Gender{constant.MALE, constant.FEMALE}
+	statuses := []constant.Status{constant.ADOPTED, constant.FINDHOME}
+
+	for i := 0; i < rand.Intn(4)+1; i++ {
+		r := &model.Pet{
+			Base: model.Base{
+				ID:        uuid.New(),
+				CreatedAt: time.Time{},
+				UpdatedAt: time.Time{},
+				DeletedAt: gorm.DeletedAt{},
+			},
+			Type:         faker.Word(),
+			Name:         faker.Name(),
+			Birthdate:    faker.Word(),
+			Gender:       genders[rand.Intn(2)],
+			Color:        faker.Word(),
+			Habit:        faker.Paragraph(),
+			Caption:      faker.Paragraph(),
+			Status:       statuses[rand.Intn(2)],
+			IsSterile:    true,
+			IsVaccinated: true,
+			IsVisible:    true,
+			Origin:       faker.Paragraph(),
+			Owner:        faker.Paragraph(),
+			Contact:      faker.Paragraph(),
+		}
+		result = append(result, r)
+	}
+
+	return result
+}
+
+func (t *PetServiceTest) createPetsDto(in []*model.Pet, imagesList [][]*dto.ImageResponse) []*dto.PetResponse {
+	var result []*dto.PetResponse
+
+	for i, p := range in {
+		r := &dto.PetResponse{
+			Id:        p.ID.String(),
+			Type:      p.Type,
+			Name:      p.Name,
+			Birthdate: p.Birthdate,
+			Gender:    p.Gender,
+			Color:     p.Color,
+
+			Habit:        p.Habit,
+			Caption:      p.Caption,
+			Status:       p.Status,
+			Images:       imagesList[i],
+			IsSterile:    &p.IsSterile,
+			IsVaccinated: &p.IsVaccinated,
+			IsVisible:    &p.IsVisible,
+			Origin:       p.Origin,
+			Owner:        p.Owner,
+			Contact:      p.Contact,
+		}
+
+		result = append(result, r)
+	}
+
+	return result
+}
+
+func (t *PetServiceTest) TestCreateSuccess() {
+	want := t.PetDto
+	want.Images = t.Images
+
+	repo := &mock.RepositoryMock{}
+
+	in := &model.Pet{
+		Type:      t.Pet.Type,
+		Name:      t.Pet.Name,
+		Birthdate: t.Pet.Birthdate,
+		Gender:    t.Pet.Gender,
+		Color:     t.Pet.Color,
+
+		Habit:        t.Pet.Habit,
+		Caption:      t.Pet.Caption,
+		Status:       t.Pet.Status,
+		IsSterile:    t.Pet.IsSterile,
+		IsVaccinated: t.Pet.IsVaccinated,
+		IsVisible:    t.Pet.IsVisible,
+		Origin:       t.Pet.Origin,
+		Owner:        t.Pet.Owner,
+		Contact:      t.Pet.Contact,
+	}
+
+	repo.On("Create", in).Return(t.Pet, nil)
+	imgSrv := new(img_mock.ServiceMock)
+
+	// imageIds := []string{t.CreatePetReqMock.Images[0], t.CreatePetReqMock.Images[1], t.CreatePetReqMock.Images[2]}
+	imgSrv.On("AssignPet", &dto.AssignPetRequest{PetId: t.Pet.ID.String(), Ids: t.ImageUrls}).Return(&dto.AssignPetResponse{Success: true})
+
+	imgSrv.On("FindByPetId", t.Pet.ID.String()).Return(t.Images, nil)
+
+	srv := pet.NewService(repo, imgSrv)
+
+	actual, err := srv.Create(t.CreatePetReqMock)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), want, actual)
+}
+
+func (t *PetServiceTest) TestCreateInternalErr() {
+	repo := &mock.RepositoryMock{}
+
+	in := &model.Pet{
+		Type:      t.Pet.Type,
+		Name:      t.Pet.Name,
+		Birthdate: t.Pet.Birthdate,
+		Gender:    t.Pet.Gender,
+		Color:     t.Pet.Color,
+
+		Habit:        t.Pet.Habit,
+		Caption:      t.Pet.Caption,
+		Status:       t.Pet.Status,
+		IsSterile:    t.Pet.IsSterile,
+		IsVaccinated: t.Pet.IsVaccinated,
+		IsVisible:    t.Pet.IsVisible,
+		Origin:       t.Pet.Origin,
+		Owner:        t.Pet.Owner,
+		Contact:      t.Pet.Contact,
+	}
+
+	repo.On("Create", in).Return(nil, errors.New("something wrong"))
+	imgSrv := new(img_mock.ServiceMock)
+
+	srv := pet.NewService(repo, imgSrv)
+
+	actual, err := srv.Create(t.CreatePetReqMock)
+
+	assert.Equal(t.T(), http.StatusInternalServerError, err.StatusCode)
+	assert.Nil(t.T(), actual)
+}
+
+func (t *PetServiceTest) TestUpdateSuccess() {
+	want := t.PetDto
+	updatePet := t.UpdatePet
+	updatePet.ID = uuid.Nil
+
+	repo := &mock.RepositoryMock{}
+	repo.On("Update", t.Pet.ID.String(), t.UpdatePet).Return(t.Pet, nil)
+	imgSrv := new(img_mock.ServiceMock)
+	imgSrv.On("FindByPetId", t.Pet.ID.String()).Return(t.Images, nil)
+
+	srv := pet.NewService(repo, imgSrv)
+	actual, err := srv.Update(t.Pet.ID.String(), t.UpdatePetReqMock)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), want, actual)
+}
+
+func (t *PetServiceTest) TestUpdateNotFound() {
+	updatePet := t.UpdatePet
+	updatePet.ID = uuid.Nil
+	repo := &mock.RepositoryMock{}
+	repo.On("Update", t.UpdatePet.ID.String(), t.UpdatePet).Return(nil, errors.New("Not found pet"))
+	imgSrv := new(img_mock.ServiceMock)
+	imgSrv.On("FindByPetId", t.UpdatePet.ID.String()).Return(t.Images, nil)
+
+	srv := pet.NewService(repo, imgSrv)
+	actual, err := srv.Update(t.UpdatePet.ID.String(), t.UpdatePetReqMock)
+
+	assert.Equal(t.T(), http.StatusNotFound, err.StatusCode)
+	assert.Nil(t.T(), actual)
 }
 
 func (t *PetServiceTest) TestChangeViewSuccess() {
-	protoReq := t.ChangeViewPetReq
-	protoResp := &petproto.ChangeViewPetResponse{
-		Success: true,
-	}
+	want := &dto.ChangeViewPetResponse{Success: true}
 
-	client := &petmock.PetClientMock{}
-	client.On("ChangeView", protoReq).Return(protoResp, nil)
+	repo := &mock.RepositoryMock{}
+	repo.On("FindOne", t.Pet.ID.String(), &model.Pet{}).Return(t.Pet, nil)
+	repo.On("Update", t.Pet.ID.String(), t.ChangeViewPet).Return(t.ChangeViewPet, nil)
+	imgSrv := new(img_mock.ServiceMock)
+	imgSrv.On("FindByPetId", t.Pet.ID.String()).Return(t.Images, nil)
 
-	imageClient := imagemock.ImageClientMock{}
-
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(client, imageSvc)
-	actual, err := svc.ChangeView(t.Pet.Id, t.ChangeViewedPetDto)
+	srv := pet.NewService(repo, imgSrv)
+	actual, err := srv.ChangeView(t.Pet.ID.String(), t.ChangeViewPetReqMock)
 
 	assert.Nil(t.T(), err)
-	assert.Equal(t.T(), actual, &dto.ChangeViewPetResponse{Success: true})
+	assert.Equal(t.T(), want, actual)
 }
 
-func (t *PetServiceTest) TestChangeViewNotFoundError() {
-	protoReq := t.ChangeViewPetReq
-	protoResp := &petproto.ChangeViewPetResponse{
-		Success: false,
-	}
+func (t *PetServiceTest) TestChangeViewNotFound() {
+	repo := &mock.RepositoryMock{}
+	repo.On("FindOne", t.Pet.ID.String(), &model.Pet{}).Return(nil, errors.New("Not found pet"))
+	repo.On("Update", t.Pet.ID.String(), t.UpdatePet).Return(nil, errors.New("Not found pet"))
+	imgSrv := new(img_mock.ServiceMock)
 
-	clientErr := status.Error(codes.NotFound, constant.PetNotFoundMessage)
+	srv := pet.NewService(repo, imgSrv)
+	actual, err := srv.ChangeView(t.Pet.ID.String(), t.ChangeViewPetReqMock)
 
-	expected := t.NotFoundErr
-
-	client := &petmock.PetClientMock{}
-	client.On("ChangeView", protoReq).Return(protoResp, clientErr)
-
-	imageClient := imagemock.ImageClientMock{}
-
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(client, imageSvc)
-	actual, err := svc.ChangeView(t.Pet.Id, t.ChangeViewedPetDto)
-
-	assert.Equal(t.T(), &dto.ChangeViewPetResponse{Success: false}, actual)
-	assert.Equal(t.T(), expected, err)
+	assert.Equal(t.T(), http.StatusNotFound, err.StatusCode)
+	assert.Nil(t.T(), actual)
 }
 
-func (t *PetServiceTest) TestChangeViewUnavailableServiceError() {
-	protoReq := t.ChangeViewPetReq
-	protoResp := &petproto.ChangeViewPetResponse{
-		Success: false,
-	}
+func (t *PetServiceTest) TestAdoptBySuccess() {
+	want := &dto.AdoptByResponse{Success: true}
+	repo := &mock.RepositoryMock{}
 
-	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
+	repo.On("FindOne", t.Pet.ID.String(), &model.Pet{}).Return(t.Pet, nil)
+	repo.On("Update", t.Pet.ID.String(), t.ChangeAdoptBy).Return(t.ChangeAdoptBy, nil)
 
-	expected := t.UnavailableServiceErr
+	imgSrv := new(img_mock.ServiceMock)
+	imgSrv.On("FindByPetId", t.Pet.ID.String()).Return(t.Images, nil)
 
-	client := &petmock.PetClientMock{}
-	client.On("ChangeView", protoReq).Return(protoResp, clientErr)
+	srv := pet.NewService(repo, imgSrv)
 
-	imageClient := imagemock.ImageClientMock{}
-
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(client, imageSvc)
-	actual, err := svc.ChangeView(t.Pet.Id, t.ChangeViewedPetDto)
-
-	assert.Equal(t.T(), &dto.ChangeViewPetResponse{Success: false}, actual)
-	assert.Equal(t.T(), expected, err)
-}
-
-func (t *PetServiceTest) TestAdoptSuccess() {
-	protoReq := t.AdoptReq
-	protoResp := &petproto.AdoptPetResponse{
-		Success: true,
-	}
-
-	client := &petmock.PetClientMock{}
-	client.On("AdoptPet", protoReq).Return(protoResp, nil)
-
-	imageClient := imagemock.ImageClientMock{}
-
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(client, imageSvc)
-	actual, err := svc.Adopt(t.Pet.Id, t.AdoptDto)
+	actual, err := srv.Adopt(t.Pet.ID.String(), t.AdoptByReq)
 
 	assert.Nil(t.T(), err)
-	assert.Equal(t.T(), actual, &dto.AdoptByResponse{Success: true})
+	assert.Equal(t.T(), want, actual)
 }
 
-func (t *PetServiceTest) TestAdoptNotFoundError() {
-	protoReq := t.AdoptReq
+func (t *PetServiceTest) TestAdoptByPetNotFound() {
+	wantError := status.Error(codes.NotFound, "pet not found")
+	repo := &mock.RepositoryMock{}
 
-	clientErr := status.Error(codes.NotFound, constant.PetNotFoundMessage)
+	repo.On("FindOne", t.Pet.ID.String(), &model.Pet{}).Return(nil, wantError)
 
-	expected := t.NotFoundErr
+	imgSrv := new(img_mock.ServiceMock)
+	srv := pet.NewService(repo, imgSrv)
 
-	client := &petmock.PetClientMock{}
-	client.On("AdoptPet", protoReq).Return(nil, clientErr)
+	actual, err := srv.Adopt(t.Pet.ID.String(), t.AdoptByReq)
 
-	imageClient := imagemock.ImageClientMock{}
-
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(client, imageSvc)
-	actual, err := svc.Adopt(t.Pet.Id, t.AdoptDto)
-
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), http.StatusNotFound, err.StatusCode)
 	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
+
+	repo.AssertNotCalled(t.T(), "Update", t.Pet.ID.String(), t.ChangeAdoptBy)
 }
 
-func (t *PetServiceTest) TestAdoptUnavailableServiceError() {
-	protoReq := t.AdoptReq
+func (t *PetServiceTest) TestAdoptByUpdateError() {
+	wantError := &dto.ResponseErr{StatusCode: http.StatusInternalServerError}
+	repo := &mock.RepositoryMock{}
 
-	clientErr := status.Error(codes.Unavailable, constant.UnavailableServiceMessage)
+	repo.On("FindOne", t.Pet.ID.String(), &model.Pet{}).Return(t.Pet, nil)
+	repo.On("Update", t.Pet.ID.String(), t.ChangeAdoptBy).Return(nil, errors.New("update error"))
 
-	expected := t.UnavailableServiceErr
+	imgSrv := new(img_mock.ServiceMock)
+	imgSrv.On("FindByPetId", t.Pet.ID.String()).Return(nil, wantError)
 
-	client := &petmock.PetClientMock{}
-	client.On("AdoptPet", protoReq).Return(nil, clientErr)
+	srv := pet.NewService(repo, imgSrv)
 
-	imageClient := imagemock.ImageClientMock{}
+	actual, err := srv.Adopt(t.Pet.ID.String(), t.AdoptByReq)
 
-	imageSvc := imageSvc.NewService(&imageClient)
-	svc := pet.NewService(client, imageSvc)
-	actual, err := svc.Adopt(t.Pet.Id, t.AdoptDto)
-
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), http.StatusInternalServerError, err.StatusCode)
 	assert.Nil(t.T(), actual)
-	assert.Equal(t.T(), expected, err)
 }

@@ -35,106 +35,106 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 }
 
 // Adopt mocks base method.
-func (m *MockService) Adopt(arg0 string, arg1 *dto.AdoptByRequest) (*dto.AdoptByResponse, *dto.ResponseErr) {
+func (m *MockService) Adopt(id string, req *dto.AdoptByRequest) (*dto.AdoptByResponse, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Adopt", arg0, arg1)
+	ret := m.ctrl.Call(m, "Adopt", id, req)
 	ret0, _ := ret[0].(*dto.AdoptByResponse)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // Adopt indicates an expected call of Adopt.
-func (mr *MockServiceMockRecorder) Adopt(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) Adopt(id, req interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Adopt", reflect.TypeOf((*MockService)(nil).Adopt), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Adopt", reflect.TypeOf((*MockService)(nil).Adopt), id, req)
 }
 
 // ChangeView mocks base method.
-func (m *MockService) ChangeView(arg0 string, arg1 *dto.ChangeViewPetRequest) (*dto.ChangeViewPetResponse, *dto.ResponseErr) {
+func (m *MockService) ChangeView(id string, req *dto.ChangeViewPetRequest) (*dto.ChangeViewPetResponse, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ChangeView", arg0, arg1)
+	ret := m.ctrl.Call(m, "ChangeView", id, req)
 	ret0, _ := ret[0].(*dto.ChangeViewPetResponse)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // ChangeView indicates an expected call of ChangeView.
-func (mr *MockServiceMockRecorder) ChangeView(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) ChangeView(id, req interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeView", reflect.TypeOf((*MockService)(nil).ChangeView), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeView", reflect.TypeOf((*MockService)(nil).ChangeView), id, req)
 }
 
 // Create mocks base method.
-func (m *MockService) Create(arg0 *dto.CreatePetRequest) (*dto.PetResponse, *dto.ResponseErr) {
+func (m *MockService) Create(req *dto.CreatePetRequest) (*dto.PetResponse, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", arg0)
+	ret := m.ctrl.Call(m, "Create", req)
 	ret0, _ := ret[0].(*dto.PetResponse)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockServiceMockRecorder) Create(arg0 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) Create(req interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockService)(nil).Create), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockService)(nil).Create), req)
 }
 
 // Delete mocks base method.
-func (m *MockService) Delete(arg0 string) (*dto.DeleteResponse, *dto.ResponseErr) {
+func (m *MockService) Delete(id string) (*dto.DeleteResponse, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", arg0)
+	ret := m.ctrl.Call(m, "Delete", id)
 	ret0, _ := ret[0].(*dto.DeleteResponse)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockServiceMockRecorder) Delete(arg0 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) Delete(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockService)(nil).Delete), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockService)(nil).Delete), id)
 }
 
 // FindAll mocks base method.
-func (m *MockService) FindAll(arg0 *dto.FindAllPetRequest, arg1 bool) (*dto.FindAllPetResponse, *dto.ResponseErr) {
+func (m *MockService) FindAll(req *dto.FindAllPetRequest, isAdmin bool) (*dto.FindAllPetResponse, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", arg0, arg1)
+	ret := m.ctrl.Call(m, "FindAll", req, isAdmin)
 	ret0, _ := ret[0].(*dto.FindAllPetResponse)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // FindAll indicates an expected call of FindAll.
-func (mr *MockServiceMockRecorder) FindAll(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) FindAll(req, isAdmin interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockService)(nil).FindAll), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockService)(nil).FindAll), req, isAdmin)
 }
 
 // FindOne mocks base method.
-func (m *MockService) FindOne(arg0 string) (*dto.PetResponse, *dto.ResponseErr) {
+func (m *MockService) FindOne(id string) (*dto.PetResponse, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindOne", arg0)
+	ret := m.ctrl.Call(m, "FindOne", id)
 	ret0, _ := ret[0].(*dto.PetResponse)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // FindOne indicates an expected call of FindOne.
-func (mr *MockServiceMockRecorder) FindOne(arg0 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) FindOne(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*MockService)(nil).FindOne), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*MockService)(nil).FindOne), id)
 }
 
 // Update mocks base method.
-func (m *MockService) Update(arg0 string, arg1 *dto.UpdatePetRequest) (*dto.PetResponse, *dto.ResponseErr) {
+func (m *MockService) Update(id string, req *dto.UpdatePetRequest) (*dto.PetResponse, *dto.ResponseErr) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", arg0, arg1)
+	ret := m.ctrl.Call(m, "Update", id, req)
 	ret0, _ := ret[0].(*dto.PetResponse)
 	ret1, _ := ret[1].(*dto.ResponseErr)
 	return ret0, ret1
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockServiceMockRecorder) Update(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) Update(id, req interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockService)(nil).Update), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockService)(nil).Update), id, req)
 }

@@ -13,12 +13,6 @@ type App struct {
 	MaxFileSize int64
 }
 
-type Service struct {
-	Auth    string
-	Backend string
-	File    string
-}
-
 type Database struct {
 	Url string
 }
@@ -57,7 +51,6 @@ type Bucket struct {
 
 type Config struct {
 	App      App
-	Service  Service
 	Database Database
 	Redis    Redis
 	Jwt      Jwt
@@ -86,12 +79,6 @@ func LoadConfig() (*Config, error) {
 		Port:        int(port),
 		Env:         os.Getenv("APP_ENV"),
 		MaxFileSize: maxFileSize,
-	}
-
-	service := Service{
-		Auth:    os.Getenv("SERVICE_AUTH"),
-		Backend: os.Getenv("SERVICE_BACKEND"),
-		File:    os.Getenv("SERVICE_FILE"),
 	}
 
 	database := Database{
@@ -148,7 +135,6 @@ func LoadConfig() (*Config, error) {
 
 	return &Config{
 		App:      app,
-		Service:  service,
 		Database: database,
 		Redis:    redis,
 		Jwt:      jwt,

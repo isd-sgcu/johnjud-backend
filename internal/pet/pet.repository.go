@@ -7,35 +7,43 @@ import (
 	"gorm.io/gorm"
 )
 
-type Repository struct {
+type Repository interface {
+	FindAll(result *[]*model.Pet, isAdmin bool) error
+	FindOne(id string, result *model.Pet) error
+	Create(in *model.Pet) error
+	Update(id string, result *model.Pet) error
+	Delete(id string) error
+}
+
+type repositoryImpl struct {
 	db *gorm.DB
 }
 
-func NewRepository(db *gorm.DB) *Repository {
-	return &Repository{db: db}
+func NewRepository(db *gorm.DB) Repository {
+	return &repositoryImpl{db: db}
 }
 
-func (r *Repository) FindAll(result *[]*model.Pet, isAdmin bool) error {
+func (r *repositoryImpl) FindAll(result *[]*model.Pet, isAdmin bool) error {
 	if isAdmin {
 		return r.db.Model(&model.Pet{}).Find(result).Error
 	}
 	return r.db.Model(&model.Pet{}).Find(result, "is_visible = ?", true).Error
 }
 
-func (r *Repository) FindOne(id string, result *model.Pet) error {
+func (r *repositoryImpl) FindOne(id string, result *model.Pet) error {
 	return r.db.Model(&model.Pet{}).First(result, "id = ?", id).Error
 }
 
-func (r *Repository) Create(in *model.Pet) error {
+func (r *repositoryImpl) Create(in *model.Pet) error {
 	return r.db.Create(&in).Error
 }
 
-func (r *Repository) Update(id string, result *model.Pet) error {
+func (r *repositoryImpl) Update(id string, result *model.Pet) error {
 	updateMap := UpdateMap(result)
-	return r.db.Model(&result).Updates(updateMap).First(&result, "id = ?", id).Error
+	return r.db.Model(&result).Where("id = ?", id).Updates(updateMap).First(&result, "id = ?", id).Error
 }
 
-func (r *Repository) Delete(id string) error {
+func (r *repositoryImpl) Delete(id string) error {
 	var pet model.Pet
 	err := r.db.Where("id = ? AND deleted_at IS NULL", id).First(&pet).Error
 	if err != nil {

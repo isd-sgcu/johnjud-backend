@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/isd-sgcu/johnjud-gateway/client/bucket"
 	"github.com/isd-sgcu/johnjud-gateway/config"
 	"github.com/isd-sgcu/johnjud-gateway/constant"
 	"github.com/isd-sgcu/johnjud-gateway/database"
@@ -26,11 +27,9 @@ import (
 	"github.com/isd-sgcu/johnjud-gateway/internal/user"
 	"github.com/isd-sgcu/johnjud-gateway/internal/utils"
 	"github.com/isd-sgcu/johnjud-gateway/internal/validator"
-	petProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/backend/pet/v1"
-	imageProto "github.com/isd-sgcu/johnjud-go-proto/johnjud/file/image/v1"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/rs/zerolog/log"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 // @title JohnJud API
@@ -92,22 +91,6 @@ func main() {
 			Msg("Failed to start service")
 	}
 
-	backendConn, err := grpc.Dial(conf.Service.Backend, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Fatal().
-			Err(err).
-			Str("service", "johnjud-backend").
-			Msg("Cannot connect to service")
-	}
-
-	fileConn, err := grpc.Dial(conf.Service.File, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Fatal().
-			Err(err).
-			Str("service", "johnjud-file").
-			Msg("Cannot connect to service")
-	}
-
 	hc := healthcheck.NewHandler()
 
 	uuidUtil := utils.NewUuidUtil()
@@ -133,12 +116,25 @@ func main() {
 
 	authGuard := guard.NewAuthGuard(authSvc, constant.ExcludePath, constant.AdminPath, conf.App, constant.VersionList)
 
-	imageClient := imageProto.NewImageServiceClient(fileConn)
-	imageService := image.NewService(imageClient)
+	minioClient, err := minio.New(conf.Bucket.Endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(conf.Bucket.AccessKeyID, conf.Bucket.SecretAccessKey, ""),
+		Secure: conf.Bucket.UseSSL,
+	})
+	if err != nil {
+		log.Fatal().
+			Err(err).
+			Str("service", "file").
+			Msg("Failed to start Minio client")
+		return
+	}
+	imageClient := bucket.NewClient(conf.Bucket, minioClient)
+	randomUtils := utils.NewRandomUtil()
+	imageRepo := image.NewRepository(db)
+	imageService := image.NewService(imageClient, imageRepo, randomUtils)
 	imageHandler := image.NewHandler(imageService, v, conf.App.MaxFileSize)
 
-	petClient := petProto.NewPetServiceClient(backendConn)
-	petService := pet.NewService(petClient, imageService)
+	petRepo := pet.NewRepository(db)
+	petService := pet.NewService(petRepo, imageService)
 	petHandler := pet.NewHandler(petService, imageService, v)
 
 	r := router.NewFiberRouter(&authGuard, conf.App)
